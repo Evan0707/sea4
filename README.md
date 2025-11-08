@@ -30,10 +30,10 @@ Application web de gestion de chantiers permettant aux commerciaux, maîtres d'�
 ```bash
 cd back
 composer install
-# Configurer le .env avec vos paramètres de base de données
-symfony console doctrine:database:create
-symfony console doctrine:migrations:migrate
-symfony console doctrine:fixtures:load
+
+# Configuration de la base de données PostgreSQL sur gigondas
+# Créez un fichier .env et ajoutez-y vos informations de connexion :
+DATABASE_URL="postgresql://votre_login:votre_password@gigondas:5432/geryev?serverVersion=17&charset=utf8&options='--search_path=bati'"
 ```
 
 ### Frontend (React)
@@ -115,10 +115,15 @@ Authorization: Bearer <token>
 ## Configuration
 
 ### Base de données
-Configurez vos paramètres de base de données dans `.env` :
-```env
-DATABASE_URL="postgresql://user:password@127.0.0.1:5432/batiparti?serverVersion=15&charset=utf8"
+Pour configurer l'accès à la base de données sur gigondas :
+1. Créez un fichier `.env` si il n'y en a pas dans le dossier `back/`
+2. Ajoutez-y la variable DATABASE_URL si il n'y en a pas avec vos informations de connexion :
 ```
+DATABASE_URL="postgresql://votre_login:votre_password@gigondas:5432/geryev?serverVersion=17&charset=utf8&options='--search_path=bati'"
+```
+3. Remplacez votre_login et votre_password par vos identifiants gigondas
+4. Le schéma 'bati' sera automatiquement utilisé grâce à l'option search_path dans la BD geryev
+5. Les tables sont déjà créées dans le schéma 'bati', aucune migration n'est nécessaire
 
 ### JWT
 Les clés JWT sont déjà incluses dans le projet (`back/config/jwt/`). 
