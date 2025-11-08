@@ -13,16 +13,16 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
 {
     #[ORM\Id]
     #[ORM\GeneratedValue(strategy: 'IDENTITY')]
-    #[ORM\Column(name: 'noUtilisateur', type: 'integer')]
+    #[ORM\Column(name: '"noUtilisateur"', type: 'integer')]
     private ?int $id = null;
 
-    #[ORM\Column(name: 'login', length: 50, unique: true)]
+    #[ORM\Column(name: '"login"', length: 50, unique: true)]
     private ?string $login = null;
 
-    #[ORM\Column(name: 'motDePasse', length: 255)]
+    #[ORM\Column(name: '"motDePasse"', length: 255)]
     private ?string $motDePasse = null;
 
-    #[ORM\Column(name: 'nomRole', length: 50)]
+    #[ORM\Column(name: '"nomRole"', length: 50)]
     private ?string $role = null;
 
     #[ORM\OneToOne(mappedBy: 'utilisateur', cascade: ['persist', 'remove'], targetEntity: MaitreOeuvre::class)]
@@ -85,7 +85,19 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function getRoles(): array
     {
-        return [$this->role];
+        // Map DB role values to Symfony security roles
+        $map = [
+            'admin' => 'ROLE_ADMIN',
+            'commercial' => 'ROLE_COMMERCIAL',
+            'maitre_oeuvre' => 'ROLE_MAITRE_OEUVRE',
+        ];
+        $roles = [];
+        if ($this->role && isset($map[$this->role])) {
+            $roles[] = $map[$this->role];
+        }
+        // Always include a base role
+        $roles[] = 'ROLE_USER';
+        return array_unique($roles);
     }
 
     public function eraseCredentials(): void

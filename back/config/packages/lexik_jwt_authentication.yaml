@@ -1,0 +1,7 @@
+lexik_jwt_authentication:
+    # Use HMAC (HS256) with a shared secret to avoid RSA keypair requirements
+    secret_key: '%env(JWT_SECRET_KEY)%'
+    # No public/private key or passphrase needed with HS256
+    token_ttl: 3600
+    encoder:
+        signature_algorithm: HS256

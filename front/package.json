@@ -10,11 +10,19 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@hookform/resolvers": "^5.2.2",
     "@mynaui/icons-react": "^0.3.9",
     "@tailwindcss/vite": "^4.1.16",
+    "@types/react-datepicker": "^7.0.0",
+    "date-fns": "^4.1.0",
+    "jwt-decode": "^4.0.0",
     "react": "^19.1.1",
+    "react-datepicker": "^8.8.0",
     "react-dom": "^19.1.1",
-    "tailwindcss": "^4.1.16"
+    "react-hook-form": "^7.66.0",
+    "react-router-dom": "^7.9.5",
+    "tailwindcss": "^4.1.16",
+    "zod": "^4.1.12"
   },
   "devDependencies": {
     "@eslint/js": "^9.36.0",
