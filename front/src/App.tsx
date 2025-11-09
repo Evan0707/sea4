@@ -2,6 +2,7 @@ import './App.css';
 import './styles/datepicker-custom.css';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { Login } from './pages/auth/Login';
+import Error404 from './pages/Error404';
 import { ProtectedRoute } from './components/auth/ProtectedRoute';
 import { DashboardLayout } from './components/DashboardLayout';
 import { DashboardPage } from './pages/dashboard/DashboardPage';
@@ -11,13 +12,19 @@ import { ProjetsPage } from './pages/dashboard/ProjetsPage';
 import { UtilisateursPage } from './pages/dashboard/UtilisateursPage';
 import { ArtisansPage } from './pages/dashboard/ArtisansPage';
 import { AuthProvider, useAuth } from './context/AuthContext';
+import { ToastProvider } from './context/useToast';
+import { OnlineProvider } from './context/useOnline';
 
 function App() {
   return (
     <BrowserRouter>
-      <AuthProvider>
-        <AppRoutes />
-      </AuthProvider>
+      <OnlineProvider>
+        <AuthProvider>
+          <ToastProvider>
+            <AppRoutes />
+          </ToastProvider>
+        </AuthProvider>
+      </OnlineProvider>
     </BrowserRouter>
   );
 }
@@ -106,6 +113,9 @@ function AppRoutes() {
 
         {/* Redirect root to login */}
         <Route path="/" element={<Navigate to="/login" replace />} />
+
+        {/* Catch all route for 404 */}
+        <Route path="*" element={<Error404 />} />
       </Routes>
   );
 }

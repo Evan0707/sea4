@@ -7,6 +7,8 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { jwtDecode } from 'jwt-decode';
 import type { JWTPayload } from '../../types/auth';
+import logo from '../../assets/Logo.svg'
+import { Link } from "react-router-dom";
 
 const loginSchema = z.object({
   email: z.string().min(1, "L'email est requis").email("Email invalide"),
@@ -66,9 +68,14 @@ export const Login = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <div className="max-w-md w-full p-8 bg-white rounded-lg shadow-lg">
-        <h2 className="text-3xl font-bold text-center text-gray-800 mb-8">Connexion</h2>
+    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-100">
+      <div className="flex flex-col items-center mb-10">
+        <img src={logo} alt="" width={60}/>
+        <h3 className="text-4xl font-bold mt-2">Bati’parti</h3>
+      </div>
+      <div className="max-w-[500px] w-full flex justify-center flex-col relative p-8 bg-white rounded-[14px] shadow-lg">
+        <h2 className="text-3xl font-bold items-center text-center text-gray-800 mb-4">Autentifiez -vous a Bati’Parti</h2>
+        <p className="text-placeholder text-center text-lg mb-8">Autentifiez -vous à Bati’Parti</p>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
           <Input
             label="Email"
@@ -84,9 +91,10 @@ export const Login = () => {
             register={register("password")}
             error={errors.password?.message}
           />
+          <Link to={'/login'} className="text-sm text-primary font-bold w-full">{'Identifant oublié ? Contactez l’administrateur >'}</Link>
           <Button
             variant="Primary"
-            classname="w-full"
+            classname="w-full mt-4"
             loading={isSubmitting}
             onClick={handleSubmit(onSubmit)}
           >

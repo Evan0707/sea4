@@ -1,5 +1,5 @@
-@import "tailwindcss";
 @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@200..800&display=swap');
+@import "tailwindcss";
 
 
 @theme{
@@ -13,10 +13,10 @@
 }
 
 :root {
-  font-family: 'Manrope', Avenir, Helvetica, Arial, sans-serif;
+
+  font-family: 'Manrope', Avenir, Helvetica, Arial, sans-serif !important;
 
   color-scheme: light dark;
-  /* color: rgba(255, 255, 255, 0.87); */
   color: rgba(0, 0, 0, 0.87);
   /* background-color: #242424; */
   background-color: #fff;
@@ -34,4 +34,58 @@
     background-color: #ffffff;
   }
 
+}
+
+
+@keyframes toast-in {
+  from {
+    transform: translateX(100%) scale(1);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0) scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes online-in {
+  from {
+    transform: translateX(0) translateY(-100%) scale(0.5);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0) scale(1);
+    opacity: 1;
+  }
+}
+
+/* Bouncy variants */
+@keyframes toast-in-bouncy {
+  0% {
+    transform: translateX(100%) scale(0.96);
+    opacity: 0;
+  }
+  60% {
+    transform: translateX(-6px) scale(1.02);
+    opacity: 1;
+  }
+  80% {
+    transform: translateX(3px) scale(1);
+  }
+  100% {
+    transform: translateX(0) scale(1);
+  }
+}
+
+@keyframes online-in-bouncy {
+  0% {
+    transform: translateY(-100%) scale(0.5);
+    opacity: 0;
+  }
+  60% {
+    transform: translateY(4px) scale(1);
+  }
+  100% {
+    transform: translateY(0) scale(1);
+  }
 }
