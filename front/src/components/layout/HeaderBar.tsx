@@ -1,5 +1,5 @@
-import type { User } from '../../types/auth'
-import profile from '../../assets/Profile.png'
+import type { User } from '@/types/auth'
+import profile from '@/assets/Profile.png'
 
 interface HeaderBarProps {
   user: User | null
