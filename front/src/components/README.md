@@ -434,6 +434,64 @@ function MyComponent() {
 
 ---
 
+### Tooltip
+
+Infobulle apparaissant au survol avec positionnement intelligent.
+
+**Props:**
+```tsx
+interface TooltipProps {
+  children: ReactNode              // Élément à entourer
+  content: string                  // Texte du tooltip
+  position?: 'top' | 'bottom' | 'left' | 'right'  // Position (défaut: 'top')
+}
+```
+
+**Exemples:**
+```tsx
+import Tooltip from '@/components/Tooltip'
+
+// Position par défaut (top)
+<Tooltip content="Éditer ce client">
+  <button>
+    <Edit size={20} />
+  </button>
+</Tooltip>
+
+// Position personnalisée
+<Tooltip content="Supprimer définitivement" position="right">
+  <button className="text-red">
+    <Trash size={20} />
+  </button>
+</Tooltip>
+
+// Sur du texte
+<Tooltip content="Cliquez pour copier l'adresse">
+  <span className="cursor-pointer">
+    123 rue de la Paix, 75000 Paris
+  </span>
+</Tooltip>
+```
+
+**Fonctionnalités:**
+- ✅ Apparition au survol (hover)
+- ✅ 4 positions disponibles (top, bottom, left, right)
+- ✅ Détection automatique du viewport (reste visible à l'écran)
+- ✅ Flèche pointant vers l'élément
+- ✅ Animation fade-in douce (0.15s)
+- ✅ Max-width 300px pour textes longs
+- ✅ Positionnement dynamique en `fixed`
+- ✅ Z-index élevé (50) pour superposition
+
+**Styling:**
+- Fond noir avec texte blanc
+- Bordure arrondie (rounded-md)
+- Padding confortable (px-3 py-1.5)
+- Taille texte 14px (text-sm)
+- Ombre portée pour profondeur
+
+---
+
 ## 🌐 Détection de Connexion
 
 ### useOnline (Hook)
@@ -507,6 +565,19 @@ className="animate-[toast-in_0.4s_ease]"
 **online-in-bouncy** - Apparition avec rebond (pour badge réseau)
 ```tsx
 className="animate-[online-in-bouncy_0.6s_cubic-bezier(.22,.68,.37,1.05)]"
+```
+
+**fade-in** - Apparition en fondu (pour tooltip)
+```tsx
+className="animate-[fade-in_0.15s_ease]"
+```
+
+**Keyframes personnalisés:**
+```css
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
 ```
 
 ---

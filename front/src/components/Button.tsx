@@ -1,6 +1,6 @@
 import { type ReactNode } from 'react'
 
-type ButtonProps = {
+interface ButtonProps {
   children: ReactNode;
   variant: 'Primary' | 'Secondary' | 'Destructive';
   classname?: string;
@@ -15,7 +15,7 @@ const Button = ({
   classname,
   onClick,
   loading = false,
-  type = 'button'
+  type = 'button',
 }: ButtonProps) => {
   const base = `${classname ?? ''} flex items-center justify-center py-[8px] font-bold min-w-[100px] rounded-[6px] text-[14] hover:opacity-70`;
   const variants =

@@ -54,14 +54,14 @@ const Select: React.FC<SelectProps> = ({
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [])
 
-  // Merge RHF register and external props
+
   const reg = register ?? ({} as UseFormRegisterReturn)
   
   const handleSelect = (option: Option) => {
     setSelectedOption(option)
     setIsOpen(false)
     
-    // Create a synthetic event for react-hook-form
+
     const syntheticEvent = {
       target: {
         name: reg.name ?? name,

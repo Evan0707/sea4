@@ -1,6 +1,7 @@
 import React, { type ReactNode } from 'react'
-import { DangerCircle } from '@mynaui/icons-react'
+import { DangerCircle, InfoCircleSolid } from '@mynaui/icons-react'
 import type { UseFormRegisterReturn } from 'react-hook-form'
+import Tooltip from './Tooltip'
 
 export type InputProps = {
   name: string
@@ -15,6 +16,8 @@ export type InputProps = {
   onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void
   value?: string
   defaultValue?: string
+  info?:boolean;
+  message?:string;
 }
 
 const Input: React.FC<InputProps> = ({
@@ -30,18 +33,20 @@ const Input: React.FC<InputProps> = ({
   onChange,
   value,
   defaultValue,
+  info=false,
+  message=''
 }) => {
   const hasError = Boolean(error)
   const inputId = name || label
   const describedBy = hasError ? `${inputId}-error` : undefined
 
-  // Merge RHF register and external props safely
+
   const reg = register ?? ({} as UseFormRegisterReturn)
   const mergedOnChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     reg.onChange?.(e)
     onChange?.(e)
   }
-  // Only pass value/defaultValue when explicitly provided to avoid React treating the input as controlled with undefined
+
   const controlProps: React.InputHTMLAttributes<HTMLInputElement> = {
     ...(value !== undefined ? { value } : {}),
     ...(defaultValue !== undefined ? { defaultValue } : {}),
@@ -49,7 +54,14 @@ const Input: React.FC<InputProps> = ({
 
   return (
     <div className={`${className ?? ''} relative w-full`}>
-      <label className='m-1 font-bold text-[14px]' htmlFor={inputId}>{label}</label>
+      <div className='flex items-center'>
+        <label className='m-1 font-bold text-[14px]' htmlFor={inputId}>{label}</label>
+        {info&&
+          <Tooltip content={message}>
+            <InfoCircleSolid size={16} className='color-placeholder'/>
+          </Tooltip>
+        }
+      </div>
       <div className={`border-[1.5px] ${hasError ? 'border-red' : 'border-border'} px-3 flex items-center rounded-[6px] focus-within:border-primary focus-within:outline-[1px] outline-border justify-between mt-1 mb-0 w-full"`}>
         <div className='flex flex-row items-center flex-1'>
           {leftIcon}

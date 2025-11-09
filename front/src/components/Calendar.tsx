@@ -31,7 +31,7 @@ const Calendar: React.FC<CalendarProps> = ({
   const inputId = name || label
   const describedBy = hasError ? `${inputId}-error` : undefined
 
-  // Merge RHF register and external props safely
+
   const reg = register ?? ({} as UseFormRegisterReturn)
   const mergedOnChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     reg.onChange?.(e)
@@ -41,7 +41,7 @@ const Calendar: React.FC<CalendarProps> = ({
     }
   }
 
-  // Only pass value/defaultValue when explicitly provided
+
   const controlProps: React.InputHTMLAttributes<HTMLInputElement> = {
     ...(value !== undefined ? { value } : {}),
     ...(defaultValue !== undefined ? { defaultValue } : {}),

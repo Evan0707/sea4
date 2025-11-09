@@ -11,8 +11,6 @@ export type TextareaProps = {
   onChange?: (e: React.ChangeEvent<HTMLTextAreaElement>) => void
   value?: string
   defaultValue?: string
-  // accept a type prop to stay backward-compatible with existing usages,
-  // but it's ignored since <textarea> doesn't support it
   type?: string
 }
 
@@ -31,13 +29,13 @@ const Textarea: React.FC<TextareaProps> = ({
   const inputId = name || label
   const describedBy = hasError ? `${inputId}-error` : undefined
 
-  // Merge RHF register and external props safely
+
   const reg = register ?? ({} as UseFormRegisterReturn)
   const mergedOnChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     reg.onChange?.(e)
     onChange?.(e)
   }
-  // Only pass value/defaultValue when explicitly provided to avoid React controlled with undefined
+
   const controlProps: React.TextareaHTMLAttributes<HTMLTextAreaElement> = {
     ...(value !== undefined ? { value } : {}),
     ...(defaultValue !== undefined ? { defaultValue } : {}),
