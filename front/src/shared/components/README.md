@@ -24,7 +24,7 @@ interface ButtonProps {
 
 **Exemples:**
 ```tsx
-import Button from '@/components/Button'
+import Button from '@/shared/components/ui/Button'
 
 // Bouton principal
 <Button variant="Primary" onClick={() => console.log('Clic')}>
@@ -74,7 +74,7 @@ interface InputProps {
 
 **Exemples:**
 ```tsx
-import Input from '@/components/Input'
+import Input from '@/shared/components/ui/Input'
 
 const [email, setEmail] = useState('')
 const [error, setError] = useState('')
@@ -121,7 +121,7 @@ interface NumInputProps {
 
 **Exemples:**
 ```tsx
-import NumInput from '@/components/NumInput'
+import NumInput from '@/shared/components/ui/NumInput'
 
 const [quantity, setQuantity] = useState(1)
 
@@ -166,7 +166,7 @@ interface TextareaProps {
 
 **Exemples:**
 ```tsx
-import Textarea from '@/components/Textarea'
+import Textarea from '@/shared/components/ui/Textarea'
 
 const [description, setDescription] = useState('')
 
@@ -200,7 +200,7 @@ interface SelectProps {
 
 **Exemples:**
 ```tsx
-import Select from '@/components/Select'
+import Select from '@/shared/components/ui/Select'
 
 const [role, setRole] = useState('')
 
@@ -235,7 +235,7 @@ interface CheckboxProps {
 
 **Exemples:**
 ```tsx
-import Checkbox from '@/components/Checkbox'
+import Checkbox from '@/shared/components/ui/Checkbox'
 
 const [accepted, setAccepted] = useState(false)
 
@@ -266,7 +266,7 @@ interface CalendarProps {
 
 **Exemples:**
 ```tsx
-import Calendar from '@/components/Calendar'
+import Calendar from '@/shared/components/ui/Calendar'
 
 const [date, setDate] = useState<Date | null>(null)
 
@@ -302,7 +302,7 @@ interface PopoverItemProps {
 
 **Exemples:**
 ```tsx
-import Popover from '@/components/Popover'
+import Popover from '@/shared/components/ui/Popover'
 import { DotsVerticalSolid, Edit, Trash } from '@mynaui/icons-react'
 
 <Popover icon={DotsVerticalSolid} iconSize={20}>
@@ -347,7 +347,7 @@ interface DashboardLayoutProps {
 
 **Exemple:**
 ```tsx
-import { DashboardLayout } from '@/components/DashboardLayout'
+import { DashboardLayout } from '@/shared/components/layout/DashboardLayout'
 
 <DashboardLayout user={currentUser}>
   <div>Contenu de la page</div>
@@ -405,7 +405,7 @@ addToast(message: string, variant?: 'info' | 'error' | 'success')
 
 **Exemples:**
 ```tsx
-import { useToast } from '@/context/useToast'
+import { useToast } from '@/shared/hooks/useToast'
 
 function MyComponent() {
   const { addToast } = useToast()
@@ -449,7 +449,7 @@ interface TooltipProps {
 
 **Exemples:**
 ```tsx
-import Tooltip from '@/components/Tooltip'
+import Tooltip from '@/shared/components/ui/Tooltip'
 
 // Position par défaut (top)
 <Tooltip content="Éditer ce client">
@@ -505,7 +505,7 @@ const online: boolean = useOnline()
 
 **Exemples:**
 ```tsx
-import { useOnline } from '@/context/useOnline'
+import { useOnline } from '@/shared/hooks/useOnline'
 
 function MyComponent() {
   const online = useOnline()
@@ -526,11 +526,11 @@ function MyComponent() {
 
 ---
 
-## 🎨 Configuration du Thème
+### Configuration du Thème
 
 ### Couleurs personnalisées
 
-Définies dans `src/index.css` avec le bloc `@theme`:
+Définies dans `src/app/styles/index.css` avec le bloc `@theme`:
 
 ```css
 @theme {
@@ -555,7 +555,7 @@ Définies dans `src/index.css` avec le bloc `@theme`:
 
 ### Animations disponibles
 
-Définies dans `src/index.css`:
+Définies dans `src/app/styles/index.css`:
 
 **toast-in** - Entrée depuis la droite avec bounce
 ```tsx
@@ -606,23 +606,28 @@ className="animate-[fade-in_0.15s_ease]"
 ### Structure des composants
 
 ```
-components/
-├── Button.tsx
-├── Input.tsx
-├── Popover.tsx
-├── README.md           ← Ce fichier
-└── layout/
-    ├── Sidebar.tsx
-    └── HeaderBar.tsx
+shared/
+├── components/
+│   ├── ui/                 # Composants UI réutilisables
+│   │   ├── Button.tsx
+│   │   ├── Input.tsx
+│   │   ├── Popover.tsx
+│   │   ├── Tooltip.tsx
+│   │   └── ...
+│   ├── layout/             # Composants de mise en page
+│   │   ├── DashboardLayout.tsx
+│   │   ├── Sidebar.tsx
+│   │   └── HeaderBar.tsx
+│   └── README.md           ← Ce fichier
 ```
 
 ### Ajouter un nouveau composant
 
-1. Créer le fichier dans `/components`
+1. Créer le fichier dans `/shared/components/ui` (pour composants UI) ou `/shared/components/layout` (pour layout)
 2. Définir l'interface des props avec TypeScript
 3. Exporter par défaut le composant
 4. Ajouter la documentation dans ce README
-5. (Optionnel) Ajouter un exemple dans `/playground`
+5. (Optionnel) Ajouter un exemple d'utilisation dans une page de test
 
 ---
 

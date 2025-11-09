@@ -9,7 +9,7 @@ Implémenter un formulaire multi-étapes pour créer un nouveau dossier (Client 
 
 ### 1. Créer le formulaire multi-étapes
 **Priorité:** Haute  
-**Fichier:** `front/src/components/forms/NouveauDossierForm.tsx`
+**Fichier:** `front/src/features/dossiers/components/NouveauDossierForm.tsx`
 
 - [ ] Créer un composant `NouveauDossierForm` avec 3 étapes :
   - Étape 1 : Informations client
@@ -30,7 +30,7 @@ const [chantierData, setChantierData] = useState<ChantierFormData>({})
 
 ### 2. Étape 1 - Formulaire Client
 **Priorité:** Haute  
-**Fichier:** `front/src/components/forms/NouveauDossierForm.tsx`
+**Fichier:** `front/src/features/dossiers/components/NouveauDossierForm.tsx`
 
 - [ ] Créer le formulaire avec les champs suivants :
   - `nom` (required) - Input texte
@@ -38,7 +38,7 @@ const [chantierData, setChantierData] = useState<ChantierFormData>({})
   - `adresse` (optional) - Input texte
   - `codePostal` (optional, 5 chars max) - Input texte avec validation
   - `ville` (optional) - Input texte
-- [ ] Utiliser les composants `Input` existants
+- [ ] Utiliser les composants `Input` existants depuis `@/shared/components/ui`
 - [ ] Ajouter validation pour code postal (5 chiffres)
 
 **Mapping avec Entity Client (PHP):**
@@ -52,13 +52,13 @@ const [chantierData, setChantierData] = useState<ChantierFormData>({})
 
 ### 3. Étape 2 - Formulaire Chantier
 **Priorité:** Haute  
-**Fichier:** `front/src/components/forms/NouveauDossierForm.tsx`
+**Fichier:** `front/src/features/dossiers/components/NouveauDossierForm.tsx`
 
 - [ ] Créer le formulaire avec les champs suivants :
   - `adresse` (optional) - Input texte
   - `codePostal` (optional, 5 chars max) - Input texte
   - `ville` (optional) - Input texte
-  - `dateCreation` (auto aujourd'hui) - Calendar component
+  - `dateCreation` (auto aujourd'hui) - Calendar component depuis `@/shared/components/ui`
   - `statut` (default 'À compléter') - Select ou readonly
 - [ ] Utiliser le composant `Calendar` pour la sélection de date
 - [ ] Pré-remplir `dateCreation` avec la date du jour
@@ -75,7 +75,7 @@ const [chantierData, setChantierData] = useState<ChantierFormData>({})
 
 ### 4. Étape 3 - Récapitulatif
 **Priorité:** Moyenne  
-**Fichier:** `front/src/components/forms/NouveauDossierForm.tsx`
+**Fichier:** `front/src/features/dossiers/components/NouveauDossierForm.tsx`
 
 - [ ] Afficher un résumé structuré des données :
   - **Informations Client** : nom, prénom, adresse complète
@@ -90,7 +90,7 @@ const [chantierData, setChantierData] = useState<ChantierFormData>({})
 
 ### 5. Créer les types TypeScript
 **Priorité:** Haute  
-**Fichier:** `front/src/types/dossier.ts`
+**Fichier:** `front/src/shared/types/dossier.ts`
 
 - [ ] Créer l'interface `ClientFormData` :
 ```typescript
@@ -150,7 +150,7 @@ public function create(Request $request): JsonResponse
 
 ### 7. Implémenter la soumission du formulaire
 **Priorité:** Haute  
-**Fichier:** `front/src/components/forms/NouveauDossierForm.tsx`
+**Fichier:** `front/src/features/dossiers/components/NouveauDossierForm.tsx`
 
 - [ ] Créer la fonction `handleSubmit` :
 ```typescript
@@ -181,7 +181,7 @@ const handleSubmit = async () => {
 }
 ```
 
-- [ ] Utiliser `useToast` pour les notifications
+- [ ] Utiliser `useToast` pour les notifications (depuis `@/shared/hooks/useToast`)
 - [ ] Utiliser `useNavigate` pour la redirection
 - [ ] Gérer les erreurs réseau et serveur
 
@@ -189,7 +189,7 @@ const handleSubmit = async () => {
 
 ### 8. Ajouter la navigation entre étapes
 **Priorité:** Haute  
-**Fichier:** `front/src/components/forms/NouveauDossierForm.tsx`
+**Fichier:** `front/src/features/dossiers/components/NouveauDossierForm.tsx`
 
 - [ ] Créer les fonctions de navigation :
 ```typescript
@@ -217,7 +217,7 @@ const handlePrevious = () => {
 
 ### 9. Validation avec Zod
 **Priorité:** Moyenne  
-**Fichier:** `front/src/schemas/dossier.ts`
+**Fichier:** `front/src/shared/schemas/dossier.ts`
 
 - [ ] Installer Zod si pas déjà fait : `npm install zod`
 - [ ] Créer le schéma pour `ClientFormData` :
@@ -266,7 +266,7 @@ const { register, handleSubmit, formState: { errors } } = useForm({
 
 ### 10. Gérer les états de chargement
 **Priorité:** Moyenne  
-**Fichier:** `front/src/components/forms/NouveauDossierForm.tsx`
+**Fichier:** `front/src/features/dossiers/components/NouveauDossierForm.tsx`
 
 - [ ] Ajouter l'état `isSubmitting` :
 ```typescript
@@ -309,15 +309,15 @@ const [isSubmitting, setIsSubmitting] = useState(false)
 ## 📚 Ressources nécessaires
 
 ### Composants existants à utiliser
-- `Button` (avec prop `loading`)
-- `Input`
-- `Calendar`
-- `Select` (si besoin pour le statut)
+- `Button` (depuis `@/shared/components/ui/Button`)
+- `Input` (depuis `@/shared/components/ui/Input`)
+- `Calendar` (depuis `@/shared/components/ui/Calendar`)
+- `Select` (depuis `@/shared/components/ui/Select`)
 
 ### Hooks existants à utiliser
-- `useToast()` - Notifications
-- `useAuth()` - Récupérer le token JWT
-- `useNavigate()` - Navigation après création
+- `useToast()` (depuis `@/shared/hooks/useToast`) - Notifications
+- `useAuth()` (depuis `@/features/auth/context/AuthContext`) - Récupérer le token JWT
+- `useNavigate()` (depuis `react-router-dom`) - Navigation après création
 
 ### Dépendances à installer
 ```powershell

@@ -1,21 +1,14 @@
 import { useForm } from "react-hook-form";
-import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import Input from "../../components/Input";
-import Button from "../../components/Button";
+import Input from "@/shared/components/ui/Input";
+import Button from "@/shared/components/ui/Button";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../../context/AuthContext";
+import { useAuth } from "@/features/auth/context/AuthContext";
 import { jwtDecode } from 'jwt-decode';
-import type { JWTPayload } from '../../types/auth';
-import logo from '../../assets/Logo.svg'
+import type { JWTPayload } from '@/shared/types/auth';
+import logo from '@/shared/assets/Logo.svg'
 import { Link } from "react-router-dom";
-
-const loginSchema = z.object({
-  email: z.string().min(1, "L'email est requis").email("Email invalide"),
-  password: z.string().min(6, "Le mot de passe doit contenir au moins 6 caractères"),
-});
-
-type LoginForm = z.infer<typeof loginSchema>;
+import { loginSchema, type LoginFormData } from "@/shared/utils/validators";
 
 export const Login = () => {
   const navigate = useNavigate();
@@ -24,11 +17,11 @@ export const Login = () => {
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
-  } = useForm<LoginForm>({
+  } = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
   });
 
-  const onSubmit = async (data: LoginForm) => {
+  const onSubmit = async (data: LoginFormData) => {
     try {
       const response = await fetch('http://localhost:8000/api/login_check', {
         method: 'POST',

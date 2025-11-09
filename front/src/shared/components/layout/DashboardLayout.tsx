@@ -1,9 +1,9 @@
 import { useNavigate } from 'react-router-dom';
-import type { User } from '../types/auth';
-import { useAuth } from '../context/AuthContext';
-import { NAV_ITEMS } from '../config/navigation';
-import { Sidebar } from './layout/Sidebar';
-import { HeaderBar } from './layout/HeaderBar';
+import type { User } from '@/shared/types/auth';
+import { useAuth } from '@/features/auth/context/AuthContext';
+import { NAV_ITEMS } from '@/shared/config/navigation';
+import { Sidebar } from './Sidebar';
+import { HeaderBar } from './HeaderBar';
 
 
 interface DashboardLayoutProps {

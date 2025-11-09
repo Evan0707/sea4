@@ -1,9 +1,9 @@
 import { Link, useLocation } from 'react-router-dom'
-import type { User } from '../../types/auth'
-import Button from '../Button'
+import type { User } from '@/shared/types/auth'
+import Button from '@/shared/components/ui/Button'
 import { Logout, SidebarSolid, SidebarAltSolid } from '@mynaui/icons-react'
-import type { NavItem } from '../../config/navigation'
-import Logo from '../../assets/Logo.svg'
+import type { NavItem } from '@/shared/config/navigation'
+import Logo from '@/shared/assets/Logo.svg'
 import { useState, useEffect } from 'react'
 
 interface SidebarProps {

@@ -74,10 +74,20 @@ back/
 ```
 front/
 ├── src/
-│   ├── components/     # Composants React réutilisables
-│   ├── pages/         # Pages de l'application
-│   ├── context/       # Contextes React (auth, etc.)
-│   └── types/         # Types TypeScript
+│   ├── app/            # Point d'entrée et configuration
+│   ├── features/       # Fonctionnalités par domaine métier
+│   │   ├── auth/       # Authentification
+│   │   ├── dashboard/  # Tableau de bord
+│   │   ├── dossiers/   # Gestion des dossiers
+│   │   ├── chantiers/  # Gestion des chantiers
+│   │   └── users/      # Gestion des utilisateurs
+│   └── shared/         # Code partagé
+│       ├── components/ # Composants réutilisables (UI + Layout)
+│       ├── context/    # Contextes React
+│       ├── hooks/      # Hooks personnalisés
+│       ├── types/      # Types TypeScript
+│       ├── config/     # Configuration
+│       └── utils/      # Fonctions utilitaires
 ```
 
 ## Fonctionnalités principales

@@ -1,6 +1,5 @@
 import { CheckCircleSolid, DangerCircleSolid, InfoCircleSolid } from '@mynaui/icons-react'
-import { createContext, useContext, useState, useCallback } from 'react'
-import type { ReactNode } from 'react'
+import { createContext, useState, useCallback, type ReactNode } from 'react'
 
 export type ToastType = 'info' | 'error' | 'success'
 
@@ -16,7 +15,7 @@ interface ToastContextType {
   removeToast: (id: number) => void
 }
 
-const ToastContext = createContext<ToastContextType | undefined>(undefined)
+export const ToastContext = createContext<ToastContextType | undefined>(undefined)
 
 export function ToastProvider({ children }: { children: ReactNode }) {
   const [toasts, setToasts] = useState<ToastProps[]>([])
@@ -90,8 +89,3 @@ export function ToastProvider({ children }: { children: ReactNode }) {
   )
 }
 
-export function useToast() {
-  const context = useContext(ToastContext)
-  if (!context) throw new Error('useToast must be used within a ToastProvider')
-  return context
-}

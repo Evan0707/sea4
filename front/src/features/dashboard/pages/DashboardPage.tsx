@@ -1,5 +1,5 @@
-import { useToast } from "../../context/useToast";
-// import Popover from "../../components/Popover";
+import { useToast } from "@/shared/hooks/useToast";
+// import Popover from "@/shared/components/ui/Popover";
 // import { DotsVerticalSolid, Edit, Trash } from "@mynaui/icons-react";
 
 export const DashboardPage = () => {

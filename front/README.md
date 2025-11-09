@@ -83,21 +83,30 @@ npm run preview
 front/
 ├── public/              # Assets statiques
 ├── src/
-│   ├── assets/         # Images, logos, fonts
-│   ├── components/     # Composants réutilisables
-│   │   ├── auth/       # Composants d'authentification
-│   │   ├── layout/     # Sidebar, HeaderBar
-│   │   └── README.md   # Documentation des composants
-│   ├── context/        # Context API (Auth, Toast, Online)
-│   ├── pages/          # Pages/vues de l'application
-│   │   ├── auth/       # Login, Register
-│   │   └── dashboard/  # Pages protégées par rôle
-│   ├── styles/         # CSS personnalisé
-│   ├── types/          # Types TypeScript
-│   ├── config/         # Configuration (navigation...)
-│   ├── App.tsx         # Composant racine + routing
-│   ├── main.tsx        # Point d'entrée
-│   └── index.css       # Styles globaux + Tailwind
+│   ├── app/            # Point d'entrée et configuration
+│   │   ├── App.tsx     # Composant racine + routing
+│   │   ├── main.tsx    # Point d'entrée
+│   │   ├── pages/      # Pages génériques (404, etc.)
+│   │   └── styles/     # Styles globaux + Tailwind
+│   ├── features/       # Fonctionnalités par domaine métier
+│   │   ├── auth/       # Authentification
+│   │   │   ├── pages/
+│   │   │   ├── components/
+│   │   │   └── context/
+│   │   ├── dashboard/  # Tableau de bord
+│   │   ├── dossiers/   # Gestion des dossiers
+│   │   ├── chantiers/  # Gestion des chantiers/projets
+│   │   └── users/      # Gestion des utilisateurs
+│   └── shared/         # Code partagé
+│       ├── components/ # Composants réutilisables
+│       │   ├── ui/     # Button, Input, Calendar, etc.
+│       │   └── layout/ # DashboardLayout, Sidebar, HeaderBar
+│       ├── context/    # Contextes React (Toast, Online)
+│       ├── hooks/      # Hooks personnalisés (useToast, useOnline)
+│       ├── types/      # Types TypeScript
+│       ├── config/     # Configuration (navigation, etc.)
+│       ├── assets/     # Images, logos, fonts
+│       └── utils/      # Fonctions utilitaires
 ├── index.html
 ├── package.json
 ├── tsconfig.json
@@ -162,7 +171,7 @@ Les routes sont protégées via le composant `ProtectedRoute` qui :
 Utilise `AuthContext` pour gérer l'état d'authentification.
 
 ```tsx
-import { useAuth } from '@/context/AuthContext'
+import { useAuth } from '@/features/auth/context/AuthContext'
 
 function MyComponent() {
   const { user, login, logout, isLoading } = useAuth()
@@ -222,6 +231,8 @@ const { user, login, logout, isLoading } = useAuth()
 Affichage de notifications toast.
 
 ```tsx
+import { useToast } from '@/shared/hooks/useToast'
+
 const { addToast } = useToast()
 
 addToast('Sauvegarde réussie', 'success')
@@ -233,6 +244,8 @@ addToast('Information', 'info')
 Détection de la connexion internet.
 
 ```tsx
+import { useOnline } from '@/shared/hooks/useOnline'
+
 const online = useOnline()
 
 if (!online) {
@@ -246,7 +259,7 @@ if (!online) {
 
 ### Tailwind CSS
 
-Configuration personnalisée dans `index.css` avec le bloc `@theme` :
+Configuration personnalisée dans `src/app/styles/index.css` avec le bloc `@theme` :
 
 ```css
 @theme {
@@ -291,7 +304,7 @@ className="animate-[online-in-bouncy_0.6s_cubic-bezier(.22,.68,.37,1.05)]"
 
 ## 🧩 Composants
 
-Voir la [documentation complète des composants](./src/components/README.md).
+Voir la [documentation complète des composants](./src/shared/components/README.md).
 
 ### Composants principaux
 
@@ -352,9 +365,11 @@ Structure prévue pour les tests :
 
 ```
 src/
-├── components/
-│   ├── Button.tsx
-│   └── Button.test.tsx
+├── shared/
+│   └── components/
+│       └── ui/
+│           ├── Button.tsx
+│           └── Button.test.tsx
 ```
 
 Librairies recommandées :
@@ -375,8 +390,9 @@ Librairies recommandées :
 Exemple d'import :
 
 ```tsx
-import Button from '@/components/Button'
-import { useAuth } from '@/context/AuthContext'
+import Button from '@/shared/components/ui/Button'
+import { useAuth } from '@/features/auth/context/AuthContext'
+import { useToast } from '@/shared/hooks/useToast'
 ```
 
 ---

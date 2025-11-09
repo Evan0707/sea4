@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom';
-import Erreur from '../assets/Erreur404.png'
-import logo from '../assets/Logo.svg'
+import Erreur from '@/shared/assets/Erreur404.png'
+import logo from '@/shared/assets/Logo.svg'
 
 export default function Error404() {
   const navigate = useNavigate();

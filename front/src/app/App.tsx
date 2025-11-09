@@ -1,19 +1,19 @@
 import './App.css';
 import './styles/datepicker-custom.css';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { Login } from './pages/auth/Login';
-import Error404 from './pages/Error404';
-import { ProtectedRoute } from './components/auth/ProtectedRoute';
-import { DashboardLayout } from './components/DashboardLayout';
-import { DashboardPage } from './pages/dashboard/DashboardPage';
-import { DossiersPage } from './pages/dashboard/DossiersPage';
-import { NouveauDossierPage } from './pages/dashboard/NouveauDossierPage';
-import { ProjetsPage } from './pages/dashboard/ProjetsPage';
-import { UtilisateursPage } from './pages/dashboard/UtilisateursPage';
-import { ArtisansPage } from './pages/dashboard/ArtisansPage';
-import { AuthProvider, useAuth } from './context/AuthContext';
-import { ToastProvider } from './context/useToast';
-import { OnlineProvider } from './context/useOnline';
+import { Login } from '../features/auth/pages/LoginPage';
+import Error404 from './pages/Error404Page';
+import { ProtectedRoute } from '../features/auth/components/ProtectedRoute';
+import { DashboardLayout } from '../shared/components/layout/DashboardLayout';
+import { DashboardPage } from '../features/dashboard/pages/DashboardPage';
+import { DossiersPage } from '../features/dossiers/pages/DossiersListPage';
+import { NouveauDossierPage } from '../features/dossiers/pages/NouveauDossierPage';
+import { ProjetsPage } from '../features/chantiers/pages/ProjetsListPage';
+import { UtilisateursPage } from '../features/users/pages/UtilisateursListPage';
+import { ArtisansPage } from '../features/users/pages/ArtisansListPage';
+import { AuthProvider, useAuth } from '../features/auth/context/AuthContext';
+import { ToastProvider } from '../shared/context/ToastProvider';
+import { OnlineProvider } from '../shared/context/OnlineProvider';
 
 function App() {
   return (
