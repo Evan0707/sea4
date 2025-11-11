@@ -5,6 +5,7 @@ import { Logout, SidebarSolid, SidebarAltSolid } from '@mynaui/icons-react'
 import type { NavItem } from '@/shared/config/navigation'
 import Logo from '@/shared/assets/Logo.svg'
 import { useState, useEffect } from 'react'
+import ConfirmPopover from '../ui/ConfirmPopover'
 
 interface SidebarProps {
   user: User | null
@@ -40,7 +41,7 @@ export function Sidebar({ user, items, onLogout }: SidebarProps) {
   }, [])
 
   return (
-    <aside className={`$${''} ${collapsed ? 'w-20' : 'w-64'} bg-[#FAFBFE] relative flex flex-col border-r-1 border-border text-white p-3 transition-all duration-300 overflow-hidden`}> 
+    <aside className={`${collapsed ? 'w-20' : 'w-64'} bg-[#FAFBFE] h-screen sticky top-0 flex flex-col border-r-1 border-border text-white p-3 transition-all duration-300 overflow-y-auto`}> 
       <button
         type="button"
         onClick={() => setCollapsed(v => !v)}
@@ -56,19 +57,19 @@ export function Sidebar({ user, items, onLogout }: SidebarProps) {
         {!collapsed && <h2 className="text-2xl font-bold text-black">Bati'Parti</h2>}
       </div>
       <nav>
-        <ul className="space-y-2 mt-22">
+        <ul className="space-y-1 mt-22">
           {filtered.map(item => (
             <li key={item.path}>
               <Link
                 to={item.path}
-                className={`px-4 flex overflow-hidden justify-start items-center py-2 rounded-lg transition-colors ${
+                className={`px-3 flex overflow-hidden justify-start items-center py-[12px] rounded-xl transition-colors ${
                   location.pathname === item.path
-                    ? 'bg-[#E4EEFE] border-1 border-[#C3DCFE] text-primary font-bold'
-                    : 'text-placeholder hover:bg-[#E4EEFE]'
+                    ? 'bg-primary border-1 border-[#C3DCFE] text-white text-[14px] font-medium'
+                    : 'text-placeholder font-medium text-[14px] hover:bg-[#E4EEFE]'
                 }`}
               >
                 <span className={`${collapsed ? 'mx-auto' : 'mr-3'}`}>{item.icon}</span>
-                {!collapsed && item.label}
+                {!collapsed && <span className="whitespace-nowrap">{item.label}</span>}
               </Link>
             </li>
           ))}
@@ -76,19 +77,34 @@ export function Sidebar({ user, items, onLogout }: SidebarProps) {
       </nav>
       <div className="mt-auto pt-6">
         {collapsed ? (
-          <button
-            onClick={onLogout}
-            className="w-full flex items-center justify-center py-2 rounded-lg text-red-600 hover:bg-red-50"
-            aria-label="Déconnexion"
+          <ConfirmPopover
             title="Déconnexion"
+            message="Voulez-vous vraiment vous déconnecter de votre session ?"
+            onConfirm={onLogout}
+            confirmText="Se déconnecter"
+            cancelText="Annuler"
           >
-            <Logout size={24} />
-          </button>
+            <button
+              className="w-full flex items-center justify-center py-2 rounded-lg text-red-600 hover:bg-red-50"
+              aria-label="Déconnexion"
+              title="Déconnexion"
+            >
+              <Logout size={24} />
+            </button>
+          </ConfirmPopover>
         ) : (
-          <Button variant="Destructive" classname="w-full justify-start px-3 overflow-hidden" onClick={onLogout}>
-            <Logout size={24} />
-            Déconnexion
-          </Button>
+          <ConfirmPopover
+            title="Déconnexion"
+            message="Voulez-vous vraiment vous déconnecter de votre session ?"
+            onConfirm={onLogout}
+            confirmText="Se déconnecter"
+            cancelText="Annuler"
+          >
+            <Button variant="Destructive" classname="w-full justify-start px-3 overflow-hidden">
+              <Logout size={24} />
+              Déconnexion
+            </Button>
+          </ConfirmPopover>
         )}
       </div>
     </aside>

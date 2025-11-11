@@ -44,6 +44,47 @@ npm install
 npm run dev
 ```
 
+## Nouveautés et composants récents
+
+### Composants UI personnalisés
+- **AddressAutocomplete** : Champ d'adresse avec autocomplétion via l'API gratuite `api-adresse.data.gouv.fr` (Base Adresse Nationale française)
+  - Autocomplétion en temps réel avec debounce
+  - Remplissage automatique des champs code postal et ville
+  - Intégré dans les formulaires client et chantier
+  
+- **DateInput** : Composant de sélection de date avec validation
+  - Props `min` et `max` pour limiter les dates sélectionnables
+  - Validation automatique avec debounce (300ms)
+  - Messages d'erreur dynamiques si la date est hors limites
+  - Style cohérent avec les autres inputs
+
+- **FilterPopover** : Système de filtres modulaire avec Portal
+  - `FilterPopover.Radio` : Boutons radio pour choix unique
+  - `FilterPopover.Checkbox` : Cases à cocher
+  - `FilterPopover.Separator` : Séparateur visuel
+  - `FilterPopover.Range` : Slider avec min/max
+  - Trigger personnalisable (bouton, icône, etc.)
+  - Fermeture sur clic extérieur et touche Échap
+
+- **ConfirmPopover** : Dialogue de confirmation
+  - Overlay assombri avec fond semi-transparent
+  - Rendu via React Portal pour éviter les problèmes de z-index
+  - Centré à l'écran avec animation
+  - Fermeture sur Échap, clic extérieur ou overlay
+
+### Utilitaires
+- **formatRole()** : Fonction de formatage des rôles en français
+  - `ROLE_ADMIN` → "Administrateur"
+  - `ROLE_COMMERCIAL` → "Commercial"
+  - `ROLE_MAITRE_OEUVRE` → "Maître d'œuvre"
+  - Utilisé dans HeaderBar pour affichage convivial
+
+### Améliorations UX
+- Toast notifications pour les erreurs de connexion
+- Validation en temps réel des formulaires avec React Hook Form + Zod
+- Autocomplétion d'adresses pour une saisie rapide et sans erreur
+- Messages d'erreur contextuels et explicites
+
 ## Comptes par défaut
 
 Les fixtures créent automatiquement trois utilisateurs de test :
@@ -76,18 +117,21 @@ front/
 ├── src/
 │   ├── app/            # Point d'entrée et configuration
 │   ├── features/       # Fonctionnalités par domaine métier
-│   │   ├── auth/       # Authentification
+│   │   ├── auth/       # Authentification (Login avec gestion d'erreurs)
 │   │   ├── dashboard/  # Tableau de bord
-│   │   ├── dossiers/   # Gestion des dossiers
+│   │   ├── dossiers/   # Gestion des dossiers (formulaire multi-étapes)
 │   │   ├── chantiers/  # Gestion des chantiers
 │   │   └── users/      # Gestion des utilisateurs
 │   └── shared/         # Code partagé
-│       ├── components/ # Composants réutilisables (UI + Layout)
-│       ├── context/    # Contextes React
-│       ├── hooks/      # Hooks personnalisés
+│       ├── components/ # Composants réutilisables
+│       │   ├── ui/     # Input, Select, Checkbox, DateInput, AddressAutocomplete,
+│       │   │           # FilterPopover, ConfirmPopover, Status, DossierItem, etc.
+│       │   └── layout/ # Sidebar, HeaderBar, DashboardLayout
+│       ├── context/    # Contextes React (Auth, Toast)
+│       ├── hooks/      # Hooks personnalisés (useToast, useAuth)
 │       ├── types/      # Types TypeScript
 │       ├── config/     # Configuration
-│       └── utils/      # Fonctions utilitaires
+│       └── utils/      # Fonctions utilitaires (validators, formatters)
 ```
 
 ## Fonctionnalités principales
@@ -99,6 +143,11 @@ front/
 
 ### Commercial
 - Création de nouveaux dossiers clients
+  - Formulaire multi-étapes avec validation en temps réel
+  - Autocomplétion d'adresses via API publique française
+  - Sélection de modèle avec affichage dynamique des étapes
+  - Réservation d'étapes de chantier
+  - Récapitulatif avant validation
 - Suivi des dossiers en cours
 - Interface de création de devis
 

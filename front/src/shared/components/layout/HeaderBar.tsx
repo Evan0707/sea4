@@ -1,4 +1,5 @@
 import type { User } from '@/shared/types/auth'
+import { formatRole } from '@/shared/utils/formatters'
 import profile from '@/shared/assets/Profile.png'
 
 interface HeaderBarProps {
@@ -6,11 +7,12 @@ interface HeaderBarProps {
 }
 
 export function HeaderBar({ user }: HeaderBarProps) {
+
   return (
-    <header className="absolute right-10 top-6 flex items-center">
+    <header className="absolute right-10 top-6 z-[0] flex items-center">
       <div>
         <p className="text-lg font-bold">{user?.username}</p>
-        <p className="text-placeholder text-sm">{user?.roles?.[0]}</p>
+        <p className="text-placeholder text-sm">{user?.roles?.[0] && formatRole(user.roles[0])}</p>
       </div>
       <img src={profile} className="ml-4" width={45} alt="" />
     </header>

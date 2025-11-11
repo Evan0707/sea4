@@ -4,15 +4,18 @@ import Input from "@/shared/components/ui/Input";
 import Button from "@/shared/components/ui/Button";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/features/auth/context/AuthContext";
+import { useToast } from "@/shared/hooks/useToast";
 import { jwtDecode } from 'jwt-decode';
 import type { JWTPayload } from '@/shared/types/auth';
 import logo from '@/shared/assets/Logo.svg'
 import { Link } from "react-router-dom";
 import { loginSchema, type LoginFormData } from "@/shared/utils/validators";
 
+
 export const Login = () => {
   const navigate = useNavigate();
   const { login } = useAuth();
+  const { addToast } = useToast();
   const {
     register,
     handleSubmit,
@@ -36,6 +39,7 @@ export const Login = () => {
 
       if (!response.ok) {
         const error = await response.json();
+        addToast(error.message || 'Identifiants incorrects', 'error');
         throw new Error(error.message || 'Échec de connexion');
       }
 
@@ -51,12 +55,16 @@ export const Login = () => {
 
       for (const [role, path] of Object.entries(roleRedirects)) {
         if (decodedToken.roles.includes(role)) {
+          addToast('Connexion réussie', 'success');
           navigate(path);
           break;
         }
       }
     } catch (error) {
       console.error("Login error:", error);
+      if (error instanceof Error && !error.message.includes('Échec de connexion')) {
+        addToast('Une erreur est survenue lors de la connexion', 'error');
+      }
     }
   };
 

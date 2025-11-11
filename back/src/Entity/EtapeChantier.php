@@ -14,15 +14,15 @@ class EtapeChantier
 {
     #[ORM\Id]
     #[ORM\GeneratedValue(strategy: 'IDENTITY')]
-    #[ORM\Column(name: 'noEtapeChantier', type: 'integer')]
+    #[ORM\Column(name: '"noEtapeChantier"', type: 'integer')]
     private ?int $id = null;
 
     #[ORM\ManyToOne(inversedBy: 'etapeChantiers')]
-    #[ORM\JoinColumn(name: 'noChantier', referencedColumnName: 'noChantier')]
+    #[ORM\JoinColumn(name: '"noChantier"', referencedColumnName: '"noChantier"')]
     private ?Chantier $chantier = null;
 
     #[ORM\ManyToOne(inversedBy: 'etapeChantiers')]
-    #[ORM\JoinColumn(name: 'noEtape', referencedColumnName: 'noEtape')]
+    #[ORM\JoinColumn(name: '"noEtape"', referencedColumnName: '"noEtape"')]
     private ?Etape $etape = null;
 
     #[ORM\Column(name: 'montantTheoriqueFacture', type: Types::DECIMAL, precision: 10, scale: 2, nullable: true)]

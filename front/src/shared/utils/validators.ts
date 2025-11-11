@@ -51,6 +51,62 @@ export const registerSchema = z.object({
 
 export type RegisterFormData = z.infer<typeof registerSchema>;
 
+/**
+ * Schéma de validation pour le formulaire Client (nouveau dossier)
+ */
+export const clientFormSchema = z.object({
+  nomClient: z
+    .string()
+    .min(1, "Le nom est requis")
+    .max(50, "Le nom ne peut pas dépasser 50 caractères"),
+  prenomClient: z
+    .string()
+    .min(1, "Le prénom est requis")
+    .max(50, "Le prénom ne peut pas dépasser 50 caractères"),
+  adresseClient: z
+    .string()
+    .max(100, "L'adresse ne peut pas dépasser 100 caractères")
+    .min(1,"La ville est requis")
+    .or(z.literal("")),
+  cpClient: z
+    .string()
+    .regex(/^[0-9]{5}$/, "Code postal invalide (5 chiffres requis)")
+    .or(z.literal("")),
+  villeClient: z
+    .string()
+    .max(50, "La ville ne peut pas dépasser 50 caractères")
+    .min(2,"La ville est requis")
+    .or(z.literal("")),
+});
+
+export type ClientFormData = z.infer<typeof clientFormSchema>;
+
+/**
+ * Schéma de validation pour le formulaire Chantier (nouveau dossier)
+ */
+export const chantierFormSchema = z.object({
+  adresseChantier: z
+    .string()
+    .max(100, "L'adresse ne peut pas dépasser 100 caractères")
+    .optional()
+    .or(z.literal("")),
+  cpChantier: z
+    .string()
+    .regex(/^[0-9]{5}$/, "Code postal invalide (5 chiffres requis)")
+    .optional()
+    .or(z.literal("")),
+  villeChantier: z
+    .string()
+    .max(50, "La ville ne peut pas dépasser 50 caractères")
+    .optional()
+    .or(z.literal("")),
+  dateCreation: z.date(),
+  statutChantier: z.enum(['À compléter', 'À venir', 'En chantier', 'Terminé']),
+  noMOE: z.string(),
+  noModele: z.number(),
+});
+
+export type ChantierFormData = z.infer<typeof chantierFormSchema>;
 
 
 // ============================================

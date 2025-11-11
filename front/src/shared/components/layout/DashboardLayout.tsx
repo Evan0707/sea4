@@ -28,7 +28,7 @@ export const DashboardLayout = ({ user, children }: DashboardLayoutProps) => {
       {/* Main Content */}
       <div className="flex-1 bg-white">
         <HeaderBar user={user} />
-        <div className="p-0 relative">
+        <div className="p-0 relative z-0">
             {children}
         </div>
       </div>

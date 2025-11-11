@@ -13,13 +13,13 @@ class Etape
 {
     #[ORM\Id]
     #[ORM\GeneratedValue(strategy: 'IDENTITY')]
-    #[ORM\Column(name: 'noEtape', type: 'integer')]
+    #[ORM\Column(name: '"noEtape"', type: 'integer')]
     private ?int $id = null;
 
-    #[ORM\Column(name: 'nomEtape', length: 50)]
+    #[ORM\Column(name: '"nomEtape"', length: 50)]
     private ?string $nom = null;
 
-    #[ORM\Column(name: 'reservable', type: 'boolean', options: ['default' => false])]
+    #[ORM\Column(name: '"reservable"', type: 'boolean', options: ['default' => false])]
     private bool $reservable = false;
 
     #[ORM\ManyToMany(targetEntity: Modele::class, mappedBy: 'etapes')]

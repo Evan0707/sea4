@@ -13,22 +13,22 @@ class Modele
 {
     #[ORM\Id]
     #[ORM\GeneratedValue(strategy: 'IDENTITY')]
-    #[ORM\Column(name: 'noModele', type: 'integer')]
+    #[ORM\Column(name: '"noModele"', type: 'integer')]
     private ?int $id = null;
 
-    #[ORM\Column(name: 'nomModele', length: 50)]
+    #[ORM\Column(name: '"nomModele"', length: 50)]
     private ?string $nom = null;
 
-    #[ORM\Column(name: 'descriptionModele', type: 'text', nullable: true)]
+    #[ORM\Column(name: '"descriptionModele"', type: 'text', nullable: true)]
     private ?string $description = null;
 
     #[ORM\OneToMany(mappedBy: 'modele', targetEntity: Chantier::class)]
     private Collection $chantiers;
 
     #[ORM\ManyToMany(targetEntity: Etape::class)]
-    #[ORM\JoinTable(name: 'construire', schema: 'bati')]
-    #[ORM\JoinColumn(name: 'noModele', referencedColumnName: 'noModele')]
-    #[ORM\InverseJoinColumn(name: 'noEtape', referencedColumnName: 'noEtape')]
+    #[ORM\JoinTable(name: '"construire"', schema: 'bati')]
+    #[ORM\JoinColumn(name: '"noModele"', referencedColumnName: '"noModele"')]
+    #[ORM\InverseJoinColumn(name: '"noEtape"', referencedColumnName: '"noEtape"')]
     private Collection $etapes;
 
     public function __construct()

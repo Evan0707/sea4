@@ -12,24 +12,23 @@ use Doctrine\ORM\Mapping as ORM;
 class Client
 {
     #[ORM\Id]
-    #[ORM\Column(name: 'noClient', type: 'integer')]
-    #[ORM\GeneratedValue(strategy: 'SEQUENCE')]
-    #[ORM\SequenceGenerator(sequenceName: 'bati.client_noClient_seq', allocationSize: 1)]
+    #[ORM\Column(name: '"noClient"', type: 'integer')]
+    #[ORM\GeneratedValue(strategy: 'IDENTITY')]
     private ?int $id = null;
 
-    #[ORM\Column(name: 'nomClient', length: 50)]
+    #[ORM\Column(name: '"nomClient"', length: 50)]
     private ?string $nom = null;
 
-    #[ORM\Column(name: 'prenomClient', length: 50)]
+    #[ORM\Column(name: '"prenomClient"', length: 50)]
     private ?string $prenom = null;
 
-    #[ORM\Column(name: 'adresseClient', length: 100, nullable: true)]
+    #[ORM\Column(name: '"adresseClient"', length: 100, nullable: true)]
     private ?string $adresse = null;
 
-    #[ORM\Column(name: 'cpClient', length: 5, nullable: true)]
+    #[ORM\Column(name: '"cpClient"', length: 5, nullable: true)]
     private ?string $codePostal = null;
 
-    #[ORM\Column(name: 'villeClient', length: 50, nullable: true)]
+    #[ORM\Column(name: '"villeClient"', length: 50, nullable: true)]
     private ?string $ville = null;
 
     #[ORM\OneToMany(mappedBy: 'client', targetEntity: Chantier::class)]
