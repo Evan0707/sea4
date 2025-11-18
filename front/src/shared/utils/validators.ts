@@ -65,18 +65,16 @@ export const clientFormSchema = z.object({
     .max(50, "Le prénom ne peut pas dépasser 50 caractères"),
   adresseClient: z
     .string()
-    .max(100, "L'adresse ne peut pas dépasser 100 caractères")
-    .min(1,"La ville est requis")
-    .or(z.literal("")),
+    .min(1, "L'adresse est requise")
+    .max(100, "L'adresse ne peut pas dépasser 100 caractères"),
   cpClient: z
     .string()
-    .regex(/^[0-9]{5}$/, "Code postal invalide (5 chiffres requis)")
-    .or(z.literal("")),
+    .min(1, "Le code postal est requis")
+    .regex(/^[0-9]{5}$/, "Code postal invalide (5 chiffres requis)"),
   villeClient: z
     .string()
-    .max(50, "La ville ne peut pas dépasser 50 caractères")
-    .min(2,"La ville est requis")
-    .or(z.literal("")),
+    .min(1, "La ville est requise")
+    .max(50, "La ville ne peut pas dépasser 50 caractères"),
 });
 
 export type ClientFormData = z.infer<typeof clientFormSchema>;
@@ -87,23 +85,24 @@ export type ClientFormData = z.infer<typeof clientFormSchema>;
 export const chantierFormSchema = z.object({
   adresseChantier: z
     .string()
-    .max(100, "L'adresse ne peut pas dépasser 100 caractères")
-    .optional()
-    .or(z.literal("")),
+    .min(1, "L'adresse du chantier est requise")
+    .max(100, "L'adresse ne peut pas dépasser 100 caractères"),
   cpChantier: z
     .string()
-    .regex(/^[0-9]{5}$/, "Code postal invalide (5 chiffres requis)")
-    .optional()
-    .or(z.literal("")),
+    .min(1, "Le code postal est requis")
+    .regex(/^[0-9]{5}$/, "Code postal invalide (5 chiffres requis)"),
   villeChantier: z
     .string()
-    .max(50, "La ville ne peut pas dépasser 50 caractères")
-    .optional()
-    .or(z.literal("")),
-  dateCreation: z.date(),
+    .min(1, "La ville est requise")
+    .max(50, "La ville ne peut pas dépasser 50 caractères"),
+  dateCreation: z.date({
+    required_error: "La date de création est requise",
+  }),
   statutChantier: z.enum(['À compléter', 'À venir', 'En chantier', 'Terminé']),
-  noMOE: z.string(),
-  noModele: z.number(),
+  noMOE: z.string().min(1, "Le maître d'œuvre est requis"),
+  noModele: z.number({
+    required_error: "Le modèle est requis",
+  }).min(1, "Le modèle est requis"),
 });
 
 export type ChantierFormData = z.infer<typeof chantierFormSchema>;

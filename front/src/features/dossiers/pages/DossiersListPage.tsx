@@ -1,7 +1,9 @@
-export const DossiersPage = () => {
+import { H1 } from '@/shared/components/ui/Typography'
+
+export const DossiersListPage = () => {
   return (
     <div className="p-8">
-      <h1 className="text-2xl font-bold mb-6">Dossiers</h1>
+      <H1 className="mb-6">Dossiers</H1>
       {/* Add dossiers list here */}
     </div>
   );

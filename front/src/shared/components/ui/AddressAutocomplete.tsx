@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { InfoCircleSolid } from '@mynaui/icons-react';
 import Tooltip from './Tooltip';
+import { Text } from './Typography';
+import { tokens } from '@/shared/styles/tokens';
 
 interface AddressAutocompleteProps {
   label: string;
@@ -118,9 +120,9 @@ export const AddressAutocomplete: React.FC<AddressAutocompleteProps> = ({
   };
 
   return (
-    <div className="flex flex-col gap-1" ref={wrapperRef}>
+    <div className="flex flex-col gap-1 relative" ref={wrapperRef}>
       <div className="flex items-center gap-2">
-        <label className="text-sm font-medium text-black">
+        <label className="text-sm font-bold text-black">
           {label}
           {required && <span className="text-red-500 ml-1">*</span>}
         </label>
@@ -139,7 +141,7 @@ export const AddressAutocomplete: React.FC<AddressAutocompleteProps> = ({
           placeholder={placeholder}
           className={`w-full px-3 py-2 border-[1.5px] border-border rounded-md focus-within:border-primary focus-within:outline-[1px] outline-border ${
             error
-              ? 'border-red-500 focus:ring-red-500'
+              ? 'border-red focus:ring-red'
               : 'border-gray-300 focus:ring-blue-500'
           }`}
         />
@@ -170,8 +172,8 @@ export const AddressAutocomplete: React.FC<AddressAutocompleteProps> = ({
           </div>
         )}
       </div>
-
-      {error && <p className="text-sm text-red-500">{error}</p>}
+      
+      {error && <Text className='text-[13px] absolute ml-1 mt-1 absolute bottom-[-23px]' weight='semibold' color={tokens.colors.error}>{error}</Text>}
     </div>
   );
 };

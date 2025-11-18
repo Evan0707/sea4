@@ -10,6 +10,7 @@ import DateInput from '@/shared/components/ui/DateInput';
 import Select from '@/shared/components/ui/Select';
 import Checkbox from '@/shared/components/ui/Checkbox';
 import { AddressAutocomplete } from '@/shared/components/ui/AddressAutocomplete';
+import { H1, H2, H3, Text } from '@/shared/components/ui/Typography';
 import { clientFormSchema, chantierFormSchema, type ClientFormData, type ChantierFormData } from '@/shared/utils/validators';
 import type { MaitreOeuvre, Modele, EtapeModele } from '@/shared/types/dossier';
 import axios from 'axios';
@@ -168,7 +169,7 @@ export const NouveauDossierPage = () => {
 
   return (
     <div className="p-10 max-w-[1500px] mx-auto">
-      <h1 className="text-3xl font-bold mb-8">Créer un nouveau dossier</h1>
+      <H1 className="mb-8">Créer un nouveau dossier</H1>
 
       {/* Indicateur de progression */}
       <div className="mb-8">
@@ -182,15 +183,15 @@ export const NouveauDossierPage = () => {
             />
           ))}
         </div>
-        <p className="text-center text-sm text-placeholder">
+        <Text variant="small" align="center" className="text-placeholder">
           Étape {currentStep}/3
-        </p>
+        </Text>
       </div>
 
       {/* Étape 1: Informations client */}
       {currentStep === 1 && (
         <div className="bg-white p-8 rounded-xl shadow w-full">
-          <h2 className="text-2xl font-bold mb-6">Informations client</h2>
+          <H2 className="mb-6">Informations client</H2>
           <form className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <Input
@@ -254,7 +255,7 @@ export const NouveauDossierPage = () => {
       {/* Étape 2: Informations chantier */}
       {currentStep === 2 && (
         <div className="bg-white p-8 rounded-lg shadow">
-          <h2 className="text-2xl font-bold mb-6">Informations chantier</h2>
+          <H2 className="mb-6">Informations chantier</H2>
           <form className="space-y-4">
             <AddressAutocomplete
               label="Adresse du chantier"
@@ -345,9 +346,9 @@ export const NouveauDossierPage = () => {
             {/* Affichage des étapes si un modèle est sélectionné */}
             {selectedModeleId && etapesModele.length > 0 && (
               <div className="mt-6">
-                <h3 className="text-lg font-semibold mb-3">
+                <H3 className="mb-3">
                   Étapes du modèle
-                </h3>
+                </H3>
                 <div className="space-y-2">
                   {etapesModele.map((etape) => (
                     <div
@@ -377,12 +378,12 @@ export const NouveauDossierPage = () => {
       {/* Étape 3: Récapitulatif */}
       {currentStep === 3 && (
         <div className="bg-white p-8 rounded-lg shadow">
-          <h2 className="text-2xl font-bold mb-6">Récapitulatif</h2>
+          <H2 className="mb-6">Récapitulatif</H2>
           <div className="space-y-6">
             <div>
-              <h3 className="text-lg font-semibold mb-3 text-primary">
+              <H3 className="mb-3" color="#3B82F6">
                 Informations client
-              </h3>
+              </H3>
               <div className="bg-gray-50 p-4 rounded-lg space-y-2">
                 <p>
                   <span className="font-medium">Nom:</span> {clientData.nomClient}
@@ -413,9 +414,9 @@ export const NouveauDossierPage = () => {
             </div>
 
             <div>
-              <h3 className="text-lg font-semibold mb-3 text-primary">
+              <H3 className="mb-3" color="#3B82F6">
                 Informations chantier
-              </h3>
+              </H3>
               <div className="bg-gray-50 p-4 rounded-lg space-y-2">
                 {chantierData.adresseChantier && (
                   <p>

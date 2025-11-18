@@ -1,6 +1,7 @@
 import { useToast } from "@/shared/hooks/useToast";
 import { useEffect, useState } from "react";
 import axios from "axios";
+import { H1 } from "@/shared/components/ui/Typography";
 import FilterPopover from "@/shared/components/ui/FilterPopover";
 import { FilterOne } from "@mynaui/icons-react";
 import Button from "@/shared/components/ui/Button";
@@ -29,7 +30,7 @@ export const DashboardPage = () => {
  
   return (
     <div className="p-8">
-      <h1 onClick={()=>addToast('Notif box','info')} className="text-2xl font-bold mb-6">Tableau de bord</h1>
+      <H1 className="mb-6 cursor-pointer" onClick={()=>addToast('Notif box','info')}>Tableau de bord</H1>
         <FilterPopover 
   trigger={<Button variant="Primary">Filtres</Button>}
   onApply={() => console.log('Apply')}

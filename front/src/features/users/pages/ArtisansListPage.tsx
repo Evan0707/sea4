@@ -1,7 +1,9 @@
-export const ArtisansPage = () => {
+import { H1 } from '@/shared/components/ui/Typography'
+
+export const ArtisansListPage = () => {
   return (
     <div className="p-8">
-      <h1 className="text-2xl font-bold mb-6">Artisans</h1>
+      <H1 className="mb-6">Artisans</H1>
       {/* Add artisans management here */}
     </div>
   );

@@ -1,7 +1,9 @@
-export const UtilisateursPage = () => {
+import { H1 } from '@/shared/components/ui/Typography'
+
+export const UtilisateursListPage = () => {
   return (
     <div className="p-8">
-      <h1 className="text-2xl font-bold mb-6">Utilisateurs</h1>
+      <H1 className="mb-6">Utilisateurs</H1>
       {/* Add users management here */}
     </div>
   );

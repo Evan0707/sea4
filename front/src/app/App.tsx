@@ -6,11 +6,11 @@ import Error404 from './pages/Error404Page';
 import { ProtectedRoute } from '../features/auth/components/ProtectedRoute';
 import { DashboardLayout } from '../shared/components/layout/DashboardLayout';
 import { DashboardPage } from '../features/dashboard/pages/DashboardPage';
-import { DossiersPage } from '../features/dossiers/pages/DossiersListPage';
+import { DossiersListPage } from '../features/dossiers/pages/DossiersListPage';
 import { NouveauDossierPage } from '../features/dossiers/pages/NouveauDossierPage';
-import { ProjetsPage } from '../features/chantiers/pages/ProjetsListPage';
-import { UtilisateursPage } from '../features/users/pages/UtilisateursListPage';
-import { ArtisansPage } from '../features/users/pages/ArtisansListPage';
+import { ProjetsListPage } from '../features/chantiers/pages/ProjetsListPage';
+import { UtilisateursListPage } from '../features/users/pages/UtilisateursListPage';
+import { ArtisansListPage } from '../features/users/pages/ArtisansListPage';
 import { AuthProvider, useAuth } from '../features/auth/context/AuthContext';
 import { ToastProvider } from '../shared/context/ToastProvider';
 import { OnlineProvider } from '../shared/context/OnlineProvider';
@@ -55,7 +55,7 @@ function AppRoutes() {
           }
         >
           <Route path="/commercial" element={withDashboard(<DashboardPage />)} />
-          <Route path="/commercial/dossiers" element={withDashboard(<DossiersPage />)} />
+          <Route path="/commercial/dossiers" element={withDashboard(<DossiersListPage />)} />
           <Route
             path="/commercial/nouveau-dossier"
             element={withDashboard(<NouveauDossierPage />)}
@@ -75,7 +75,7 @@ function AppRoutes() {
           <Route path="/maitre-doeuvre" element={withDashboard(<DashboardPage />)} />
           <Route
             path="/maitre-doeuvre/dossiers"
-            element={withDashboard(<DossiersPage />)}
+            element={withDashboard(<DossiersListPage />)}
           />
           <Route
             path="/maitre-doeuvre/dossiers/:id"
@@ -83,7 +83,7 @@ function AppRoutes() {
           />
           <Route
             path="/maitre-doeuvre/projets"
-            element={withDashboard(<ProjetsPage />)}
+            element={withDashboard(<ProjetsListPage />)}
           />
           <Route
             path="/maitre-doeuvre/projets/:id"
@@ -102,13 +102,13 @@ function AppRoutes() {
           }
         >
           <Route path="/admin" element={withDashboard(<DashboardPage />)} />
-          <Route path="/admin/dossiers" element={withDashboard(<DossiersPage />)} />
-          <Route path="/admin/projets" element={withDashboard(<ProjetsPage />)} />
+          <Route path="/admin/dossiers" element={withDashboard(<DossiersListPage />)} />
+          <Route path="/admin/projets" element={withDashboard(<ProjetsListPage />)} />
           <Route
             path="/admin/utilisateurs"
-            element={withDashboard(<UtilisateursPage />)}
+            element={withDashboard(<UtilisateursListPage />)}
           />
-          <Route path="/admin/artisans" element={withDashboard(<ArtisansPage />)} />
+          <Route path="/admin/artisans" element={withDashboard(<ArtisansListPage />)} />
         </Route>
 
         {/* Redirect root to login */}
