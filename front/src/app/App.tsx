@@ -11,20 +11,24 @@ import { NouveauDossierPage } from '../features/dossiers/pages/NouveauDossierPag
 import { ProjetsListPage } from '../features/chantiers/pages/ProjetsListPage';
 import { UtilisateursListPage } from '../features/users/pages/UtilisateursListPage';
 import { ArtisansListPage } from '../features/users/pages/ArtisansListPage';
+import { SettingsPage } from '../features/settings/pages/SettingsPage';
 import { AuthProvider, useAuth } from '../features/auth/context/AuthContext';
 import { ToastProvider } from '../shared/context/ToastProvider';
 import { OnlineProvider } from '../shared/context/OnlineProvider';
+import { ThemeProvider } from '../shared/context/ThemeProvider';
 
 function App() {
   return (
     <BrowserRouter>
-      <OnlineProvider>
-        <AuthProvider>
-          <ToastProvider>
-            <AppRoutes />
-          </ToastProvider>
-        </AuthProvider>
-      </OnlineProvider>
+      <ThemeProvider>
+        <OnlineProvider>
+          <AuthProvider>
+            <ToastProvider>
+              <AppRoutes />
+            </ToastProvider>
+          </AuthProvider>
+        </OnlineProvider>
+      </ThemeProvider>
     </BrowserRouter>
   );
 }
@@ -60,6 +64,10 @@ function AppRoutes() {
             path="/commercial/nouveau-dossier"
             element={withDashboard(<NouveauDossierPage />)}
           />
+          <Route
+            path="/commercial/settings"
+            element={withDashboard(<SettingsPage />)}
+          />
         </Route>
 
         {/* Maitre d'oeuvre Routes */}
@@ -89,6 +97,10 @@ function AppRoutes() {
             path="/maitre-doeuvre/projets/:id"
             element={withDashboard(<div>Détails du projet</div>)}
           />
+          <Route
+            path="/maitre-doeuvre/settings"
+            element={withDashboard(<SettingsPage />)}
+          />
         </Route>
 
         {/* Admin Routes */}
@@ -109,6 +121,7 @@ function AppRoutes() {
             element={withDashboard(<UtilisateursListPage />)}
           />
           <Route path="/admin/artisans" element={withDashboard(<ArtisansListPage />)} />
+          <Route path="/admin/settings" element={withDashboard(<SettingsPage />)} />
         </Route>
 
         {/* Redirect root to login */}

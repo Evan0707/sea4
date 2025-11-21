@@ -2,10 +2,11 @@ import React, { type ReactNode } from 'react'
 import { DangerCircle, InfoCircleSolid } from '@mynaui/icons-react'
 import type { UseFormRegisterReturn } from 'react-hook-form'
 import Tooltip from './Tooltip'
+import { Label } from './Typography'
 
 export type InputProps = {
   name: string
-  label: string
+  label?: string
   type: 'password' | 'text' | 'email'
   placeholder?: string
   className?: string
@@ -18,6 +19,7 @@ export type InputProps = {
   defaultValue?: string
   info?:boolean;
   message?:string;
+  width?:string;
 }
 
 const Input: React.FC<InputProps> = ({
@@ -34,7 +36,8 @@ const Input: React.FC<InputProps> = ({
   value,
   defaultValue,
   info=false,
-  message=''
+  message='',
+  width='w-full'
 }) => {
   const hasError = Boolean(error)
   const inputId = name || label
@@ -53,12 +56,12 @@ const Input: React.FC<InputProps> = ({
   }
 
   return (
-    <div className={`${className ?? ''} relative w-full`}>
+    <div className={`${className ?? ''} relative ${width}`}>
       <div className='flex items-center'>
-        <label className='m-1 font-bold text-[14px]' htmlFor={inputId}>{label}</label>
+        {label&& <Label className='m-1 text-text-primary text-[14px]' weight='bold' htmlFor={inputId}>{label}</Label>}
         {info&&
           <Tooltip content={message}>
-            <InfoCircleSolid size={16} className='color-placeholder'/>
+            <InfoCircleSolid size={14} className='text-text-secondary ml-1'/>
           </Tooltip>
         }
       </div>
@@ -71,7 +74,7 @@ const Input: React.FC<InputProps> = ({
             placeholder={placeholder}
             aria-invalid={hasError}
             aria-describedby={describedBy}
-            className={`focus:outline-none h-[38px] ${leftIcon?'px-[10px]':'px-[0px]'} ml-1 flex-1 bg-transparent w-full`}
+            className={`focus:outline-none h-[38px] ${leftIcon?'px-[10px]':'px-[0px]'} text-text-primary ml-1 flex-1 bg-transparent w-full placeholder-placeholder`}
             onChange={mergedOnChange}
             {...controlProps}
             name={reg.name ?? name}

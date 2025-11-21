@@ -69,13 +69,13 @@ export const Login = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-100">
+    <div className="min-h-screen flex flex-col items-center justify-center bg-bg-primary">
       <div className="flex flex-col items-center mb-10">
         <img src={logo} alt="" width={60}/>
-        <h3 className="text-4xl font-bold mt-2">Bati’parti</h3>
+        <h3 className="text-4xl text-text-primary font-bold mt-2">Bati’parti</h3>
       </div>
-      <div className="max-w-[500px] w-full flex justify-center flex-col relative p-8 bg-white rounded-[14px] shadow-lg">
-        <h2 className="text-3xl font-bold items-center text-center text-gray-800 mb-4">Autentifiez -vous a Bati’Parti</h2>
+      <div className="max-w-[500px] w-full flex justify-center flex-col relative p-8 bg-bg-secondary rounded-[14px] shadow-lg">
+        <h2 className="text-3xl font-bold items-center text-center text-text-primary mb-4">Autentifiez -vous a Bati’Parti</h2>
         <p className="text-placeholder text-center text-lg mb-8">Autentifiez -vous à Bati’Parti</p>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
           <Input

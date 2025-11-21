@@ -96,12 +96,12 @@ export const chantierFormSchema = z.object({
     .min(1, "La ville est requise")
     .max(50, "La ville ne peut pas dépasser 50 caractères"),
   dateCreation: z.date({
-    required_error: "La date de création est requise",
+    message: "La date de création est requise",
   }),
   statutChantier: z.enum(['À compléter', 'À venir', 'En chantier', 'Terminé']),
   noMOE: z.string().min(1, "Le maître d'œuvre est requis"),
   noModele: z.number({
-    required_error: "Le modèle est requis",
+    message: "Le modèle est requis",
   }).min(1, "Le modèle est requis"),
 });
 

@@ -1,5 +1,4 @@
 import { DangerCircle } from '@mynaui/icons-react'
-import React from 'react'
 
 interface statusProps{
     label:'À venir'|'Terminé'|'Complété'|'En chantier'|'À compléter'
@@ -9,7 +8,7 @@ const Status = ({label}:statusProps) => {
 
     const variant = label=='Complété'&&'border-[1.5px] border-[#85FA81] text-[#208900] bg-[#E9FFF0]'
     ||label=='Terminé'&&'border-[1.5px] border-[#85FA81] text-[#208900] bg-[#E9FFF0]'
-    ||label=='En chantier'&&'border-[1.5px] border-[#FFC39B] text-[#FF6803] bg-[#FFF2E9]'
+    ||label=='En chantier'&&'border-[1.5px] border-[#FF6803] text-[#FF6803] bg-[#FF6803]/20'
     ||label=='À venir'&&'border-[1.5px] border-primary text-primary bg-primary/10'
     ||label=='À compléter'&&'border-[1.5px] border-red text-red bg-red-bg'
 

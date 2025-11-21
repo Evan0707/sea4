@@ -26,7 +26,6 @@ export const Heading = ({
   className = '',
   align = 'left',
   weight,
-  color = tokens.colors.black,
   onClick,
 }: HeadingProps) => {
   const baseStyles = `font-bold text-${align}`
@@ -52,9 +51,8 @@ export const Heading = ({
   const weightClass = `font-${weights[level]}`
   const sizeClass = sizes[level]
   
-  const classNames = `${baseStyles} ${sizeClass} ${weightClass} ${className}`
-  const style = { color }
-  const props = { className: classNames, style, onClick }
+  const classNames = `${baseStyles} ${sizeClass} ${weightClass} text-text-primary ${className}`
+  const props = { className: classNames, onClick }
   
   switch (level) {
     case 1:
@@ -97,17 +95,16 @@ export const Text = ({
   className = '',
   align = 'left',
   weight = 'normal',
-  color = tokens.colors.gray[900],
   italic = false,
   underline = false,
   strikethrough = false,
   as: Component = 'p',
 }: TextProps) => {
   const variants = {
-    lead: 'text-xl leading-relaxed',      // 20px
-    body: 'text-base leading-normal',     // 16px
-    small: 'text-sm leading-normal',      // 14px
-    caption: 'text-xs leading-normal',    // 12px
+    lead: 'text-xl leading-relaxed text-text-primary',      // 20px
+    body: 'text-base leading-normal text-text-primary',     // 16px
+    small: 'text-sm leading-normal text-text-secondary',      // 14px
+    caption: 'text-xs leading-normal text-text-secondary',    // 12px
   }
   
   const styles = [
@@ -121,7 +118,7 @@ export const Text = ({
   ].filter(Boolean).join(' ')
   
   return (
-    <Component className={styles} style={{ color }}>
+    <Component className={`${styles}`}>
       {children}
     </Component>
   )
@@ -137,15 +134,13 @@ export const Label = ({
   children,
   className = '',
   weight = 'medium',
-  color = tokens.colors.gray[700],
   htmlFor,
   required = false,
 }: LabelProps) => {
   return (
     <label
       htmlFor={htmlFor}
-      className={`text-sm font-${weight} ${className}`}
-      style={{ color }}
+      className={`text-sm font-${weight} ${className} text-text-primary`}
     >
       {children}
       {required && <span className="text-red-500 ml-1">*</span>}

@@ -20,7 +20,7 @@ const Button = ({
   const base = `${classname ?? ''} flex items-center justify-center py-[8px] font-bold min-w-[100px] rounded-[6px] text-[14] cursor-pointer transition-colors`;
   const variants =
     (variant=='Primary' && 'bg-primary border-[1.5px] border-[#341FCE] text-white h-[42px] hover:bg-[#281FD1]')
-    || (variant=='Secondary' && 'border-[1.5px] border-border bg-secondary text-black h-[42px] hover:bg-border')
+    || (variant=='Secondary' && 'border-[1.5px] border-border bg-secondary text-text-primary h-[42px] hover:bg-border')
     || (variant=='Destructive' && 'bg-red-bg text-red h-[42px] hover:bg-[#F6DAE1]')
     || '';
   const loadingStyles = loading ? 'opacity-60 cursor-not-allowed pointer-events-none' : '';

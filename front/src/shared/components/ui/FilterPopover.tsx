@@ -2,6 +2,7 @@ import { useState, useRef, useEffect, type ReactNode } from 'react'
 import { createPortal } from 'react-dom'
 import Button from './Button'
 import { FilterOne } from '@mynaui/icons-react'
+import { H3, Label, Text } from './Typography'
 
 interface FilterPopoverProps {
   trigger: ReactNode
@@ -89,9 +90,9 @@ const FilterPopover = ({
               top: `${position.top}px`,
               left: `${position.left}px`,
             }}
-            className="z-[99999] bg-white rounded-lg shadow-lg border border-border p-4 min-w-[300px] animate-in fade-in zoom-in-95 duration-200"
+            className="z-[99999] bg-bg-primary rounded-lg shadow-lg border border-border p-4 min-w-[300px] animate-in fade-in zoom-in-95 duration-200"
           >
-            <h3 className="font-bold text-[16px] text-black mb-4">Filtres</h3>
+            <H3 >Filtres</H3>
             
             <div className="space-y-4 mb-4">
               {children}
@@ -124,7 +125,7 @@ interface FilterRadioProps {
 const FilterRadio = ({ label, name, options, value, onChange }: FilterRadioProps) => {
   return (
     <div>
-      <label className="block text-sm font-semibold mb-2">{label}</label>
+      <Label className="block text-sm font-semibold mb-2 mt-1">{label}</Label>
       <div className="space-y-2">
         {options.map((option) => (
           <label key={option.value} className="flex items-center gap-2 cursor-pointer">
@@ -134,9 +135,9 @@ const FilterRadio = ({ label, name, options, value, onChange }: FilterRadioProps
               value={option.value}
               checked={value === option.value}
               onChange={(e) => onChange(e.target.value)}
-              className="w-4 h-4 text-primary border-border focus:ring-primary cursor-pointer"
+              className="w-4 h-4 text-text-primary border-border focus:ring-primary cursor-pointer accent-primary hover:scale-110 transition-all"
             />
-            <span className="text-sm">{option.label}</span>
+            <Text variant='body' className="text-sm text-text-primary">{option.label}</Text>
           </label>
         ))}
       </div>
@@ -153,15 +154,15 @@ interface FilterCheckboxProps {
 
 const FilterCheckbox = ({ label, checked, onChange }: FilterCheckboxProps) => {
   return (
-    <label className="flex items-center gap-2 cursor-pointer">
+    <Label className="flex items-center gap-2 cursor-pointer">
       <input
         type="checkbox"
         checked={checked}
         onChange={(e) => onChange(e.target.checked)}
-        className="w-4 h-4 text-primary border-border rounded focus:ring-primary cursor-pointer"
+        className="w-4 h-4 text-primary border-border rounded focus:ring-primary cursor-pointer accent-primary hover:scale-110 transition-all"
       />
-      <span className="text-sm font-medium">{label}</span>
-    </label>
+      <Text className="text-sm font-medium">{label}</Text>
+    </Label>
   )
 }
 
@@ -190,24 +191,40 @@ const FilterRange = ({
   step = 1,
   showValue = true 
 }: FilterRangeProps) => {
+  // Calculer la position du tooltip en pourcentage
+  const percentage = ((value - min) / (max - min)) * 100
+
   return (
     <div>
       <div className="flex items-center justify-between mb-2">
-        <label className="text-sm font-semibold">{label}</label>
-        {showValue && <span className="text-sm text-placeholder">{value}</span>}
+        <Label className="text-sm text-text-primary font-semibold">{label}</Label>
       </div>
-      <input
-        type="range"
-        min={min}
-        max={max}
-        step={step}
-        value={value}
-        onChange={(e) => onChange(Number(e.target.value))}
-        className="w-full h-2 bg-primary/10 rounded-lg appearance-none cursor-pointer accent-primary"
-      />
+      <div className="relative pt-6 pb-2">
+        {/* Tooltip qui suit le curseur */}
+        {showValue && (
+          <div 
+            className="absolute -top-1 transform -translate-x-1/2 transition-all duration-100"
+            style={{ left: `${percentage}%` }}
+          >
+            <div className="bg-primary text-white px-2 py-1 rounded text-xs font-medium whitespace-nowrap">
+              {value}
+            </div>
+            <div className="w-0 h-0 border-l-4 border-r-4 border-t-4 border-l-transparent border-r-transparent border-t-primary mx-auto"></div>
+          </div>
+        )}
+        <input
+          type="range"
+          min={min}
+          max={max}
+          step={step}
+          value={value}
+          onChange={(e) => onChange(Number(e.target.value))}
+          className="w-full h-2 bg-primary/10 rounded-lg appearance-none cursor-pointer accent-primary"
+        />
+      </div>
       <div className="flex justify-between text-xs text-placeholder mt-1">
-        <span>{min}</span>
-        <span>{max}</span>
+        <Text variant='small'>{min}</Text>
+        <Text variant='small'>{max}</Text>
       </div>
     </div>
   )

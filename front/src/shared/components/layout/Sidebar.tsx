@@ -1,11 +1,12 @@
 import { Link, useLocation } from 'react-router-dom'
 import type { User } from '@/shared/types/auth'
 import Button from '@/shared/components/ui/Button'
-import { Logout, SidebarSolid, SidebarAltSolid } from '@mynaui/icons-react'
+import { Logout, SidebarSolid, SidebarAltSolid, CogFour } from '@mynaui/icons-react'
 import type { NavItem } from '@/shared/config/navigation'
 import Logo from '@/shared/assets/Logo.svg'
 import { useState, useEffect } from 'react'
 import ConfirmPopover from '../ui/ConfirmPopover'
+import { H2 } from '../ui/Typography'
 
 interface SidebarProps {
   user: User | null
@@ -25,6 +26,16 @@ export function Sidebar({ user, items, onLogout }: SidebarProps) {
         localStorage.setItem('sidebar:collapsed', collapsed ? '1' : '0')
     }, [collapsed])
 
+  // Déterminer le chemin settings basé sur le rôle
+  const getSettingsPath = () => {
+    if (user?.roles?.includes('ROLE_ADMIN')) return '/admin/settings'
+    if (user?.roles?.includes('ROLE_MAITRE_DOEUVRE')) return '/maitre-doeuvre/settings'
+    if (user?.roles?.includes('ROLE_COMMERCIAL')) return '/commercial/settings'
+    return '/settings'
+  }
+
+  const settingsPath = getSettingsPath()
+
 
   // Keyboard shortcut: Ctrl/Cmd + B pour toggle sidebar 
   useEffect(() => {
@@ -41,7 +52,7 @@ export function Sidebar({ user, items, onLogout }: SidebarProps) {
   }, [])
 
   return (
-    <aside className={`${collapsed ? 'w-20' : 'w-64'} bg-[#FAFBFE] h-screen sticky top-0 flex flex-col border-r-1 border-border text-white p-3 transition-all duration-300 overflow-y-auto`}> 
+    <aside className={`${collapsed ? 'w-20' : 'w-64'} bg-bg-secondary h-screen sticky top-0 flex flex-col border-r-1 border-border text-white p-3 transition-all duration-300 overflow-y-auto`}> 
       <button
         type="button"
         onClick={() => setCollapsed(v => !v)}
@@ -54,7 +65,7 @@ export function Sidebar({ user, items, onLogout }: SidebarProps) {
       </button>
       <div className={`mb-8 absolute left-5 flex items-center mt-8 ${collapsed ? 'justify-center' : ''}`}>
         <img src={Logo} width={35} className={collapsed ? '' : 'mr-3'} />
-        {!collapsed && <h2 className="text-2xl font-bold text-black">Bati'Parti</h2>}
+        {!collapsed && <H2 className='text-xl ml-3' weight='bold'>Bati'Parti</H2>}
       </div>
       <nav>
         <ul className="space-y-1 mt-22">
@@ -62,10 +73,10 @@ export function Sidebar({ user, items, onLogout }: SidebarProps) {
             <li key={item.path}>
               <Link
                 to={item.path}
-                className={`px-3 flex overflow-hidden justify-start items-center py-[12px] rounded-xl transition-colors ${
+                className={`px-3 flex overflow-hidden justify-start items-center py-[12px] rounded-[6px] transition-colors border-1 ${
                   location.pathname === item.path
-                    ? 'bg-primary border-1 border-[#C3DCFE] text-white text-[14px] font-medium'
-                    : 'text-placeholder font-medium text-[14px] hover:bg-[#E4EEFE]'
+                    ? 'bg-primary/10 border-primary text-text-primary text-[14px] font-medium'
+                    : 'text-text-secondary font-medium text-[14px] hover:bg-primary/5 border-transparent'
                 }`}
               >
                 <span className={`${collapsed ? 'mx-auto' : 'mr-3'}`}>{item.icon}</span>
@@ -76,6 +87,18 @@ export function Sidebar({ user, items, onLogout }: SidebarProps) {
         </ul>
       </nav>
       <div className="mt-auto pt-6">
+        <Link
+          to={settingsPath}
+          className={`px-3 flex overflow-hidden justify-start items-center py-[12px] rounded-[6px] mb-2 transition-colors border-1 ${
+            location.pathname === settingsPath
+              ? 'bg-primary/10 border-primary text-text-primary text-[14px] font-medium'
+              : 'text-text-secondary font-medium text-[14px] hover:bg-primary/5 border-transparent'
+          }`}
+        >
+          <span className={`${collapsed ? 'mx-auto' : 'mr-3'}`}><CogFour className='text-text-white'/></span>
+          {!collapsed && <span className="whitespace-nowrap">Paramètre</span>}
+        </Link>
+
         {collapsed ? (
           <ConfirmPopover
             title="Déconnexion"

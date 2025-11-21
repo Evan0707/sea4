@@ -26,7 +26,7 @@ export const DashboardLayout = ({ user, children }: DashboardLayoutProps) => {
       <Sidebar user={user} items={NAV_ITEMS} onLogout={handleLogout} />
 
       {/* Main Content */}
-      <div className="flex-1 bg-white">
+      <div className="flex-1 bg-bg-primary">
         <HeaderBar user={user} />
         <div className="p-0 relative z-0">
             {children}

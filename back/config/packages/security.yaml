@@ -40,6 +40,7 @@ security:
         - { path: ^/api/register, roles: PUBLIC_ACCESS }
         - { path: ^/api/modeles, roles: PUBLIC_ACCESS }
         - { path: ^/api/maitres-oeuvre, roles: PUBLIC_ACCESS }
+        - { path: ^/api/chantiers, roles: PUBLIC_ACCESS }
         - { path: ^/api/admin, roles: ROLE_ADMIN }
         - { path: ^/api/commercial, roles: ROLE_COMMERCIAL }
         - { path: ^/api/maitre_oeuvre, roles: ROLE_MAITRE_OEUVRE }

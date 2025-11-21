@@ -1,37 +1,45 @@
 @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@200..800&display=swap');
 @import "tailwindcss";
 
-
+/* stylelint-disable-next-line at-rule-no-unknown */
 @theme{
+  /* Couleurs fixes */
   --color-primary : #4040F2;
-  --color-secondary:#F0F0F0;
-  --color-border:#D6D6D6;
   --color-red:#DA2551;
   --color-red-bg:#FBF3F5;
   --color-black:#000;
-  --color-placeholder:#515970;
+  
+  
+  /* Couleurs thématiques - Light (défaut) */
+  --color-bg-primary: #ffffff;
+  --color-bg-secondary: #F9FAFB;
+  --color-text-primary: #000000;
+  --color-text-secondary: #515970;
+  --color-border: #D6D6D6;
+  --color-placeholder: #515970;
+}
+
+/* Thème sombre - Override des variables thématiques */
+:root[data-theme="dark"] {
+  --color-bg-primary: #161618;
+  --color-bg-secondary: #202022;
+  --color-text-primary: #ffffff;
+  --color-text-secondary: #a0a0a0;
+  --color-border: #383838;
+  --color-placeholder: #a0a0a0;
+
+
+  --color-primary : #4040F2;
+  --color-red:#DA2551;
+  --color-red-bg:#da255221;
+  --color-black:#000;
 }
 
 :root {
-
   font-family: 'Manrope', Avenir, Helvetica, Arial, sans-serif !important;
-
-  color-scheme: light dark;
-  color: rgba(0, 0, 0, 0.87);
-  /* background-color: #242424; */
-  background-color: #fff;
-
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-}
-
-
-@media (prefers-color-scheme: light) {
-  :root {
-    color: #213547;
-    background-color: #ffffff;
-  }
-
+  transition: background-color 0.3s ease, color 0.3s ease;
 }

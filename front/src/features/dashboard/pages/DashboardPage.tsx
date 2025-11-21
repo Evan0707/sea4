@@ -1,9 +1,7 @@
 import { useToast } from "@/shared/hooks/useToast";
-import { useEffect, useState } from "react";
-import axios from "axios";
+import { useState } from "react";
 import { H1 } from "@/shared/components/ui/Typography";
 import FilterPopover from "@/shared/components/ui/FilterPopover";
-import { FilterOne } from "@mynaui/icons-react";
 import Button from "@/shared/components/ui/Button";
 // import Popover from "@/shared/components/ui/Popover";
 // import { DotsVerticalSolid, Edit, Trash } from "@mynaui/icons-react";
@@ -14,55 +12,41 @@ export const DashboardPage = () => {
   const [premium, setPremium] = useState(false)
   const [price, setPrice] = useState(50)
 
-    useEffect(() => {
-    const fetchModeles = async () => {
-      try {
-        const response = await axios.get('http://localhost:8000/api/modeles');
-        console.log('Modèles:', response.data);
-      } catch (error) {
-        console.error('Erreur lors de la récupération des modèles:', error);
-      }
-    };
-
-    fetchModeles();
-  }, [])
-  
- 
   return (
     <div className="p-8">
-      <H1 className="mb-6 cursor-pointer" onClick={()=>addToast('Notif box','info')}>Tableau de bord</H1>
-        <FilterPopover 
-  trigger={<Button variant="Primary">Filtres</Button>}
-  onApply={() => console.log('Apply')}
-  onReset={() => { setStatus('all'); setPremium(false); setPrice(50) }}
->
-  <FilterPopover.Radio
-    label="Statut"
-    name="status"
-    options={[
-      { value: 'all', label: 'Tous' },
-      { value: 'active', label: 'Actif' },
-      { value: 'inactive', label: 'Inactif' }
-    ]}
-    value={status}
-    onChange={setStatus}
-  />
-  
-  <FilterPopover.Checkbox
-    label="Premium uniquement"
-    checked={premium}
-    onChange={setPremium}
-  />
-  
-  <FilterPopover.Range
-    label="Prix maximum"
-    min={0}
-    max={100}
-    value={price}
-    onChange={setPrice}
-  />
-</FilterPopover>
-        {/* <Popover icon={DotsVerticalSolid} iconSize={28}>
+      <H1 className="mb-6 cursor-pointer" onClick={() => addToast('Notif box', 'info')}>Tableau de bord</H1>
+      <FilterPopover
+        trigger={<Button variant="Primary">Filtres</Button>}
+        onApply={() => console.log('Apply')}
+        onReset={() => { setStatus('all'); setPremium(false); setPrice(50) }}
+      >
+        <FilterPopover.Radio
+          label="Statut"
+          name="status"
+          options={[
+            { value: 'all', label: 'Tous' },
+            { value: 'active', label: 'Actif' },
+            { value: 'inactive', label: 'Inactif' }
+          ]}
+          value={status}
+          onChange={setStatus}
+        />
+
+        <FilterPopover.Checkbox
+          label="Premium uniquement"
+          checked={premium}
+          onChange={setPremium}
+        />
+
+        <FilterPopover.Range
+          label="Prix maximum"
+          min={0}
+          max={100}
+          value={price}
+          onChange={setPrice}
+        />
+      </FilterPopover>
+      {/* <Popover icon={DotsVerticalSolid} iconSize={28}>
           <Popover.Item icon={Edit} onClick={() => console.log('Éditer')}>
             Éditer
           </Popover.Item>

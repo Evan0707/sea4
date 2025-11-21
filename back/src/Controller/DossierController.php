@@ -4,7 +4,6 @@ namespace App\Controller;
 
 use App\Entity\Client;
 use App\Entity\Chantier;
-use App\Entity\EtapeChantier;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -101,23 +100,7 @@ class DossierController extends AbstractController
         $entityManager->persist($chantier);
         $entityManager->flush();
 
-        // Créer les réservations d'étapes si fournies
-        if (isset($data['chantier']['etapesReservees']) && is_array($data['chantier']['etapesReservees'])) {
-            foreach ($data['chantier']['etapesReservees'] as $noEtape) {
-                $etape = $entityManager->getRepository(\App\Entity\Etape::class)->find($noEtape);
-                if ($etape) {
-                    $etapeChantier = new EtapeChantier();
-                    $etapeChantier->setEtape($etape);
-                    $etapeChantier->setChantier($chantier);
-                    $etapeChantier->setReservee(true);
-                    $etapeChantier->setDateDebut(null);
-                    $etapeChantier->setDateFin(null);
-                    
-                    $entityManager->persist($etapeChantier);
-                }
-            }
-            $entityManager->flush();
-        }
+        // Les étapes seront créées automatiquement par le trigger de la base de données
 
         return $this->json([
             'message' => 'Dossier créé avec succès',

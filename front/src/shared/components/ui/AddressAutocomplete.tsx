@@ -122,13 +122,13 @@ export const AddressAutocomplete: React.FC<AddressAutocompleteProps> = ({
   return (
     <div className="flex flex-col gap-1 relative" ref={wrapperRef}>
       <div className="flex items-center gap-2">
-        <label className="text-sm font-bold text-black">
+        <label className="text-sm font-bold text-text-primary m-1">
           {label}
           {required && <span className="text-red-500 ml-1">*</span>}
         </label>
         {info && (
           <Tooltip content={info}>
-            <InfoCircleSolid size={16} className="text-black" />
+            <InfoCircleSolid size={14} className="text-text-secondary" />
           </Tooltip>
         )}
       </div>
@@ -139,10 +139,10 @@ export const AddressAutocomplete: React.FC<AddressAutocompleteProps> = ({
           value={value}
           onChange={handleInputChange}
           placeholder={placeholder}
-          className={`w-full px-3 py-2 border-[1.5px] border-border rounded-md focus-within:border-primary focus-within:outline-[1px] outline-border ${
+          className={`w-full px-3 py-2 border-[1.5px] border-border rounded-md focus-within:border-primary focus-within:outline-[1px] outline-border  placeholder-placeholder ${
             error
               ? 'border-red focus:ring-red'
-              : 'border-gray-300 focus:ring-blue-500'
+              : 'border-border focus:ring-blue-500'
           }`}
         />
 

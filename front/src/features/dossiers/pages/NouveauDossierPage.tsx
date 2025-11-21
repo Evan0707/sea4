@@ -8,7 +8,6 @@ import Button from '@/shared/components/ui/Button';
 import Input from '@/shared/components/ui/Input';
 import DateInput from '@/shared/components/ui/DateInput';
 import Select from '@/shared/components/ui/Select';
-import Checkbox from '@/shared/components/ui/Checkbox';
 import { AddressAutocomplete } from '@/shared/components/ui/AddressAutocomplete';
 import { H1, H2, H3, Text } from '@/shared/components/ui/Typography';
 import { clientFormSchema, chantierFormSchema, type ClientFormData, type ChantierFormData } from '@/shared/utils/validators';
@@ -28,7 +27,6 @@ export const NouveauDossierPage = () => {
   const [modeles, setModeles] = useState<Modele[]>([]);
   const [etapesModele, setEtapesModele] = useState<EtapeModele[]>([]);
   const [selectedModeleId, setSelectedModeleId] = useState<number | null>(null);
-  const [etapesReservees, setEtapesReservees] = useState<Set<number>>(new Set());
 
   // Form pour Client (étape 1)
   const clientForm = useForm<ClientFormData>({
@@ -131,7 +129,6 @@ export const NouveauDossierPage = () => {
             adresseChantier: chantierData.adresseChantier || null,
             villeChantier: chantierData.villeChantier || null,
             dateCreation: chantierData.dateCreation.toISOString().split('T')[0],
-            etapesReservees: Array.from(etapesReservees),
           },
         },
         {
@@ -152,23 +149,13 @@ export const NouveauDossierPage = () => {
     }
   };
 
-  const toggleEtapeReservation = (noEtape: number) => {
-    setEtapesReservees((prev) => {
-      const newSet = new Set(prev);
-      if (newSet.has(noEtape)) {
-        newSet.delete(noEtape);
-      } else {
-        newSet.add(noEtape);
-      }
-      return newSet;
-    });
-  };
+
 
   const clientData = clientForm.watch();
   const chantierData = chantierForm.watch();
 
   return (
-    <div className="p-10 max-w-[1500px] mx-auto">
+    <div className="p-10 pt-5 max-w-[1500px] mx-auto">
       <H1 className="mb-8">Créer un nouveau dossier</H1>
 
       {/* Indicateur de progression */}
@@ -177,10 +164,18 @@ export const NouveauDossierPage = () => {
           {[1, 2, 3].map((step) => (
             <div
               key={step}
-              className={`flex-1 h-1 rounded-full mx-1 transition-colors transition-300 ${
-                step <= currentStep ? 'bg-primary' : 'bg-primary/20'
-              }`}
-            />
+              className="flex-1 h-1 rounded-full mx-1 bg-primary/20 overflow-hidden"
+            >
+              <div
+                className={`h-full bg-primary transition-all duration-500 ease-out ${
+                  step < currentStep
+                    ? 'w-full'
+                    : step === currentStep
+                    ? 'w-full animate-in slide-in-from-left'
+                    : 'w-0'
+                }`}
+              />
+            </div>
           ))}
         </div>
         <Text variant="small" align="center" className="text-placeholder">
@@ -190,7 +185,7 @@ export const NouveauDossierPage = () => {
 
       {/* Étape 1: Informations client */}
       {currentStep === 1 && (
-        <div className="bg-white p-8 rounded-xl shadow w-full">
+        <div className="p-8 rounded-lg border border-border bg-bg-primary w-full">
           <H2 className="mb-6">Informations client</H2>
           <form className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
@@ -254,7 +249,7 @@ export const NouveauDossierPage = () => {
 
       {/* Étape 2: Informations chantier */}
       {currentStep === 2 && (
-        <div className="bg-white p-8 rounded-lg shadow">
+        <div className="bg-white p-8 rounded-lg border border-border bg-gray-50">
           <H2 className="mb-6">Informations chantier</H2>
           <form className="space-y-4">
             <AddressAutocomplete
@@ -337,7 +332,6 @@ export const NouveauDossierPage = () => {
                   if (numValue !== null) {
                     chantierForm.setValue('noModele', numValue);
                   }
-                  setEtapesReservees(new Set());
                 }}
                 error={chantierForm.formState.errors.noModele?.message}
               />
@@ -353,19 +347,9 @@ export const NouveauDossierPage = () => {
                   {etapesModele.map((etape) => (
                     <div
                       key={etape.noEtape}
-                      className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
+                      className="p-3 bg-gray-50 rounded-lg"
                     >
-                      <div>
-                        <p className="font-medium">{etape.nomEtape}</p>
-                      </div>
-                      {etape.reservable && (
-                        <Checkbox
-                          name={`etape-${etape.noEtape}`}
-                          label="Réserver"
-                          checked={etapesReservees.has(etape.noEtape)}
-                          onChange={() => toggleEtapeReservation(etape.noEtape)}
-                        />
-                      )}
+                      <p className="font-medium">{etape.nomEtape}</p>
                     </div>
                   ))}
                 </div>
@@ -377,7 +361,7 @@ export const NouveauDossierPage = () => {
 
       {/* Étape 3: Récapitulatif */}
       {currentStep === 3 && (
-        <div className="bg-white p-8 rounded-lg shadow">
+        <div className="bg-white p-8 rounded-lg border border-border bg-gray-50">
           <H2 className="mb-6">Récapitulatif</H2>
           <div className="space-y-6">
             <div>
@@ -459,21 +443,6 @@ export const NouveauDossierPage = () => {
                         ?.nomModele
                     }
                   </p>
-                )}
-                {etapesReservees.size > 0 && (
-                  <div>
-                    <span className="font-medium">Étapes réservées:</span>
-                    <ul className="list-disc list-inside ml-4">
-                      {Array.from(etapesReservees).map((noEtape) => (
-                        <li key={noEtape}>
-                          {
-                            etapesModele.find((e) => e.noEtape === noEtape)
-                              ?.nomEtape
-                          }
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
                 )}
               </div>
               <button
