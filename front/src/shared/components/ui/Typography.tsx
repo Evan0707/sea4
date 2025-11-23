@@ -91,6 +91,7 @@ interface TextProps extends BaseTypographyProps {
 
 export const Text = ({
   variant = 'body',
+  color,
   children,
   className = '',
   align = 'left',
@@ -101,14 +102,22 @@ export const Text = ({
   as: Component = 'p',
 }: TextProps) => {
   const variants = {
-    lead: 'text-xl leading-relaxed text-text-primary',      // 20px
-    body: 'text-base leading-normal text-text-primary',     // 16px
-    small: 'text-sm leading-normal text-text-secondary',      // 14px
-    caption: 'text-xs leading-normal text-text-secondary',    // 12px
+    lead: 'text-xl leading-relaxed',      // 20px
+    body: 'text-base leading-normal',     // 16px
+    small: 'text-sm leading-normal',      // 14px
+    caption: 'text-xs leading-normal',    // 12px
+  }
+
+  const defaultColors = {
+    lead: 'text-text-primary',
+    body: 'text-text-primary',
+    small: 'text-text-secondary',
+    caption: 'text-text-secondary',
   }
   
   const styles = [
     variants[variant],
+    !color && defaultColors[variant],
     `text-${align}`,
     `font-${weight}`,
     italic && 'italic',
@@ -118,7 +127,7 @@ export const Text = ({
   ].filter(Boolean).join(' ')
   
   return (
-    <Component className={`${styles}`}>
+    <Component className={styles} style={color ? { color } : undefined}>
       {children}
     </Component>
   )

@@ -44,7 +44,8 @@ security:
         - { path: ^/api/admin, roles: ROLE_ADMIN }
         - { path: ^/api/commercial, roles: ROLE_COMMERCIAL }
         - { path: ^/api/maitre_oeuvre, roles: ROLE_MAITRE_OEUVRE }
-        - { path: ^/api/dossiers, roles: ROLE_COMMERCIAL }
+        - { path: ^/api/dossier, roles: PUBLIC_ACCESS }
+        - { path: ^/api/dossiers, roles: PUBLIC_ACCESS }
         - { path: ^/api, roles: IS_AUTHENTICATED_FULLY }
 
 when@test:

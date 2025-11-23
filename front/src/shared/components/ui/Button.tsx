@@ -21,7 +21,7 @@ const Button = ({
   const variants =
     (variant=='Primary' && 'bg-primary border-[1.5px] border-[#341FCE] text-white h-[42px] hover:bg-[#281FD1]')
     || (variant=='Secondary' && 'border-[1.5px] border-border bg-secondary text-text-primary h-[42px] hover:bg-border')
-    || (variant=='Destructive' && 'bg-red-bg text-red h-[42px] hover:bg-[#F6DAE1]')
+    || (variant=='Destructive' && 'bg-red/8 text-red h-[42px] hover:bg-red/15')
     || '';
   const loadingStyles = loading ? 'opacity-60 cursor-not-allowed pointer-events-none' : '';
   const handleClick = loading ? undefined : onClick;

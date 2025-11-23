@@ -8,6 +8,7 @@ import { DashboardLayout } from '../shared/components/layout/DashboardLayout';
 import { DashboardPage } from '../features/dashboard/pages/DashboardPage';
 import { DossiersListPage } from '../features/dossiers/pages/DossiersListPage';
 import { NouveauDossierPage } from '../features/dossiers/pages/NouveauDossierPage';
+import { EditDossierPage } from '../features/dossiers/pages/EditDossierPage';
 import { ProjetsListPage } from '../features/chantiers/pages/ProjetsListPage';
 import { UtilisateursListPage } from '../features/users/pages/UtilisateursListPage';
 import { ArtisansListPage } from '../features/users/pages/ArtisansListPage';
@@ -63,6 +64,10 @@ function AppRoutes() {
           <Route
             path="/commercial/nouveau-dossier"
             element={withDashboard(<NouveauDossierPage />)}
+          />
+          <Route
+            path="/commercial/dossiers/:id/edit"
+            element={withDashboard(<EditDossierPage />)}
           />
           <Route
             path="/commercial/settings"

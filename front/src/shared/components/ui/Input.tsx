@@ -65,7 +65,7 @@ const Input: React.FC<InputProps> = ({
           </Tooltip>
         }
       </div>
-      <div className={`border-[1.5px] ${hasError ? 'border-red' : 'border-border'} px-3 flex items-center rounded-[6px] focus-within:border-primary focus-within:outline-[1px] outline-border justify-between mt-1 mb-0 w-full"`}>
+      <div className={`border-[1px] ${hasError ? 'border-red' : 'border-border'} px-3 flex items-center rounded-[6px] focus-within:border-primary focus-within:outline-[1px] outline-border justify-between mt-1 mb-0 w-full"`}>
         <div className='flex flex-row items-center flex-1'>
           {leftIcon}
           <input

@@ -39,7 +39,7 @@ export const DossiersListPage = () => {
   const fetchDossiers = async () => {
     setLoading(true);
     try {
-      const response = await axios.get('http://localhost:8000/api/chantiers', {
+      const response = await axios.get('http://localhost:8000/api/dossier', {
         params: {
           search: debouncedSearch,
           sortOrder,
@@ -60,12 +60,12 @@ export const DossiersListPage = () => {
   return (
     <div className="p-8 h-screen flex flex-col">
       <H1 className="mb-6">Dossiers</H1>
-      <Input 
-        name='search' 
-        width='w-[350px]' 
-        className='mb-5' 
-        type='text' 
-        rightIcon={<Search className='text-placeholder'/>}
+      <Input
+        name='search'
+        width='w-[350px]'
+        className='mb-5'
+        type='text'
+        rightIcon={<Search className='text-placeholder' />}
         value={search}
         onChange={(e) => setSearch(e.target.value)}
         placeholder="Rechercher par nom, prénom ou ville..."
@@ -77,7 +77,7 @@ export const DossiersListPage = () => {
         <div className="flex items-center justify-between py-3 pl-5 pr-15 border-b border-border flex-shrink-0 bg-bg-secondary">
           <Text className="w-[150px] font-semibold text-sm">Nom Prénom</Text>
           <Text className="w-[300px] font-semibold text-sm">Adresse</Text>
-          <button 
+          <button
             onClick={toggleSort}
             className="w-[100px] flex items-center gap-1 hover:text-primary transition-colors"
           >
@@ -86,23 +86,23 @@ export const DossiersListPage = () => {
           </button>
           <Text className="w-[120px] font-semibold text-right text-sm">Statut</Text>
         </div>
-        
+
         {/* Liste des dossiers */}
         <div className="divide-y relative  divide-border bg-bg-primary overflow-y-auto flex-1">
           {loading ? (
             <>
-              <DossierItem loading={true} nom='load' prenom='load' address='load' cp='load' ville='load' start='load' status='Complété'/>
-              <DossierItem loading={true} nom='load' prenom='load' address='load' cp='load' ville='load' start='load' status='Complété'/>
-              <DossierItem loading={true} nom='load' prenom='load' address='load' cp='load' ville='load' start='load' status='Complété'/>
-              <DossierItem loading={true} nom='load' prenom='load' address='load' cp='load' ville='load' start='load' status='Complété'/>
-              <DossierItem loading={true} nom='load' prenom='load' address='load' cp='load' ville='load' start='load' status='Complété'/>
+              <DossierItem loading={true} nom='load' prenom='load' address='load' cp='load' ville='load' start='load' status='Complété' />
+              <DossierItem loading={true} nom='load' prenom='load' address='load' cp='load' ville='load' start='load' status='Complété' />
+              <DossierItem loading={true} nom='load' prenom='load' address='load' cp='load' ville='load' start='load' status='Complété' />
+              <DossierItem loading={true} nom='load' prenom='load' address='load' cp='load' ville='load' start='load' status='Complété' />
+              <DossierItem loading={true} nom='load' prenom='load' address='load' cp='load' ville='load' start='load' status='Complété' />
             </>
             // <div className="flex items-center justify-center h-full">
             //   <Text variant='body' color='text-placeholder'>Chargement...</Text>
             // </div>
           ) : dossiers.length > 0 ? dossiers.map((dossier) => (
-            <DossierItem 
-              key={dossier.noChantier} 
+            <DossierItem
+              key={dossier.noChantier}
               {...dossier}
               onEdit={() => console.log('Éditer dossier', dossier.noChantier)}
               onDelete={() => console.log('Supprimer dossier', dossier.noChantier)}

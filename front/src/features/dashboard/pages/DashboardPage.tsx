@@ -46,6 +46,10 @@ export const DashboardPage = () => {
           onChange={setPrice}
         />
       </FilterPopover>
+
+
+
+      
       {/* <Popover icon={DotsVerticalSolid} iconSize={28}>
           <Popover.Item icon={Edit} onClick={() => console.log('Éditer')}>
             Éditer

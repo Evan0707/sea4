@@ -124,4 +124,168 @@ class DossierController extends AbstractController
             ]
         ], 201);
     }
+
+    #[Route('/api/dossiers/{id}', name: 'api_dossiers_update', methods: ['PUT'])]
+    public function update(
+        int $id,
+        Request $request,
+        EntityManagerInterface $entityManager,
+        ValidatorInterface $validator
+    ): JsonResponse {
+        $data = json_decode($request->getContent(), true);
+
+        $chantier = $entityManager->getRepository(\App\Entity\Chantier::class)->find($id);
+        if (!$chantier) {
+            return $this->json(['message' => 'Chantier non trouvé'], 404);
+        }
+        $client = $chantier->getClient();
+
+        // MAJ client
+        if (isset($data['client'])) {
+            $client->setNom($data['client']['nomClient']);
+            $client->setPrenom($data['client']['prenomClient']);
+            $client->setAdresse($data['client']['adresseClient'] ?? null);
+            $client->setCodePostal($data['client']['cpClient'] ?? null);
+            $client->setVille($data['client']['villeClient'] ?? null);
+
+            $errorsClient = $validator->validate($client);
+            if (count($errorsClient) > 0) {
+                $errors = [];
+                foreach ($errorsClient as $error) {
+                    $errors[] = $error->getMessage();
+                }
+                return $this->json([
+                    'message' => 'Erreur de validation du client',
+                    'errors' => $errors
+                ], 400);
+            }
+        }
+
+        // MAJ chantier
+        if (isset($data['chantier'])) {
+            $chantier->setAdresse($data['chantier']['adresseChantier'] ?? null);
+            $chantier->setCodePostal($data['chantier']['cpChantier'] ?? null);
+            $chantier->setVille($data['chantier']['villeChantier'] ?? null);
+            $chantier->setDateCreation(new \DateTime($data['chantier']['dateCreation']));
+            $chantier->setStatut($data['chantier']['statutChantier']);
+
+            // Maître d'œuvre
+            if (isset($data['chantier']['noMOE'])) {
+                $maitreOeuvre = $entityManager->getRepository(\App\Entity\MaitreOeuvre::class)
+                    ->find($data['chantier']['noMOE']);
+                $chantier->setMaitreOeuvre($maitreOeuvre ?: null);
+            }
+
+            // Modèle
+            if (isset($data['chantier']['noModele'])) {
+                $modele = $entityManager->getRepository(\App\Entity\Modele::class)
+                    ->find($data['chantier']['noModele']);
+                $chantier->setModele($modele ?: null);
+            }
+
+            $errorsChantier = $validator->validate($chantier);
+            if (count($errorsChantier) > 0) {
+                $errors = [];
+                foreach ($errorsChantier as $error) {
+                    $errors[] = $error->getMessage();
+                }
+                return $this->json([
+                    'message' => 'Erreur de validation du chantier',
+                    'errors' => $errors
+                ], 400);
+            }
+        }
+
+        $entityManager->flush();
+
+        return $this->json(['message' => 'Dossier modifié avec succès']);
+    }
+
+        #[Route('/api/dossiers/{id}', name: 'api_dossiers_get', methods: ['GET'])]
+    public function getDossier(
+        int $id,
+        EntityManagerInterface $entityManager
+    ): JsonResponse {
+        $chantier = $entityManager->getRepository(Chantier::class)->find($id);
+        if (!$chantier) {
+            return $this->json(['message' => 'Chantier non trouvé'], 404);
+        }
+        $client = $chantier->getClient();
+        return $this->json([
+            'chantier' => [
+                'noChantier' => $chantier->getId(),
+                'adresseChantier' => $chantier->getAdresse(),
+                'cpChantier' => $chantier->getCodePostal(),
+                'villeChantier' => $chantier->getVille(),
+                'dateCreation' => $chantier->getDateCreation()?->format('Y-m-d'),
+                'statutChantier' => $chantier->getStatut(),
+                'noMOE' => $chantier->getMaitreOeuvre()?->getId(),
+                'noModele' => $chantier->getModele()?->getId(),
+            ],
+            'client' => [
+                'noClient' => $client?->getId(),
+                'nomClient' => $client?->getNom(),
+                'prenomClient' => $client?->getPrenom(),
+                'adresseClient' => $client?->getAdresse(),
+                'cpClient' => $client?->getCodePostal(),
+                'villeClient' => $client?->getVille(),
+            ]
+        ]);
+    }
+    #[Route('/api/dossier', name: 'api_dossiers_list_todo', methods: ['GET'])]
+    public function getDossiersToCompleteOrUpcoming(
+        Request $request,
+        EntityManagerInterface $entityManager
+    ): JsonResponse {
+        $search = $request->query->get('search', '');
+        $sortOrder = $request->query->get('sortOrder', 'asc');
+
+        // Valider le sortOrder
+        if (!in_array($sortOrder, ['asc', 'desc'])) {
+            $sortOrder = 'asc';
+        }
+
+        $qb = $entityManager->getRepository(Chantier::class)->createQueryBuilder('ch')
+            ->leftJoin('ch.client', 'cl')
+            ->addSelect('cl')
+            ->where('ch.statut IN (:statuses)')
+            ->setParameter('statuses', ['À compléter', 'À venir']);
+
+        // Filtrage par recherche
+        if (!empty($search)) {
+            $qb->andWhere(
+                $qb->expr()->orX(
+                    $qb->expr()->like('LOWER(cl.nom)', ':search'),
+                    $qb->expr()->like('LOWER(cl.prenom)', ':search'),
+                    $qb->expr()->like('LOWER(ch.ville)', ':search')
+                )
+            )
+            ->setParameter('search', '%' . strtolower($search) . '%');
+        }
+
+        // Tri par date de création
+        $qb->orderBy('ch.dateCreation', $sortOrder === 'desc' ? 'DESC' : 'ASC');
+
+        $chantiers = $qb->getQuery()->getResult();
+
+        $result = [];
+        foreach ($chantiers as $chantier) {
+            $client = $chantier->getClient();
+            $result[] = [
+                'noChantier' => $chantier->getId(),
+                'nom' => $client->getNom(),
+                'prenom' => $client->getPrenom(),
+                'address' => $chantier->getAdresse(),
+                'cp' => $chantier->getCodePostal(),
+                'ville' => $chantier->getVille(),
+                'start' => $chantier->getDateCreation()?->format('Y-m-d'),
+                'status' => $chantier->getStatut(),
+                'noClient' => $client->getId(),
+                'noMOE' => $chantier->getMaitreOeuvre()?->getId(),
+                'noModele' => $chantier->getModele()?->getId(),
+            ];
+        }
+
+        return $this->json($result);
+    }
 }

@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react'
 import { DangerCircle, ChevronDown } from '@mynaui/icons-react'
 import type { UseFormRegisterReturn } from 'react-hook-form'
+import { Label } from './Typography'
 
 export type Option = {
   value: string
@@ -75,13 +76,13 @@ const Select: React.FC<SelectProps> = ({
 
   return (
     <div className={`${className ?? ''} relative`} ref={dropdownRef}>
-      <label className='m-1 font-bold text-[14px]' htmlFor={inputId}>{label}</label>
+      <Label className='m-1 font-bold text-[14px] text-text-primary' htmlFor={inputId}>{label}</Label>
       <div 
         onClick={() => setIsOpen(!isOpen)}
         className={`border-[1.5px] h-[40px] cursor-pointer ${hasError ? 'border-red' : 'border-border'} px-3 flex items-center rounded-[6px] hover:border-primary focus-within:border-primary focus-within:outline-[1px] outline-border justify-between mt-1 mb-0 min-h-[38px]`}
       >
         <div className='flex flex-row items-center flex-1 py-1'>
-          <span className={`flex-1 ${!selectedOption ? 'text-gray-400' : ''}`}>
+          <span className={`flex-1 ${!selectedOption ? 'text-placeholder' : 'text-text-primary'}`}>
             {selectedOption ? selectedOption.label : placeholder}
           </span>
         </div>
@@ -110,13 +111,13 @@ const Select: React.FC<SelectProps> = ({
 
       {/* Custom dropdown */}
       {isOpen && (
-        <div className="absolute z-50 w-full mt-1 bg-white border border-border rounded-[6px] shadow-lg max-h-60 overflow-auto">
+        <div className="absolute z-50 w-full mt-1 bg-bg-primary border border-border rounded-[6px] shadow-lg max-h-60 overflow-auto">
           {options.map((option) => (
             <div
               key={option.value}
               onClick={() => handleSelect(option)}
-              className={`px-3 py-2 cursor-pointer hover:bg-gray-50 ${
-                selectedOption?.value === option.value ? 'bg-primary/10 font-semibold' : ''
+              className={`px-3 py-2 cursor-pointer hover:bg-bg-secondary/50 text-text-primary ${
+                selectedOption?.value === option.value ? 'bg-bg-secondary font-semibold' : ''
               }`}
             >
               {option.label}

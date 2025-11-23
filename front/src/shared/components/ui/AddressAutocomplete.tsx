@@ -1,8 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { InfoCircleSolid } from '@mynaui/icons-react';
 import Tooltip from './Tooltip';
-import { Text } from './Typography';
-import { tokens } from '@/shared/styles/tokens';
+import { Label, Text } from './Typography';
 
 interface AddressAutocompleteProps {
   label: string;
@@ -50,6 +49,8 @@ export const AddressAutocomplete: React.FC<AddressAutocompleteProps> = ({
   const [isLoading, setIsLoading] = useState(false);
   const wrapperRef = useRef<HTMLDivElement>(null);
   const debounceTimer = useRef<number | null>(null);
+
+  const inputId = value || label
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -122,10 +123,10 @@ export const AddressAutocomplete: React.FC<AddressAutocompleteProps> = ({
   return (
     <div className="flex flex-col gap-1 relative" ref={wrapperRef}>
       <div className="flex items-center gap-2">
-        <label className="text-sm font-bold text-text-primary m-1">
+        <Label className="text-sm font-bold text-text-primary m-1" htmlFor={inputId}>
           {label}
           {required && <span className="text-red-500 ml-1">*</span>}
-        </label>
+        </Label>
         {info && (
           <Tooltip content={info}>
             <InfoCircleSolid size={14} className="text-text-secondary" />
@@ -136,10 +137,11 @@ export const AddressAutocomplete: React.FC<AddressAutocompleteProps> = ({
       <div className="relative">
         <input
           type="text"
+          id={inputId}
           value={value}
           onChange={handleInputChange}
           placeholder={placeholder}
-          className={`w-full px-3 py-2 border-[1.5px] border-border rounded-md focus-within:border-primary focus-within:outline-[1px] outline-border  placeholder-placeholder ${
+          className={`w-full px-3 py-2 border-[1.5px] border-border rounded-md focus-within:border-primary focus-within:outline-[1px] outline-border  placeholder-placeholder text-text-primary ${
             error
               ? 'border-red focus:ring-red'
               : 'border-border focus:ring-blue-500'
@@ -153,18 +155,18 @@ export const AddressAutocomplete: React.FC<AddressAutocompleteProps> = ({
         )}
 
         {isOpen && suggestions.length > 0 && (
-          <div className="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-y-auto">
+          <div className="absolute z-50 w-full mt-1 bg-bg-secondary border border-border rounded-md shadow-lg max-h-60 overflow-y-auto">
             {suggestions.map((suggestion, index) => (
               <button
                 key={index}
                 type="button"
                 onClick={() => handleSelectSuggestion(suggestion)}
-                className="w-full text-left px-3 py-2 hover:bg-blue-50 focus:bg-blue-50 focus:outline-none transition-colors border-b border-gray-100 last:border-b-0"
+                className="w-full text-left px-3 py-2 hover:bg-bg-primary focus:bg-blue-50 focus:outline-none transition-colors border-b border-border last:border-b-0"
               >
-                <div className="font-medium text-sm text-gray-900">
+                <div className="font-medium text-sm text-text-primary">
                   {suggestion.street}
                 </div>
-                <div className="text-xs text-gray-500">
+                <div className="text-xs text-placeholder">
                   {suggestion.postcode} {suggestion.city}
                 </div>
               </button>
@@ -173,7 +175,7 @@ export const AddressAutocomplete: React.FC<AddressAutocompleteProps> = ({
         )}
       </div>
       
-      {error && <Text className='text-[13px] absolute ml-1 mt-1 absolute bottom-[-23px]' weight='semibold' color={tokens.colors.error}>{error}</Text>}
+      {error && <Text className='text-[13px] text-red absolute ml-1 mt-1 absolute bottom-[-23px] text-red' weight='semibold' color='text-red'>{error}</Text>}
     </div>
   );
 };

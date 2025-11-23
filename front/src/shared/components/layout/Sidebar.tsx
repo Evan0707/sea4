@@ -1,7 +1,8 @@
-import { Link, useLocation } from 'react-router-dom'
+import { useLocation } from 'react-router-dom'
+import SidebarButton from './SidebarButton'
 import type { User } from '@/shared/types/auth'
 import Button from '@/shared/components/ui/Button'
-import { Logout, SidebarSolid, SidebarAltSolid, CogFour } from '@mynaui/icons-react'
+import { Logout, Sidebar as Side, SidebarAlt, CogFour } from '@mynaui/icons-react'
 import type { NavItem } from '@/shared/config/navigation'
 import Logo from '@/shared/assets/Logo.svg'
 import { useState, useEffect } from 'react'
@@ -52,52 +53,45 @@ export function Sidebar({ user, items, onLogout }: SidebarProps) {
   }, [])
 
   return (
-    <aside className={`${collapsed ? 'w-20' : 'w-64'} bg-bg-secondary h-screen sticky top-0 flex flex-col border-r-1 border-border text-white p-3 transition-all duration-300 overflow-y-auto`}> 
-      <button
-        type="button"
-        onClick={() => setCollapsed(v => !v)}
-        className="text-placeholder absolute right-7 top-3"
-        aria-label={collapsed ? 'Étendre la barre latérale' : 'Réduire la barre latérale'}
-        aria-keyshortcuts="Ctrl+B Meta+B"
-        title={`${collapsed ? 'Étendre' : 'Réduire'} (Ctrl/Cmd+B)`}
-      >
-        {collapsed ? <SidebarAltSolid /> : <SidebarSolid />}
-      </button>
-      <div className={`mb-8 absolute left-5 flex items-center mt-8 ${collapsed ? 'justify-center' : ''}`}>
+    <aside className={`${collapsed ? 'w-20' : 'w-64'} bg-bg-secondary h-screen sticky top-0 flex flex-col border-r-1 border-border text-white p-3 transition-all duration-300 overflow-y-auto overflow-x-hidden`}> 
+      <div className={`mb-8 absolute flex items-center w-full mt-2 ${collapsed ? 'justify-center left-0' : 'left-5'}`}>
         <img src={Logo} width={35} className={collapsed ? '' : 'mr-3'} />
         {!collapsed && <H2 className='text-xl ml-3' weight='bold'>Bati'Parti</H2>}
+        <button
+          type="button"
+          onClick={() => setCollapsed(v => !v)}
+          className={`text-placeholder absolute top-[50%] translate-y-[-50%] transition-all duration-300 ${collapsed?'left-0 right-0 h-full top-0 bottom-0':'right-10'}`}
+          aria-label={collapsed ? 'Étendre la barre latérale' : 'Réduire la barre latérale'}
+          aria-keyshortcuts="Ctrl+B Meta+B"
+          title={`${collapsed ? 'Étendre' : 'Réduire'} (Ctrl/Cmd+B)`}
+        >
+          {collapsed ? <SidebarAlt strokeWidth={2} className='opacity-0'/> : <Side strokeWidth={2}/>}
+        </button>
       </div>
       <nav>
         <ul className="space-y-1 mt-22">
           {filtered.map(item => (
             <li key={item.path}>
-              <Link
+              <SidebarButton
                 to={item.path}
-                className={`px-3 flex overflow-hidden justify-start items-center py-[12px] rounded-[6px] transition-colors border-1 ${
-                  location.pathname === item.path
-                    ? 'bg-primary/10 border-primary text-text-primary text-[14px] font-medium'
-                    : 'text-text-secondary font-medium text-[14px] hover:bg-primary/5 border-transparent'
-                }`}
-              >
-                <span className={`${collapsed ? 'mx-auto' : 'mr-3'}`}>{item.icon}</span>
-                {!collapsed && <span className="whitespace-nowrap">{item.label}</span>}
-              </Link>
+                icon={item.icon}
+                label={item.label}
+                collapsed={collapsed}
+                active={location.pathname === item.path}
+              />
             </li>
           ))}
         </ul>
       </nav>
       <div className="mt-auto pt-6">
-        <Link
+        <SidebarButton
           to={settingsPath}
-          className={`px-3 flex overflow-hidden justify-start items-center py-[12px] rounded-[6px] mb-2 transition-colors border-1 ${
-            location.pathname === settingsPath
-              ? 'bg-primary/10 border-primary text-text-primary text-[14px] font-medium'
-              : 'text-text-secondary font-medium text-[14px] hover:bg-primary/5 border-transparent'
-          }`}
-        >
-          <span className={`${collapsed ? 'mx-auto' : 'mr-3'}`}><CogFour className='text-text-white'/></span>
-          {!collapsed && <span className="whitespace-nowrap">Paramètre</span>}
-        </Link>
+          icon={<CogFour className='text-text-white' />}
+          label="Paramètre"
+          collapsed={collapsed}
+          active={location.pathname === settingsPath}
+          className="mb-2"
+        />
 
         {collapsed ? (
           <ConfirmPopover

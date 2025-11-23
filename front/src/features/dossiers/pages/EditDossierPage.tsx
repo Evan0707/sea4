@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { useToast } from '@/shared/hooks/useToast';
 import { useAuth } from '@/features/auth/context/AuthContext';
 import Button from '@/shared/components/ui/Button';
@@ -16,43 +16,25 @@ import { clientFormSchema, chantierFormSchema, type ClientFormData, type Chantie
 import type { MaitreOeuvre, Modele, EtapeModele } from '@/shared/types/dossier';
 import axios from 'axios';
 
-const STORAGE_KEY = 'nouveau-dossier-draft';
-
-export const NouveauDossierPage = () => {
+export const EditDossierPage = () => {
   const navigate = useNavigate();
   const { addToast } = useToast();
   const { user } = useAuth();
+  const { id } = useParams();
 
-  const [currentStep, setCurrentStep] = useState(() => {
-    const saved = localStorage.getItem(STORAGE_KEY);
-    return saved ? JSON.parse(saved).currentStep || 1 : 1;
-  });
+  const [currentStep, setCurrentStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  
-  // Données des listes déroulantes
   const [maitresOeuvre, setMaitresOeuvre] = useState<MaitreOeuvre[]>([]);
   const [modeles, setModeles] = useState<Modele[]>([]);
   const [etapesModele, setEtapesModele] = useState<EtapeModele[]>([]);
   const [selectedModeleId, setSelectedModeleId] = useState<number | null>(null);
   const [loadingEtapes, setLoadingEtapes] = useState(false);
-
-  // Charger les données sauvegardées
-  const savedData = useMemo(() => {
-    const saved = localStorage.getItem(STORAGE_KEY);
-    if (saved) {
-      try {
-        return JSON.parse(saved);
-      } catch {
-        return null;
-      }
-    }
-    return null;
-  }, []);
+  const [loading, setLoading] = useState(true);
 
   // Form pour Client (étape 1)
   const clientForm = useForm<ClientFormData>({
     resolver: zodResolver(clientFormSchema),
-    defaultValues: savedData?.clientData || {
+    defaultValues: {
       nomClient: '',
       prenomClient: '',
       adresseClient: '',
@@ -64,7 +46,7 @@ export const NouveauDossierPage = () => {
   // Form pour Chantier (étape 2)
   const chantierForm = useForm<ChantierFormData>({
     resolver: zodResolver(chantierFormSchema),
-    defaultValues: savedData?.chantierData || {
+    defaultValues: {
       adresseChantier: '',
       cpChantier: '',
       villeChantier: '',
@@ -75,23 +57,53 @@ export const NouveauDossierPage = () => {
     },
   });
 
-  // Charger les MOE et Modèles au montage
+  // Charger toutes les données au montage
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchAllData = async () => {
+      setLoading(true);
       try {
+        // 1. Charger les options (MOE et Modèles)
         const [moeResponse, modelesResponse] = await Promise.all([
           axios.get('http://localhost:8000/api/maitres-oeuvre'),
           axios.get('http://localhost:8000/api/modeles'),
         ]);
         setMaitresOeuvre(moeResponse.data);
         setModeles(modelesResponse.data);
+
+        // 2. Charger le dossier
+        const dossierResponse = await axios.get(`http://localhost:8000/api/dossiers/${id}`);
+        const dossier = dossierResponse.data;
+
+        // 3. Remplir les forms
+        clientForm.reset({
+          nomClient: dossier.client.nomClient || '',
+          prenomClient: dossier.client.prenomClient || '',
+          adresseClient: dossier.client.adresseClient || '',
+          cpClient: dossier.client.cpClient || '',
+          villeClient: dossier.client.villeClient || '',
+        });
+
+        chantierForm.reset({
+          adresseChantier: dossier.chantier.adresseChantier || '',
+          cpChantier: dossier.chantier.cpChantier || '',
+          villeChantier: dossier.chantier.villeChantier || '',
+          dateCreation: dossier.chantier.dateCreation || new Date().toISOString().split('T')[0],
+          statutChantier: dossier.chantier.statutChantier || 'À compléter',
+          noMOE: dossier.chantier.noMOE ? String(dossier.chantier.noMOE) : '',
+          noModele: (dossier.chantier.noModele ? String(dossier.chantier.noModele) : undefined) as any,
+        });
+
+        setSelectedModeleId(dossier.chantier.noModele || null);
       } catch (error) {
-        console.error('Erreur lors du chargement des données:', error);
         addToast('Erreur lors du chargement des données', 'error');
+        navigate('/commercial');
+      } finally {
+        setLoading(false);
       }
     };
-    fetchData();
-  }, [addToast]);
+
+    fetchAllData();
+  }, [id, clientForm, chantierForm, addToast, navigate]);
 
   // Charger les étapes quand un modèle est sélectionné
   useEffect(() => {
@@ -102,7 +114,6 @@ export const NouveauDossierPage = () => {
           const response = await axios.get(`http://localhost:8000/api/modeles/${selectedModeleId}/etapes`);
           setEtapesModele(response.data);
         } catch (error) {
-          console.error('Erreur lors du chargement des étapes:', error);
           addToast('Erreur lors du chargement des étapes', 'error');
         } finally {
           setLoadingEtapes(false);
@@ -113,33 +124,6 @@ export const NouveauDossierPage = () => {
       setEtapesModele([]);
     }
   }, [selectedModeleId, addToast]);
-
-  // Sauvegarder les données dans localStorage à chaque changement
-  useEffect(() => {
-    const subscription = clientForm.watch((data) => {
-      const saved = localStorage.getItem(STORAGE_KEY);
-      const current = saved ? JSON.parse(saved) : {};
-      localStorage.setItem(STORAGE_KEY, JSON.stringify({
-        ...current,
-        clientData: data,
-        currentStep,
-      }));
-    });
-    return () => subscription.unsubscribe();
-  }, [clientForm, currentStep]);
-
-  useEffect(() => {
-    const subscription = chantierForm.watch((data) => {
-      const saved = localStorage.getItem(STORAGE_KEY);
-      const current = saved ? JSON.parse(saved) : {};
-      localStorage.setItem(STORAGE_KEY, JSON.stringify({
-        ...current,
-        chantierData: data,
-        currentStep,
-      }));
-    });
-    return () => subscription.unsubscribe();
-  }, [chantierForm, currentStep]);
 
   const handleNext = async () => {
     if (currentStep === 1) {
@@ -162,11 +146,10 @@ export const NouveauDossierPage = () => {
   const handleSubmit = async () => {
     const clientData = clientForm.getValues();
     const chantierData = chantierForm.getValues();
-
     setIsSubmitting(true);
     try {
-      await axios.post(
-        'http://localhost:8000/api/dossiers',
+      await axios.put(
+        `http://localhost:8000/api/dossiers/${id}`,
         {
           client: {
             ...clientData,
@@ -189,31 +172,35 @@ export const NouveauDossierPage = () => {
           },
         }
       );
-
-      addToast('Dossier créé avec succès', 'success');
-      localStorage.removeItem(STORAGE_KEY); // Nettoyer le brouillon après succès
+      addToast('Dossier modifié avec succès', 'success');
       navigate('/commercial/dossiers');
     } catch (error) {
-      console.error('Erreur:', error);
-      addToast('Erreur lors de la création du dossier', 'error');
+      addToast('Erreur lors de la modification du dossier', 'error');
+      navigate('/commercial')
     } finally {
       setIsSubmitting(false);
     }
   };
 
   const handleCancelConfirm = () => {
-    localStorage.removeItem(STORAGE_KEY);
     navigate('/commercial/dossiers');
   };
-
 
   const clientData = clientForm.watch();
   const chantierData = chantierForm.watch();
 
+  if (loading) {
+    return (
+      <div className="p-10 pt-5 max-w-[1500px] mx-auto">
+        <H1 className="mb-8">Modifier le dossier</H1>
+        <Skeleton className="h-[400px] w-full rounded-lg" />
+      </div>
+    );
+  }
+
   return (
     <div className="p-10 pt-5 max-w-[1500px] mx-auto">
-      <H1 className="mb-8">Créer un nouveau dossier</H1>
-
+      <H1 className="mb-8">Modifier le dossier</H1>
       {/* Indicateur de progression */}
       <div className="mb-8">
         <div className="flex items-center justify-between mb-2">
@@ -223,13 +210,12 @@ export const NouveauDossierPage = () => {
               className="flex-1 h-1 rounded-full mx-1 bg-primary/20 overflow-hidden"
             >
               <div
-                className={`h-full bg-primary transition-all duration-500 ease-out ${
-                  step < currentStep
-                    ? 'w-full'
-                    : step === currentStep
+                className={`h-full bg-primary transition-all duration-500 ease-out ${step < currentStep
+                  ? 'w-full'
+                  : step === currentStep
                     ? 'w-full animate-in slide-in-from-left'
                     : 'w-0'
-                }`}
+                  }`}
               />
             </div>
           ))}
@@ -238,7 +224,6 @@ export const NouveauDossierPage = () => {
           Étape {currentStep}/3
         </Text>
       </div>
-
       {/* Étape 1: Informations client */}
       {currentStep === 1 && (
         <div className="p-8 rounded-lg border border-border bg-bg-secondary w-full">
@@ -302,7 +287,6 @@ export const NouveauDossierPage = () => {
           </form>
         </div>
       )}
-
       {/* Étape 2: Informations chantier */}
       {currentStep === 2 && (
         <div className="p-8 rounded-lg border border-border bg-bg-secondary">
@@ -391,7 +375,6 @@ export const NouveauDossierPage = () => {
                 error={chantierForm.formState.errors.noModele?.message}
               />
             </div>
-
             {/* Affichage des étapes si un modèle est sélectionné */}
             {selectedModeleId && (
               <div className="mt-6">
@@ -423,7 +406,6 @@ export const NouveauDossierPage = () => {
           </form>
         </div>
       )}
-
       {/* Étape 3: Récapitulatif */}
       {currentStep === 3 && (
         <div className="p-8 rounded-lg border border-border bg-bg-secondary">
@@ -461,7 +443,6 @@ export const NouveauDossierPage = () => {
                 Modifier
               </button>
             </div>
-
             <div>
               <H3 className="mb-3" color="#3B82F6">
                 Informations chantier
@@ -520,7 +501,6 @@ export const NouveauDossierPage = () => {
           </div>
         </div>
       )}
-
       {/* Boutons de navigation */}
       <div className="flex justify-between mt-8">
         <div>
@@ -533,8 +513,8 @@ export const NouveauDossierPage = () => {
         <div className="flex gap-4">
           <ConfirmPopover
             onConfirm={handleCancelConfirm}
-            title="Annuler la création du dossier ?"
-            message="Les données saisies seront perdues. Cette action est irréversible."
+            title="Annuler la modification du dossier ?"
+            message="Les modifications seront perdues. Cette action est irréversible."
             confirmText="Oui, annuler"
             cancelText="Non, continuer"
           >
@@ -553,7 +533,7 @@ export const NouveauDossierPage = () => {
               loading={isSubmitting}
               classname="px-8"
             >
-              Créer le dossier
+              Enregistrer les modifications
             </Button>
           )}
         </div>
