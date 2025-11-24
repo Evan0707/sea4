@@ -60,6 +60,7 @@ export const DossiersListPage = () => {
   return (
     <div className="p-8 h-screen flex flex-col">
       <H1 className="mb-6">Dossiers</H1>
+      {/*
       <Input
         name='search'
         width='w-[350px]'
@@ -69,11 +70,11 @@ export const DossiersListPage = () => {
         value={search}
         onChange={(e) => setSearch(e.target.value)}
         placeholder="Rechercher par nom, prénom ou ville..."
-      />
+      /> */}
 
-      {/* Frame container */}
+      {/* Frame container
       <div className="bg-bg-secondary rounded-lg border border-border  overflow-hidden flex flex-col flex-1">
-        {/* En-tête */}
+
         <div className="flex items-center justify-between py-3 pl-5 pr-15 border-b border-border flex-shrink-0 bg-bg-secondary">
           <Text className="w-[150px] font-semibold text-sm">Nom Prénom</Text>
           <Text className="w-[300px] font-semibold text-sm">Adresse</Text>
@@ -85,9 +86,9 @@ export const DossiersListPage = () => {
             {sortOrder === 'asc' ? <ArrowUp strokeWidth={2} className="w-4 h-4 text-placeholder" /> : <ArrowDown strokeWidth={2} className="w-4 h-4 text-placeholder" />}
           </button>
           <Text className="w-[120px] font-semibold text-right text-sm">Statut</Text>
-        </div>
+        </div> */}
 
-        {/* Liste des dossiers */}
+        {/* Liste des dossiers 
         <div className="divide-y relative  divide-border bg-bg-primary overflow-y-auto flex-1">
           {loading ? (
             <>
@@ -112,15 +113,16 @@ export const DossiersListPage = () => {
               <Text variant='body' color='text-placeholder'>Aucun dossier trouvé</Text>
             </div>
           )}
-        </div>
+        </div>*/}
 
-        {/* Nombre de résultats */}
+        {/* Nombre de résultats 
         <div className="py-2 px-5 border-t border-border bg-bg-secondary flex-shrink-0">
           <Text className="text-sm text-placeholder">
             {dossiers.length} résultat{dossiers.length > 1 ? 's' : ''}
           </Text>
         </div>
       </div>
+      */}
     </div>
   );
 };

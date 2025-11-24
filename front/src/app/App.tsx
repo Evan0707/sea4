@@ -17,6 +17,7 @@ import { AuthProvider, useAuth } from '../features/auth/context/AuthContext';
 import { ToastProvider } from '../shared/context/ToastProvider';
 import { OnlineProvider } from '../shared/context/OnlineProvider';
 import { ThemeProvider } from '../shared/context/ThemeProvider';
+import Unauthorized from './pages/Unauthorized';
 
 function App() {
   return (
@@ -47,7 +48,7 @@ function AppRoutes() {
     <Routes>
         {/* Public Routes */}
         <Route path="/login" element={<Login />} />
-        <Route path="/unauthorized" element={<div>Accès non autorisé</div>} />
+        <Route path="/unauthorized" element={<Unauthorized/>} />
 
         {/* Commercial Routes */}
         <Route

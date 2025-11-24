@@ -92,7 +92,7 @@ export const Login = () => {
             register={register("password")}
             error={errors.password?.message}
           />
-          <Link to={'/login'} className="text-sm text-primary font-bold w-full">{'Identifant oublié ? Contactez l’administrateur >'}</Link>
+          {/* <Link to={'/login'} className="text-sm text-primary font-bold w-full">{'Identifant oublié ? Contactez l’administrateur >'}</Link> */}
           <Button
             variant="Primary"
             classname="w-full mt-4"
