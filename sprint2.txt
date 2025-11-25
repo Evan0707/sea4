@@ -13,9 +13,9 @@ API artisan:
 
 API utilisateurs:
 - /api/utilisateur [GET]
-- /api/utilisateurs [POST]
-- /api/utilisateurs/{id}/edit [PUT]
-- /api/utilisateurs/{id}/delete [DELETE]
+- /api/utilisateur [POST]
+- /api/utilisateur/{id}/edit [PUT]
+- /api/utilisateur/{id}/delete [DELETE]
 
 Front:
 - Fix DataInput (value, defaultValue)
