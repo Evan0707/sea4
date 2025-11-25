@@ -1,0 +1,27 @@
+Nouvelle features:
+- Creation/Supp/Modif d'un artian (Admin)
+- Gestions des comptes utilisateurs (Admin)
+
+API dossier:
+- /api/dossier/delete
+
+API artisan:
+- /api/artisan [GET]
+- /api/artisan [POST]
+- /api/artisan/{id}/edit [PUT]
+- /api/artisan/{id}/delete [DELETE]
+
+API utilisateurs:
+- /api/utilisateur [GET]
+- /api/utilisateurs [POST]
+- /api/utilisateurs/{id}/edit [PUT]
+- /api/utilisateurs/{id}/delete [DELETE]
+
+Front:
+- Fix DataInput (value, defaultValue)
+- Fix Select (value, defaultValue)
+- Création formulaire artisan
+- Page ArtisansListPage
+- Création formulaire utilisateur
+- Page UtilisateursListPage
+
