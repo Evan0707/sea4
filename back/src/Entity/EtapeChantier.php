@@ -25,39 +25,42 @@ class EtapeChantier
     #[ORM\JoinColumn(name: '"noEtape"', referencedColumnName: '"noEtape"')]
     private ?Etape $etape = null;
 
-    #[ORM\Column(name: 'montantTheoriqueFacture', type: Types::DECIMAL, precision: 10, scale: 2, nullable: true)]
+    #[ORM\Column(name: '"montantTheoriqueFacture"', type: Types::DECIMAL, precision: 10, scale: 2, nullable: true)]
     private ?string $montantTheoriqueFacture = null;
 
-    #[ORM\Column(name: 'reservee', type: 'boolean', options: ['default' => false])]
+    #[ORM\Column(name: '"reservee"', type: 'boolean', options: ['default' => false])]
     private bool $reservee = false;
 
-    #[ORM\Column(name: 'reducSuppl', type: Types::DECIMAL, precision: 5, scale: 2, nullable: true)]
+    #[ORM\Column(name: '"reducSuppl"', type: Types::DECIMAL, precision: 5, scale: 2, nullable: true)]
     private ?string $reductionSupplementaire = null;
 
-    #[ORM\Column(name: 'descriptionReducSuppl', length: 100, nullable: true)]
+    #[ORM\Column(name: '"descriptionReducSuppl"', length: 100, nullable: true)]
     private ?string $descriptionReductionSupplementaire = null;
 
-    #[ORM\Column(name: 'dateDebutTheorique', type: Types::DATE_MUTABLE, nullable: true)]
+    #[ORM\Column(name: '"dateDebutTheorique"', type: Types::DATE_MUTABLE, nullable: true)]
     private ?\DateTimeInterface $dateDebutTheorique = null;
 
-    #[ORM\Column(name: 'dateDebut', type: Types::DATE_MUTABLE, nullable: true)]
+    #[ORM\Column(name: '"dateDebut"', type: Types::DATE_MUTABLE, nullable: true)]
     private ?\DateTimeInterface $dateDebut = null;
 
-    #[ORM\Column(name: 'dateFin', type: Types::DATE_MUTABLE, nullable: true)]
+    #[ORM\Column(name: '"dateFin"', type: Types::DATE_MUTABLE, nullable: true)]
     private ?\DateTimeInterface $dateFin = null;
 
-    #[ORM\Column(name: 'statutEtape', length: 20, options: ['default' => 'À venir'])]
+    #[ORM\Column(name: '"statutEtape"', length: 20, options: ['default' => 'À venir'])]
     private string $statut = 'À venir';
 
-    #[ORM\ManyToOne(inversedBy: 'etapeChantiers')]
-    #[ORM\JoinColumn(name: 'noArtisan', referencedColumnName: 'noArtisan')]
-    private ?Artisan $artisan = null;
+    #[ORM\ManyToMany(targetEntity: Artisan::class, inversedBy: 'etapeChantiers')]
+    #[ORM\JoinTable(name: 'confier', schema: 'bati')]
+    #[ORM\JoinColumn(name: 'noEtapeChantier', referencedColumnName: 'id')]
+    #[ORM\InverseJoinColumn(name: 'noArtisan', referencedColumnName: 'id')]
+    private Collection $artisans;
 
     #[ORM\ManyToMany(targetEntity: FactureArtisan::class, mappedBy: 'etapeChantiers')]
     private Collection $facturesArtisan;
 
     public function __construct()
     {
+        $this->artisans = new ArrayCollection();
         $this->facturesArtisan = new ArrayCollection();
     }
 
@@ -176,15 +179,32 @@ class EtapeChantier
         return $this;
     }
 
-    public function getArtisan(): ?Artisan
+    /**
+     * @return Collection<int, Artisan>
+     */
+    public function getArtisans(): Collection
     {
-        return $this->artisan;
+        return $this->artisans;
     }
 
-    public function setArtisan(?Artisan $artisan): static
+    public function addArtisan(Artisan $artisan): static
     {
-        $this->artisan = $artisan;
+        if (!$this->artisans->contains($artisan)) {
+            $this->artisans->add($artisan);
+        }
         return $this;
+    }
+
+    public function removeArtisan(Artisan $artisan): static
+    {
+        $this->artisans->removeElement($artisan);
+        return $this;
+    }
+
+    // Helper method for compatibility (returns the first artisan or null)
+    public function getArtisan(): ?Artisan
+    {
+        return $this->artisans->first() ?: null;
     }
 
     /**

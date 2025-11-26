@@ -28,6 +28,9 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\OneToOne(mappedBy: 'utilisateur', cascade: ['persist', 'remove'], targetEntity: MaitreOeuvre::class)]
     private ?MaitreOeuvre $maitreOeuvre = null;
 
+    #[ORM\OneToOne(mappedBy: 'utilisateur', cascade: ['persist', 'remove'], targetEntity: Commercial::class)]
+    private ?Commercial $commercial = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -80,6 +83,23 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
             $maitreOeuvre->setUtilisateur($this);
         }
         $this->maitreOeuvre = $maitreOeuvre;
+        return $this;
+    }
+
+    public function getCommercial(): ?Commercial
+    {
+        return $this->commercial;
+    }
+
+    public function setCommercial(?Commercial $commercial): static
+    {
+        if ($commercial === null && $this->commercial !== null) {
+            $this->commercial->setUtilisateur(null);
+        }
+        if ($commercial !== null && $commercial->getUtilisateur() !== $this) {
+            $commercial->setUtilisateur($this);
+        }
+        $this->commercial = $commercial;
         return $this;
     }
 

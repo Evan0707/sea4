@@ -42,6 +42,7 @@ security:
         - { path: ^/api/maitres-oeuvre, roles: PUBLIC_ACCESS }
         - { path: ^/api/chantiers, roles: PUBLIC_ACCESS }
         - { path: ^/api/admin, roles: ROLE_ADMIN }
+        - { path: ^/api/artisan, roles: PUBLIC_ACCESS }
         - { path: ^/api/commercial, roles: ROLE_COMMERCIAL }
         - { path: ^/api/maitre_oeuvre, roles: ROLE_MAITRE_OEUVRE }
         - { path: ^/api/dossier, roles: PUBLIC_ACCESS }

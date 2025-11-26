@@ -13,34 +13,34 @@ class Artisan
 {
     #[ORM\Id]
     #[ORM\GeneratedValue(strategy: 'IDENTITY')]
-    #[ORM\Column(name: 'noArtisan', type: 'integer')]
+    #[ORM\Column(name: '"noArtisan"', type: 'integer')]
     private ?int $id = null;
 
-    #[ORM\Column(name: 'nomArtisan', length: 50)]
+    #[ORM\Column(name: '"nomArtisan"', length: 50)]
     private ?string $nom = null;
 
-    #[ORM\Column(name: 'prenomArtisan', length: 50, nullable: true)]
+    #[ORM\Column(name: '"prenomArtisan"', length: 50, nullable: true)]
     private ?string $prenom = null;
 
-    #[ORM\Column(name: 'adresseArtisan', length: 100, nullable: true)]
+    #[ORM\Column(name: '"adresseArtisan"', length: 100, nullable: true)]
     private ?string $adresse = null;
 
-    #[ORM\Column(name: 'cpArtisan', length: 5, nullable: true)]
+    #[ORM\Column(name: '"cpArtisan"', length: 5, nullable: true)]
     private ?string $codePostal = null;
 
-    #[ORM\Column(name: 'villeArtisan', length: 50, nullable: true)]
+    #[ORM\Column(name: '"villeArtisan"', length: 50, nullable: true)]
     private ?string $ville = null;
 
     #[ORM\ManyToMany(targetEntity: Etape::class)]
     #[ORM\JoinTable(name: 'etre_qualifie_pour', schema: 'bati')]
     #[ORM\JoinColumn(name: 'noArtisan', referencedColumnName: 'noArtisan')]
-    #[ORM\InverseJoinColumn(name: 'noEtape', referencedColumnName: 'noEtape')]
+    #[ORM\InverseJoinColumn(name: '"noEtape"', referencedColumnName: '"noEtape"')]
     private Collection $etapesQualifiees;
 
     #[ORM\OneToMany(mappedBy: 'artisan', targetEntity: FactureArtisan::class)]
     private Collection $factures;
 
-    #[ORM\OneToMany(mappedBy: 'artisan', targetEntity: EtapeChantier::class)]
+    #[ORM\ManyToMany(targetEntity: EtapeChantier::class, mappedBy: 'artisans')]
     private Collection $etapeChantiers;
 
     public function __construct()
@@ -171,7 +171,7 @@ class Artisan
     {
         if (!$this->etapeChantiers->contains($etapeChantier)) {
             $this->etapeChantiers->add($etapeChantier);
-            $etapeChantier->setArtisan($this);
+            $etapeChantier->addArtisan($this);
         }
         return $this;
     }
@@ -179,9 +179,7 @@ class Artisan
     public function removeEtapeChantier(EtapeChantier $etapeChantier): static
     {
         if ($this->etapeChantiers->removeElement($etapeChantier)) {
-            if ($etapeChantier->getArtisan() === $this) {
-                $etapeChantier->setArtisan(null);
-            }
+            $etapeChantier->removeArtisan($this);
         }
         return $this;
     }

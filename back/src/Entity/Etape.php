@@ -16,14 +16,12 @@ class Etape
     #[ORM\Column(name: '"noEtape"', type: 'integer')]
     private ?int $id = null;
 
-    #[ORM\Column(name: '"nomEtape"', length: 50)]
+    #[ORM\Column(name: 'nomEtape', length: 50)]
     private ?string $nom = null;
 
-    #[ORM\Column(name: '"reservable"', type: 'boolean', options: ['default' => false])]
+    #[ORM\Column(name: 'reservable', type: 'boolean', options: ['default' => false])]
     private bool $reservable = false;
 
-    #[ORM\ManyToMany(targetEntity: Modele::class, mappedBy: 'etapes')]
-    private Collection $modeles;
 
     #[ORM\ManyToMany(targetEntity: Artisan::class, mappedBy: 'etapesQualifiees')]
     private Collection $artisansQualifies;
@@ -33,7 +31,6 @@ class Etape
 
     public function __construct()
     {
-        $this->modeles = new ArrayCollection();
         $this->artisansQualifies = new ArrayCollection();
         $this->etapeChantiers = new ArrayCollection();
     }
@@ -65,13 +62,6 @@ class Etape
         return $this;
     }
 
-    /**
-     * @return Collection<int, Modele>
-     */
-    public function getModeles(): Collection
-    {
-        return $this->modeles;
-    }
 
     /**
      * @return Collection<int, Artisan>

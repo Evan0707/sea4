@@ -6,7 +6,7 @@ use App\Repository\ConstruireRepository;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: ConstruireRepository::class)]
-#[ORM\Table(name: '"construire"', schema: 'bati')]
+#[ORM\Table(name: 'construire', schema: 'bati')]
 class Construire
 {
     #[ORM\Id]
@@ -19,8 +19,15 @@ class Construire
     #[ORM\JoinColumn(name: '"noEtape"', referencedColumnName: '"noEtape"', nullable: false)]
     private ?Etape $noEtape = null;
 
-    #[ORM\Column(name: '"ordre"', type: 'integer', nullable: true)]
-    private ?int $ordre = null;
+
+    #[ORM\Column(name: '"montantFacture"', type: 'decimal', precision: 10, scale: 2, nullable: true)]
+    private ?string $montantFacture = null;
+
+    #[ORM\Column(name: '"coutSousTraitant"', type: 'decimal', precision: 10, scale: 2, nullable: true)]
+    private ?string $coutSousTraitant = null;
+
+    #[ORM\Column(name: '"nbJoursRealisation"', type: 'integer', nullable: true)]
+    private ?int $nbJoursRealisation = null;
 
     public function getNoModele(): ?Modele
     {
@@ -44,14 +51,36 @@ class Construire
         return $this;
     }
 
-    public function getOrdre(): ?int
+    public function getMontantFacture(): ?string
     {
-        return $this->ordre;
+        return $this->montantFacture;
     }
 
-    public function setOrdre(?int $ordre): self
+    public function setMontantFacture(?string $montantFacture): self
     {
-        $this->ordre = $ordre;
+        $this->montantFacture = $montantFacture;
+        return $this;
+    }
+
+    public function getCoutSousTraitant(): ?string
+    {
+        return $this->coutSousTraitant;
+    }
+
+    public function setCoutSousTraitant(?string $coutSousTraitant): self
+    {
+        $this->coutSousTraitant = $coutSousTraitant;
+        return $this;
+    }
+
+    public function getNbJoursRealisation(): ?int
+    {
+        return $this->nbJoursRealisation;
+    }
+
+    public function setNbJoursRealisation(?int $nbJoursRealisation): self
+    {
+        $this->nbJoursRealisation = $nbJoursRealisation;
         return $this;
     }
 }

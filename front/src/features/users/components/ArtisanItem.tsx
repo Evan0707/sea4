@@ -1,38 +1,32 @@
 import { DotsVertical, Edit, Trash } from '@mynaui/icons-react';
 import { useState, useRef, useEffect } from 'react';
-import Status from '@/shared/components/ui/Status';
 import { Text } from '@/shared/components/ui/Typography';
 import Skeleton from '@/shared/components/ui/Skeleton';
-import { formatDate } from '@/shared/utils/dateFormatter';
 import { useNavigate } from 'react-router-dom';
 
-interface DossierItemProps {
-  nom: string;
-  prenom: string;
-  address: string;
-  cp: string;
-  ville: string;
-  start: string;
-  status: 'À venir' | 'Terminé' | 'Complété' | 'En chantier' | 'À compléter';
+interface ArtisanItemProps {
+  noArtisan?: number;
+  nomArtisan?: string;
+  prenomArtisan?: string;
+  adresseArtisan?: string;
+  cpArtisan?: string;
+  villeArtisan?: string;
   onEdit?: () => void;
   onDelete?: () => void;
-  loading?: Boolean;
-  noChantier?: number;
+  loading?: boolean;
 }
 
-const DossierItem = ({
-  nom,
-  prenom,
-  address,
-  cp,
-  ville,
-  start,
-  status,
+const ArtisanItem = ({
+  noArtisan,
+  nomArtisan,
+  prenomArtisan,
+  adresseArtisan,
+  cpArtisan,
+  villeArtisan,
   onEdit,
   onDelete,
   loading = false,
-  noChantier,
-}: DossierItemProps) => {
+}: ArtisanItemProps) => {
   const [isHovered, setIsHovered] = useState(false);
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const popoverRef = useRef<HTMLDivElement>(null);
@@ -61,6 +55,11 @@ const DossierItem = ({
     }
   }, [isHovered, isPopoverOpen]);
 
+  useEffect(()=>{
+    console.log(nomArtisan);
+    
+  },[])
+
   return (
     <div
       className="flex items-center justify-between py-3 pl-5 pr-15 w-full hover:bg-bg-secondary transition-colors cursor-pointer relative"
@@ -70,23 +69,17 @@ const DossierItem = ({
       {
         !loading ?
           <>
-            <Text className="truncate w-[150px] font-medium">
-              {nom} {prenom}
+            <Text className="truncate w-[200px] font-medium">
+              {nomArtisan} {prenomArtisan}
             </Text>
-            <Text className="truncate w-[300px] text-placeholder">
-              {address}, {cp} {ville}
+            <Text className="truncate w-[400px] text-placeholder">
+              {adresseArtisan}, {cpArtisan} {villeArtisan}
             </Text>
-            <Text className="truncate w-[100px] font-medium font-mono tabular-nums">{formatDate(start)}</Text>
-            <div className="w-[120px] flex justify-end items-center gap-2">
-              <Status label={status} />
-            </div>
           </>
           :
           <>
-            <Skeleton className="w-[150px] h-[24px]" />
-            <Skeleton className="w-[300px] h-[24px]" />
-            <Skeleton className="w-[100px] h-[24px]" />
-            <Skeleton className="w-[120px] h-[24px]" />
+            <Skeleton className="w-[200px] h-[24px]" />
+            <Skeleton className="w-[400px] h-[24px]" />
           </>
       }
 
@@ -109,9 +102,6 @@ const DossierItem = ({
                   e.stopPropagation();
                   if (onEdit) {
                     onEdit();
-                    setIsPopoverOpen(false);
-                  } else if (noChantier) {
-                    navigate(`/commercial/dossiers/${noChantier}/edit`);
                     setIsPopoverOpen(false);
                   }
                 }}
@@ -139,4 +129,4 @@ const DossierItem = ({
   );
 };
 
-export default DossierItem;
+export default ArtisanItem;

@@ -16,25 +16,21 @@ class Modele
     #[ORM\Column(name: '"noModele"', type: 'integer')]
     private ?int $id = null;
 
-    #[ORM\Column(name: '"nomModele"', length: 50)]
+    #[ORM\Column(name: 'nomModele', length: 50)]
     private ?string $nom = null;
 
-    #[ORM\Column(name: '"descriptionModele"', type: 'text', nullable: true)]
+    #[ORM\Column(name: 'descriptionModele', type: 'text', nullable: true)]
     private ?string $description = null;
 
     #[ORM\OneToMany(mappedBy: 'modele', targetEntity: Chantier::class)]
     private Collection $chantiers;
 
-    #[ORM\ManyToMany(targetEntity: Etape::class)]
-    #[ORM\JoinTable(name: '"construire"', schema: 'bati')]
-    #[ORM\JoinColumn(name: '"noModele"', referencedColumnName: '"noModele"')]
-    #[ORM\InverseJoinColumn(name: '"noEtape"', referencedColumnName: '"noEtape"')]
-    private Collection $etapes;
+
 
     public function __construct()
     {
         $this->chantiers = new ArrayCollection();
-        $this->etapes = new ArrayCollection();
+
     }
 
     public function getId(): ?int
@@ -91,25 +87,5 @@ class Modele
         return $this;
     }
 
-    /**
-     * @return Collection<int, Etape>
-     */
-    public function getEtapes(): Collection
-    {
-        return $this->etapes;
-    }
 
-    public function addEtape(Etape $etape): static
-    {
-        if (!$this->etapes->contains($etape)) {
-            $this->etapes->add($etape);
-        }
-        return $this;
-    }
-
-    public function removeEtape(Etape $etape): static
-    {
-        $this->etapes->removeElement($etape);
-        return $this;
-    }
 }
