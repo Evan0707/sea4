@@ -8,49 +8,49 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
-#[ORM\Table(name: 'etape_chantier', schema: 'bati')]
+#[ORM\Table(name: 'etape_chantier', schema: 'batiparti')]
 #[ORM\Entity(repositoryClass: EtapeChantierRepository::class)]
 class EtapeChantier
 {
     #[ORM\Id]
     #[ORM\GeneratedValue(strategy: 'IDENTITY')]
-    #[ORM\Column(name: '"noEtapeChantier"', type: 'integer')]
+    #[ORM\Column(name: 'noEtapeChantier', type: 'integer')]
     private ?int $id = null;
 
     #[ORM\ManyToOne(inversedBy: 'etapeChantiers')]
-    #[ORM\JoinColumn(name: '"noChantier"', referencedColumnName: '"noChantier"')]
+    #[ORM\JoinColumn(name: 'noChantier', referencedColumnName: 'noChantier')]
     private ?Chantier $chantier = null;
 
     #[ORM\ManyToOne(inversedBy: 'etapeChantiers')]
-    #[ORM\JoinColumn(name: '"noEtape"', referencedColumnName: '"noEtape"')]
+    #[ORM\JoinColumn(name: 'noEtape', referencedColumnName: 'noEtape')]
     private ?Etape $etape = null;
 
-    #[ORM\Column(name: '"montantTheoriqueFacture"', type: Types::DECIMAL, precision: 10, scale: 2, nullable: true)]
+    #[ORM\Column(name: 'montantTheoriqueFacture', type: Types::DECIMAL, precision: 10, scale: 2, nullable: true)]
     private ?string $montantTheoriqueFacture = null;
 
-    #[ORM\Column(name: '"reservee"', type: 'boolean', options: ['default' => false])]
+    #[ORM\Column(name: 'reservee', type: 'boolean', options: ['default' => false])]
     private bool $reservee = false;
 
-    #[ORM\Column(name: '"reducSuppl"', type: Types::DECIMAL, precision: 5, scale: 2, nullable: true)]
+    #[ORM\Column(name: 'reducSuppl', type: Types::DECIMAL, precision: 5, scale: 2, nullable: true)]
     private ?string $reductionSupplementaire = null;
 
-    #[ORM\Column(name: '"descriptionReducSuppl"', length: 100, nullable: true)]
+    #[ORM\Column(name: 'descriptionReducSuppl', length: 100, nullable: true)]
     private ?string $descriptionReductionSupplementaire = null;
 
-    #[ORM\Column(name: '"dateDebutTheorique"', type: Types::DATE_MUTABLE, nullable: true)]
+    #[ORM\Column(name: 'dateDebutTheorique', type: Types::DATE_MUTABLE, nullable: true)]
     private ?\DateTimeInterface $dateDebutTheorique = null;
 
-    #[ORM\Column(name: '"dateDebut"', type: Types::DATE_MUTABLE, nullable: true)]
+    #[ORM\Column(name: 'dateDebut', type: Types::DATE_MUTABLE, nullable: true)]
     private ?\DateTimeInterface $dateDebut = null;
 
-    #[ORM\Column(name: '"dateFin"', type: Types::DATE_MUTABLE, nullable: true)]
+    #[ORM\Column(name: 'dateFin', type: Types::DATE_MUTABLE, nullable: true)]
     private ?\DateTimeInterface $dateFin = null;
 
-    #[ORM\Column(name: '"statutEtape"', length: 20, options: ['default' => 'À venir'])]
+    #[ORM\Column(name: 'statutEtape', length: 20, options: ['default' => 'À venir'])]
     private string $statut = 'À venir';
 
     #[ORM\ManyToMany(targetEntity: Artisan::class, inversedBy: 'etapeChantiers')]
-    #[ORM\JoinTable(name: 'confier', schema: 'bati')]
+    #[ORM\JoinTable(name: 'confier', schema: 'batiparti')]
     #[ORM\JoinColumn(name: 'noEtapeChantier', referencedColumnName: 'id')]
     #[ORM\InverseJoinColumn(name: 'noArtisan', referencedColumnName: 'id')]
     private Collection $artisans;

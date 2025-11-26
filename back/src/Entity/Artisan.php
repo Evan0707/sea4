@@ -7,34 +7,34 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
-#[ORM\Table(name: 'artisan', schema: 'bati')]
+#[ORM\Table(name: 'artisan', schema: 'batiparti')]
 #[ORM\Entity(repositoryClass: ArtisanRepository::class)]
 class Artisan
 {
     #[ORM\Id]
     #[ORM\GeneratedValue(strategy: 'IDENTITY')]
-    #[ORM\Column(name: '"noArtisan"', type: 'integer')]
+    #[ORM\Column(name: 'noArtisan', type: 'integer')]
     private ?int $id = null;
 
-    #[ORM\Column(name: '"nomArtisan"', length: 50)]
+    #[ORM\Column(name: 'nomArtisan', length: 50)]
     private ?string $nom = null;
 
-    #[ORM\Column(name: '"prenomArtisan"', length: 50, nullable: true)]
+    #[ORM\Column(name: 'prenomArtisan', length: 50, nullable: true)]
     private ?string $prenom = null;
 
-    #[ORM\Column(name: '"adresseArtisan"', length: 100, nullable: true)]
+    #[ORM\Column(name: 'adresseArtisan', length: 100, nullable: true)]
     private ?string $adresse = null;
 
-    #[ORM\Column(name: '"cpArtisan"', length: 5, nullable: true)]
+    #[ORM\Column(name: 'cpArtisan', length: 5, nullable: true)]
     private ?string $codePostal = null;
 
-    #[ORM\Column(name: '"villeArtisan"', length: 50, nullable: true)]
+    #[ORM\Column(name: 'villeArtisan', length: 50, nullable: true)]
     private ?string $ville = null;
 
     #[ORM\ManyToMany(targetEntity: Etape::class)]
-    #[ORM\JoinTable(name: 'etre_qualifie_pour', schema: 'bati')]
+    #[ORM\JoinTable(name: 'etre_qualifie_pour', schema: 'batiparti')]
     #[ORM\JoinColumn(name: 'noArtisan', referencedColumnName: 'noArtisan')]
-    #[ORM\InverseJoinColumn(name: '"noEtape"', referencedColumnName: '"noEtape"')]
+    #[ORM\InverseJoinColumn(name: 'noEtape', referencedColumnName: 'noEtape')]
     private Collection $etapesQualifiees;
 
     #[ORM\OneToMany(mappedBy: 'artisan', targetEntity: FactureArtisan::class)]

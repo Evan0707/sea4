@@ -8,40 +8,40 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
-#[ORM\Table(name: 'chantier', schema: 'bati')]
+#[ORM\Table(name: 'chantier', schema: 'batiparti')]
 #[ORM\Entity(repositoryClass: ChantierRepository::class)]
 class Chantier
 {
     #[ORM\Id]
     #[ORM\GeneratedValue(strategy: 'IDENTITY')]
-    #[ORM\Column(name: '"noChantier"', type: 'integer')]
+    #[ORM\Column(name: 'noChantier', type: 'integer')]
     private ?int $id = null;
 
-    #[ORM\Column(name: '"adresseChantier"', length: 100, nullable: true)]
+    #[ORM\Column(name: 'adresseChantier', length: 100, nullable: true)]
     private ?string $adresse = null;
 
-    #[ORM\Column(name: '"cpChantier"', length: 5, nullable: true)]
+    #[ORM\Column(name: 'cpChantier', length: 5, nullable: true)]
     private ?string $codePostal = null;
 
-    #[ORM\Column(name: '"villeChantier"', length: 50, nullable: true)]
+    #[ORM\Column(name: 'villeChantier', length: 50, nullable: true)]
     private ?string $ville = null;
 
-    #[ORM\Column(name: '"dateCreation"', type: Types::DATE_MUTABLE)]
+    #[ORM\Column(name: 'dateCreation', type: Types::DATE_MUTABLE)]
     private ?\DateTimeInterface $dateCreation = null;
 
-    #[ORM\Column(name: '"statutChantier"', length: 20, options: ['default' => 'À compléter'])]
+    #[ORM\Column(name: 'statutChantier', length: 20, options: ['default' => 'À compléter'])]
     private string $statut = 'À compléter';
 
     #[ORM\ManyToOne(inversedBy: 'chantiers')]
-    #[ORM\JoinColumn(name: '"noClient"', referencedColumnName: '"noClient"', nullable: false)]
+    #[ORM\JoinColumn(name: 'noClient', referencedColumnName: 'noClient', nullable: false)]
     private ?Client $client = null;
 
     #[ORM\ManyToOne(inversedBy: 'chantiers')]
-    #[ORM\JoinColumn(name: '"noMOE"', referencedColumnName: '"noMOE"')]
+    #[ORM\JoinColumn(name: 'noMOE', referencedColumnName: 'noMOE')]
     private ?MaitreOeuvre $maitreOeuvre = null;
 
     #[ORM\ManyToOne(inversedBy: 'chantiers')]
-    #[ORM\JoinColumn(name: '"noModele"', referencedColumnName: '"noModele"')]
+    #[ORM\JoinColumn(name: 'noModele', referencedColumnName: 'noModele')]
     private ?Modele $modele = null;
 
     #[ORM\OneToMany(mappedBy: 'chantier', targetEntity: EtapeChantier::class)]

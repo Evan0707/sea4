@@ -8,35 +8,35 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
-#[ORM\Table(name: 'facture_artisan', schema: 'bati')]
+#[ORM\Table(name: 'facture_artisan', schema: 'batiparti')]
 #[ORM\Entity(repositoryClass: FactureArtisanRepository::class)]
 class FactureArtisan
 {
     #[ORM\Id]
     #[ORM\GeneratedValue(strategy: 'IDENTITY')]
-    #[ORM\Column(name: '"noFacture"', type: 'integer')]
+    #[ORM\Column(name: 'noFacture', type: 'integer')]
     private ?int $id = null;
 
     #[ORM\ManyToOne(inversedBy: 'factures')]
     #[ORM\JoinColumn(name: 'noArtisan', referencedColumnName: 'noArtisan')]
     private ?Artisan $artisan = null;
 
-    #[ORM\Column(name: '"dateFacture"', type: Types::DATE_MUTABLE)]
+    #[ORM\Column(name: 'dateFacture', type: Types::DATE_MUTABLE)]
     private ?\DateTimeInterface $dateFacture = null;
 
-    #[ORM\Column(name: '"montantFacture"', type: Types::DECIMAL, precision: 10, scale: 2)]
+    #[ORM\Column(name: 'montantFacture', type: Types::DECIMAL, precision: 10, scale: 2)]
     private ?string $montant = null;
 
-    #[ORM\Column(name: '"nbJoursTravail"', type: 'integer', nullable: true)]
+    #[ORM\Column(name: 'nbJoursTravail', type: 'integer', nullable: true)]
     private ?int $nbJoursTravail = null;
 
-    #[ORM\Column(name: '"dateReglFacture"', type: Types::DATE_MUTABLE, nullable: true)]
+    #[ORM\Column(name: 'dateReglFacture', type: Types::DATE_MUTABLE, nullable: true)]
     private ?\DateTimeInterface $dateReglement = null;
 
     #[ORM\ManyToMany(targetEntity: EtapeChantier::class, inversedBy: 'facturesArtisan')]
-    #[ORM\JoinTable(name: 'associer', schema: 'bati')]
-    #[ORM\JoinColumn(name: '"noFacture"', referencedColumnName: '"noFacture"')]
-    #[ORM\InverseJoinColumn(name: '"noEtapeChantier"', referencedColumnName: '"noEtapeChantier"')]
+    #[ORM\JoinTable(name: 'associer', schema: 'batiparti')]
+    #[ORM\JoinColumn(name: 'noFacture', referencedColumnName: 'noFacture')]
+    #[ORM\InverseJoinColumn(name: 'noEtapeChantier', referencedColumnName: 'noEtapeChantier')]
     private Collection $etapeChantiers;
 
     public function __construct()

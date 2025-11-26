@@ -7,22 +7,22 @@ use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 
-#[ORM\Table(name: 'utilisateur', schema: 'bati')]
+#[ORM\Table(name: 'utilisateur', schema: 'batiparti')]
 #[ORM\Entity(repositoryClass: UtilisateurRepository::class)]
 class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
 {
     #[ORM\Id]
     #[ORM\GeneratedValue(strategy: 'IDENTITY')]
-    #[ORM\Column(name: '"noUtilisateur"', type: 'integer')]
+    #[ORM\Column(name: 'noUtilisateur', type: 'integer')]
     private ?int $id = null;
 
-    #[ORM\Column(name: '"login"', length: 50, unique: true)]
+    #[ORM\Column(name: 'login', length: 50, unique: true)]
     private ?string $login = null;
 
-    #[ORM\Column(name: '"motDePasse"', length: 255)]
+    #[ORM\Column(name: 'motdepasse', length: 255)]
     private ?string $motDePasse = null;
 
-    #[ORM\Column(name: '"nomRole"', length: 50)]
+    #[ORM\Column(name: 'nomrole', length: 50)]
     private ?string $role = null;
 
     #[ORM\OneToOne(mappedBy: 'utilisateur', cascade: ['persist', 'remove'], targetEntity: MaitreOeuvre::class)]

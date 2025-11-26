@@ -6,7 +6,7 @@ use App\Repository\AppelRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
-#[ORM\Table(name: 'appel', schema: 'bati')]
+#[ORM\Table(name: 'appel', schema: 'batiparti')]
 #[ORM\Entity(repositoryClass: AppelRepository::class)]
 
 class Appel
@@ -16,6 +16,14 @@ class Appel
     #[ORM\Column(name: 'noAppel', type: 'integer')]
     private ?int $id = null;
 
+    #[ORM\ManyToOne(targetEntity: Chantier::class, inversedBy: 'appels')]
+    #[ORM\JoinColumn(name: 'noChantier', referencedColumnName: 'noChantier', nullable: true, onDelete: 'CASCADE')]
+    private ?Chantier $chantier = null;
+
+    #[ORM\Column(name: 'dateAppel', type: Types::DATE_MUTABLE, options: ['default' => 'CURRENT_DATE'])]
+    private ?\DateTimeInterface $dateAppel = null;
+
+    #[ORM\Column(name: 'montantAppel', type: Types::DECIMAL, precision: 10, scale: 2, nullable: true)]
     private ?string $montant = null;
 
     #[ORM\Column(name: 'dateReglAppel', type: Types::DATE_MUTABLE, nullable: true)]

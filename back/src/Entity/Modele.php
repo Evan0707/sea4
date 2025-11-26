@@ -7,13 +7,13 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
-#[ORM\Table(name: 'modele', schema: 'bati')]
+#[ORM\Table(name: 'modele', schema: 'batiparti')]
 #[ORM\Entity(repositoryClass: ModeleRepository::class)]
 class Modele
 {
     #[ORM\Id]
     #[ORM\GeneratedValue(strategy: 'IDENTITY')]
-    #[ORM\Column(name: '"noModele"', type: 'integer')]
+    #[ORM\Column(name: 'noModele', type: 'integer')]
     private ?int $id = null;
 
     #[ORM\Column(name: 'nomModele', length: 50)]
