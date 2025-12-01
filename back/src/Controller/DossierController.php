@@ -10,6 +10,9 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
+use Symfony\Component\HttpFoundation\Response;
+use App\Entity\EtapeChantier;
+use App\Entity\Artisan;
 
 class DossierController extends AbstractController
 {
@@ -96,7 +99,7 @@ class DossierController extends AbstractController
             ], 400);
         }
 
-        // Persister le chantier
+        // Persister le chantier pour obtenir le noChantier (PK)
         $entityManager->persist($chantier);
         $entityManager->flush();
 
@@ -287,5 +290,177 @@ class DossierController extends AbstractController
         }
 
         return $this->json($result);
+    }
+
+    #[Route('/api/mes-dossiers', name: 'api_mes_dossiers', methods: ['GET'])]
+    public function getMesDossiers(Request $request, EntityManagerInterface $entityManager): JsonResponse
+    {
+        /** @var \App\Entity\Utilisateur|null $user */
+        $user = $this->getUser();
+        if (!$user) {
+            return $this->json([], 401);
+        }
+
+        $maitre = $user->getMaitreOeuvre();
+        if (!$maitre) {
+            return $this->json([]);
+        }
+
+        $search = $request->query->get('search', '');
+        $sortOrder = $request->query->get('sortOrder', 'asc');
+        if (!in_array($sortOrder, ['asc', 'desc'])) {
+            $sortOrder = 'asc';
+        }
+
+        $qb = $entityManager->getRepository(Chantier::class)->createQueryBuilder('ch')
+            ->leftJoin('ch.client', 'cl')
+            ->addSelect('cl')
+            ->where('ch.maitreOeuvre = :moe')
+            ->andWhere('ch.statut IN (:statuses)')
+            ->setParameter('moe', $maitre->getId())
+            ->setParameter('statuses', ['À compléter', 'Complété']);
+
+        if (!empty($search)) {
+            $qb->andWhere(
+                $qb->expr()->orX(
+                    $qb->expr()->like('LOWER(cl.nom)', ':search'),
+                    $qb->expr()->like('LOWER(cl.prenom)', ':search'),
+                    $qb->expr()->like('LOWER(ch.ville)', ':search')
+                )
+            )
+            ->setParameter('search', '%' . strtolower($search) . '%');
+        }
+
+        $qb->orderBy('ch.dateCreation', $sortOrder === 'desc' ? 'DESC' : 'ASC');
+
+        $chantiers = $qb->getQuery()->getResult();
+
+        $result = [];
+        foreach ($chantiers as $chantier) {
+            $client = $chantier->getClient();
+            $result[] = [
+                'noChantier' => $chantier->getId(),
+                'nom' => $client->getNom(),
+                'prenom' => $client->getPrenom(),
+                'address' => $chantier->getAdresse(),
+                'cp' => $chantier->getCodePostal(),
+                'ville' => $chantier->getVille(),
+                'start' => $chantier->getDateCreation()?->format('Y-m-d'),
+                'status' => $chantier->getStatut(),
+                'noClient' => $client->getId(),
+                'noMOE' => $chantier->getMaitreOeuvre()?->getId(),
+                'noModele' => $chantier->getModele()?->getId(),
+            ];
+        }
+
+        return $this->json($result);
+    }
+
+    #[Route('/api/dossiers/{id}/etapes', name: 'api_dossier_etapes', methods: ['GET'], requirements: ['id' => '\\d+'])]
+    public function getEtapesForDossier(int $id, EntityManagerInterface $entityManager): JsonResponse
+    {
+        $chantier = $entityManager->getRepository(\App\Entity\Chantier::class)->find($id);
+        if (!$chantier) {
+            return $this->json(['message' => 'Chantier non trouvé'], 404);
+        }
+
+        $etapeChantiers = $chantier->getEtapeChantiers();
+        $result = [];
+        foreach ($etapeChantiers as $ec) {
+            /** @var EtapeChantier $ec */
+            $artisan = $ec->getArtisan();
+            $result[] = [
+                'noEtapeChantier' => $ec->getId(),
+                'noEtape' => $ec->getEtape()?->getId(),
+                'nomEtape' => $ec->getEtape()?->getNom(),
+                'reservable' => $ec->getEtape()?->isReservable() ?? false,
+                'montantTheoriqueFacture' => $ec->getMontantTheoriqueFacture() !== null ? (float) $ec->getMontantTheoriqueFacture() : null,
+                'reservee' => $ec->isReservee(),
+                'dateDebutTheorique' => $ec->getDateDebutTheorique()?->format('Y-m-d'),
+                'dateDebut' => $ec->getDateDebut()?->format('Y-m-d'),
+                'dateFin' => $ec->getDateFin()?->format('Y-m-d'),
+                'statutEtape' => $ec->getStatut(),
+                'noArtisan' => $artisan ? $artisan->getId() : null,
+            ];
+        }
+
+        return $this->json($result);
+    }
+
+    #[Route('/api/dossiers/{id}/etapes', name: 'api_dossier_etapes_update', methods: ['POST'], requirements: ['id' => '\\d+'])]
+    public function updateEtapesForDossier(int $id, Request $request, EntityManagerInterface $entityManager): JsonResponse
+    {
+        $chantier = $entityManager->getRepository(\App\Entity\Chantier::class)->find($id);
+        if (!$chantier) {
+            return $this->json(['message' => 'Chantier non trouvé'], 404);
+        }
+
+        $data = json_decode($request->getContent(), true);
+        if (!isset($data['etapes']) || !is_array($data['etapes'])) {
+            return $this->json(['message' => 'Payload invalide'], 400);
+        }
+
+        $repo = $entityManager->getRepository(EtapeChantier::class);
+
+        foreach ($data['etapes'] as $item) {
+            $idEc = $item['noEtapeChantier'] ?? null;
+            if (!$idEc) continue;
+            $ec = $repo->find((int) $idEc);
+            if (!$ec) continue;
+
+            // montant théorique
+            if (array_key_exists('montantTheorique', $item)) {
+                $val = $item['montantTheorique'];
+                $ec->setMontantTheoriqueFacture($val !== null ? number_format((float)$val, 2, '.', '') : null);
+            }
+
+            // reservee
+            if (array_key_exists('reservee', $item)) {
+                $ec->setReservee((bool) $item['reservee']);
+            }
+
+            // date theorique
+            if (!empty($item['dateTheorique'])) {
+                try {
+                    $dt = new \DateTime($item['dateTheorique']);
+                    $ec->setDateDebutTheorique($dt);
+                } catch (\Exception $e) {
+                    // ignore invalid date
+                }
+            } elseif (array_key_exists('dateTheorique', $item) && $item['dateTheorique'] === null) {
+                $ec->setDateDebutTheorique(null);
+            }
+
+            // supplement / reduction: store net value in reductionSupplementaire column
+            $supp = isset($item['supplement']) ? (float)$item['supplement'] : 0.0;
+            $red = isset($item['reduction']) ? (float)$item['reduction'] : 0.0;
+            $net = $supp - $red;
+            $ec->setReductionSupplementaire(number_format($net, 2, '.', ''));
+
+            if (array_key_exists('supplementDesc', $item)) {
+                $ec->setDescriptionReductionSupplementaire($item['supplementDesc']);
+            }
+
+            // artisan assignment: set single artisan (clear existing)
+            if (array_key_exists('artisanId', $item)) {
+                // remove existing artisans
+                foreach ($ec->getArtisans() as $a) {
+                    $ec->removeArtisan($a);
+                }
+                $artisanId = $item['artisanId'];
+                if ($artisanId) {
+                    $artisan = $entityManager->getRepository(Artisan::class)->find((int)$artisanId);
+                    if ($artisan) {
+                        $ec->addArtisan($artisan);
+                    }
+                }
+            }
+
+            $entityManager->persist($ec);
+        }
+
+        $entityManager->flush();
+
+        return $this->json(['message' => 'Étapes mises à jour']);
     }
 }

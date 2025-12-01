@@ -6,18 +6,23 @@ import Error404 from './pages/Error404Page';
 import { ProtectedRoute } from '../features/auth/components/ProtectedRoute';
 import { DashboardLayout } from '../shared/components/layout/DashboardLayout';
 import { DashboardPage } from '../features/dashboard/pages/DashboardPage';
+import EditArtisanPage from '@/features/users/pages/EditArtisanPage';
 import { DossiersListPage } from '../features/dossiers/pages/DossiersListPage';
+import { MesDossiersPage } from '../features/dossiers/pages/MesDossiersPage';
 import { NouveauDossierPage } from '../features/dossiers/pages/NouveauDossierPage';
 import { EditDossierPage } from '../features/dossiers/pages/EditDossierPage';
+import CompleteDossierPage from '../features/dossiers/pages/CompleteDossierPage';
 import { ProjetsListPage } from '../features/chantiers/pages/ProjetsListPage';
 import { UtilisateursListPage } from '../features/users/pages/UtilisateursListPage';
 import { ArtisansListPage } from '../features/users/pages/ArtisansListPage';
+import NewUtilisateurPage from '@/features/users/pages/NewUtilisateurPage';
 import { SettingsPage } from '../features/settings/pages/SettingsPage';
 import { AuthProvider, useAuth } from '../features/auth/context/AuthContext';
 import { ToastProvider } from '../shared/context/ToastProvider';
 import { OnlineProvider } from '../shared/context/OnlineProvider';
 import { ThemeProvider } from '../shared/context/ThemeProvider';
 import Unauthorized from './pages/Unauthorized';
+import NewArtisanPage from '@/features/users/pages/NewArtisanPage';
 
 function App() {
   return (
@@ -82,26 +87,30 @@ function AppRoutes() {
             <ProtectedRoute
               isAuthenticated={isAuthenticated}
               userRoles={user?.roles ?? []}
-              allowedRoles={['ROLE_MAITRE_DOEUVRE']}
+              allowedRoles={['ROLE_MAITRE_OEUVRE']}
             />
           }
         >
           <Route path="/maitre-doeuvre" element={withDashboard(<DashboardPage />)} />
           <Route
             path="/maitre-doeuvre/dossiers"
-            element={withDashboard(<DossiersListPage />)}
+            element={withDashboard(<MesDossiersPage />)}
           />
           <Route
             path="/maitre-doeuvre/dossiers/:id"
             element={withDashboard(<div>Détails du dossier</div>)}
           />
           <Route
-            path="/maitre-doeuvre/projets"
+            path="/maitre-doeuvre/chantiers/:id/completer"
+            element={withDashboard(<CompleteDossierPage />)}
+          />
+          <Route
+            path="/maitre-doeuvre/chantiers"
             element={withDashboard(<ProjetsListPage />)}
           />
           <Route
-            path="/maitre-doeuvre/projets/:id"
-            element={withDashboard(<div>Détails du projet</div>)}
+            path="/maitre-doeuvre/chantiers/:id"
+            element={withDashboard(<div>Détails du chantier</div>)}
           />
           <Route
             path="/maitre-doeuvre/settings"
@@ -121,13 +130,15 @@ function AppRoutes() {
         >
           <Route path="/admin" element={withDashboard(<DashboardPage />)} />
           <Route path="/admin/dossiers" element={withDashboard(<DossiersListPage />)} />
-          <Route path="/admin/projets" element={withDashboard(<ProjetsListPage />)} />
+          <Route path="/admin/chantiers" element={withDashboard(<ProjetsListPage />)} />
           <Route
             path="/admin/utilisateurs"
             element={withDashboard(<UtilisateursListPage />)}
           />
+          <Route path="/admin/utilisateurs/new" element={withDashboard(<NewUtilisateurPage />)} />
           <Route path="/admin/artisans" element={withDashboard(<ArtisansListPage />)} />
-          <Route path="/admin/settings" element={withDashboard(<SettingsPage />)} />
+          <Route path="/admin/artisans/:id/edit" element={withDashboard(<EditArtisanPage />)} />
+          <Route path='/admin/artisans/new' element={withDashboard(<NewArtisanPage />)} />
         </Route>
 
         {/* Redirect root to login */}

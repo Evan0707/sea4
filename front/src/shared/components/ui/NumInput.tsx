@@ -15,6 +15,7 @@ export type NumInputProps = {
   min?: number
   max?: number
   step?: number
+  size?: 'small' | 'default'
 }
 
 const NumInput: React.FC<NumInputProps> = ({
@@ -30,6 +31,7 @@ const NumInput: React.FC<NumInputProps> = ({
   min = 0,
   max = 999999.99,
   step = 0.01,
+  size = 'default'
 }) => {
   const [internalValue, setInternalValue] = useState<number | ''>(defaultValue ?? '')
   const value = controlledValue ?? internalValue
@@ -132,7 +134,7 @@ const NumInput: React.FC<NumInputProps> = ({
   }
 
   return (
-    <div className={`${className ?? ''}`}>
+    <div className={`${className ?? ''} ${size === 'small' ? 'flex items-center' : ''}`}>
       <label className='m-1 font-bold text-[14px]' htmlFor={inputId}>{label}</label>
       <div className={`border-[1.5px] ${hasError ? 'border-red' : 'border-border'} flex items-center rounded-[6px] focus-within:border-primary focus-within:outline-[1px] outline-border justify-between mt-1 mb-0`}>
         <div className="flex flex-col border-l border-border">
@@ -151,7 +153,7 @@ const NumInput: React.FC<NumInputProps> = ({
             <ChevronDown className="w-5 h-5 text-placeholder" />
           </button>
         </div>
-        <div className='flex flex-row items-center flex-1'>
+        <div className={`flex flex-row items-center flex-1`}>
           <input
             id={inputId}
             type="text"
@@ -159,7 +161,7 @@ const NumInput: React.FC<NumInputProps> = ({
             placeholder={placeholder}
             aria-invalid={hasError}
             aria-describedby={describedBy}
-            className="focus:outline-none h-[38px] px-3 flex-1 bg-transparent text-right"
+            className={`focus:outline-none px-3 flex-1 bg-transparent text-right ${size === 'small' ? 'max-w-25 h-[30px]' : 'h-[38px]'}`}
             value={displayValue}
             onChange={handleInputChange}
             onFocus={() => setIsEditing(true)}

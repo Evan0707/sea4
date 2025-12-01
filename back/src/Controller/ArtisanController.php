@@ -46,17 +46,65 @@ class ArtisanController extends AbstractController
 
         $result = [];
         foreach ($artisans as $artisan) {
+            $etapes = [];
+            foreach ($artisan->getEtapesQualifiees() as $e) {
+                $etapes[] = [
+                    'noEtape' => $e->getId(),
+                    'nomEtape' => $e->getNom(),
+                ];
+            }
+
             $result[] = [
                 'noArtisan' => $artisan->getId(),
-                '"nomArtisan"' => $artisan->getNom(),
-                '"prenomArtisan"' => $artisan->getPrenom(),
-                '"adresseArtisan"' => $artisan->getAdresse(),
-                '"cpArtisan"' => $artisan->getCodePostal(),
-                '"villeArtisan"' => $artisan->getVille(),
+                'nomArtisan' => $artisan->getNom(),
+                'prenomArtisan' => $artisan->getPrenom(),
+                'adresseArtisan' => $artisan->getAdresse(),
+                'cpArtisan' => $artisan->getCodePostal(),
+                'villeArtisan' => $artisan->getVille(),
+                'etapes' => $etapes,
             ];
         }
 
         return $this->json($result);
+    }
+
+    // Alias plural route for frontend convenience
+    #[Route('/api/artisans', name: 'api_artisans_list', methods: ['GET'])]
+    public function listPlural(Request $request, EntityManagerInterface $entityManager): JsonResponse
+    {
+        // reuse the same logic as list() by forwarding the request
+        return $this->list($request, $entityManager);
+    }
+
+    #[Route('/api/artisan/{id}', name: 'api_artisan_show', methods: ['GET'], requirements: ['id' => '\\d+'])]
+    public function show(
+        string $id,
+        EntityManagerInterface $entityManager
+    ): JsonResponse {
+        $idInt = (int) $id;
+        $artisan = $entityManager->getRepository(Artisan::class)->find($idInt);
+        if (!$artisan) {
+            return $this->json(['message' => 'Artisan non trouvé'], 404);
+        }
+
+        // Include qualified steps
+        $etapes = [];
+        foreach ($artisan->getEtapesQualifiees() as $e) {
+            $etapes[] = [
+                'noEtape' => $e->getId(),
+                'nomEtape' => $e->getNom(),
+            ];
+        }
+
+        return $this->json([
+            'noArtisan' => $artisan->getId(),
+            'nomArtisan' => $artisan->getNom(),
+            'prenomArtisan' => $artisan->getPrenom(),
+            'adresseArtisan' => $artisan->getAdresse(),
+            'cpArtisan' => $artisan->getCodePostal(),
+            'villeArtisan' => $artisan->getVille(),
+            'etapes' => $etapes,
+        ]);
     }
 
     #[Route('/api/artisan', name: 'api_artisan_create', methods: ['POST'])]
@@ -75,11 +123,29 @@ class ArtisanController extends AbstractController
 
         // Créer l'artisan
         $artisan = new Artisan();
-        $artisan->setNom($data['"nomArtisan"']);
-        $artisan->setPrenom($data['"prenomArtisan"'] ?? null);
-        $artisan->setAdresse($data['"adresseArtisan"'] ?? null);
-        $artisan->setCodePostal($data['"cpArtisan"'] ?? null);
-        $artisan->setVille($data['"villeArtisan"'] ?? null);
+        $artisan->setNom($data['nomArtisan']);
+        $artisan->setPrenom($data['prenomArtisan'] ?? null);
+        $artisan->setAdresse($data['adresseArtisan'] ?? null);
+        $artisan->setCodePostal($data['cpArtisan'] ?? null);
+        $artisan->setVille($data['villeArtisan'] ?? null);
+
+        // Sync etapes if provided on creation
+        if (isset($data['etapes']) && is_array($data['etapes'])) {
+            foreach ($data['etapes'] as $item) {
+                $no = null;
+                if (is_array($item) && isset($item['noEtape'])) {
+                    $no = (int) $item['noEtape'];
+                } elseif (is_numeric($item)) {
+                    $no = (int) $item;
+                }
+                if ($no !== null) {
+                    $et = $entityManager->getRepository(\App\Entity\Etape::class)->find($no);
+                    if ($et) {
+                        $artisan->addEtapeQualifiee($et);
+                    }
+                }
+            }
+        }
 
         // Valider l'artisan
         $errors = $validator->validate($artisan);
@@ -153,6 +219,45 @@ class ArtisanController extends AbstractController
                 'message' => 'Erreur de validation',
                 'errors' => $errorMessages
             ], 400);
+        }
+
+        // Sync etapes if provided: accept array of ids or array of {noEtape, nomEtape}
+        if (isset($data['etapes']) && is_array($data['etapes'])) {
+            // Build set of requested ids
+            $requested = [];
+            foreach ($data['etapes'] as $item) {
+                if (is_array($item) && isset($item['noEtape'])) {
+                    $requested[] = (int) $item['noEtape'];
+                } elseif (is_numeric($item)) {
+                    $requested[] = (int) $item;
+                }
+            }
+
+            // Current etapes ids
+            $current = [];
+            foreach ($artisan->getEtapesQualifiees() as $e) {
+                $current[] = $e->getId();
+            }
+
+            // Remove those not requested
+            foreach ($current as $curId) {
+                if (!in_array($curId, $requested, true)) {
+                    $et = $entityManager->getRepository(\App\Entity\Etape::class)->find($curId);
+                    if ($et) {
+                        $artisan->removeEtapeQualifiee($et);
+                    }
+                }
+            }
+
+            // Add missing requested
+            foreach ($requested as $reqId) {
+                if (!in_array($reqId, $current, true)) {
+                    $et = $entityManager->getRepository(\App\Entity\Etape::class)->find($reqId);
+                    if ($et) {
+                        $artisan->addEtapeQualifiee($et);
+                    }
+                }
+            }
         }
 
         $entityManager->flush();

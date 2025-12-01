@@ -13,9 +13,12 @@ interface SidebarProps {
   user: User | null
   items: NavItem[]
   onLogout: () => void
+  // mobile props
+  mobileOpen?: boolean
+  onClose?: () => void
 }
 
-export function Sidebar({ user, items, onLogout }: SidebarProps) {
+export function Sidebar({ user, items, onLogout, mobileOpen = false, onClose }: SidebarProps) {
   const location = useLocation()
   const filtered = items.filter(item => user?.roles?.some(r => item.roles.includes(r)))
 
@@ -30,15 +33,13 @@ export function Sidebar({ user, items, onLogout }: SidebarProps) {
   // Déterminer le chemin settings basé sur le rôle
   const getSettingsPath = () => {
     if (user?.roles?.includes('ROLE_ADMIN')) return '/admin/settings'
-    if (user?.roles?.includes('ROLE_MAITRE_DOEUVRE')) return '/maitre-doeuvre/settings'
+    if (user?.roles?.includes('ROLE_MAITRE_OEUVRE')) return '/maitre-doeuvre/settings'
     if (user?.roles?.includes('ROLE_COMMERCIAL')) return '/commercial/settings'
     return '/settings'
   }
 
   const settingsPath = getSettingsPath()
 
-
-  // Keyboard shortcut: Ctrl/Cmd + B pour toggle sidebar 
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
       const isMac = navigator.platform.toUpperCase().includes('MAC')
@@ -53,8 +54,10 @@ export function Sidebar({ user, items, onLogout }: SidebarProps) {
   }, [])
 
   return (
-    <aside className={`${collapsed ? 'w-20' : 'w-64'} bg-bg-secondary h-screen sticky top-0 flex flex-col border-r-1 border-border text-white p-3 transition-all duration-300 overflow-y-auto overflow-x-hidden`}> 
-      <div className={`mb-8 absolute flex items-center w-full mt-2 ${collapsed ? 'justify-center left-0' : 'left-5'}`}>
+    <>
+      {/* Desktop sidebar (md+) */}
+      <aside className={`${collapsed ? 'w-20' : 'w-64'} hidden lg:flex bg-bg-secondary h-screen sticky top-0 flex-col border-r-1 border-border text-white p-3 transition-all duration-300 overflow-y-auto overflow-x-hidden`}> 
+        <div className={`mb-8 absolute flex items-center w-full mt-2 ${collapsed ? 'justify-center left-0' : 'left-5'}`}>
         <img src={Logo} width={35} className={collapsed ? '' : 'mr-3'} />
         {!collapsed && <H2 className='text-xl ml-3' weight='bold'>Bati'Parti</H2>}
         <button
@@ -124,6 +127,63 @@ export function Sidebar({ user, items, onLogout }: SidebarProps) {
           </ConfirmPopover>
         )}
       </div>
-    </aside>
+      </aside>
+
+      {/* Mobile overlay sidebar */}
+      <div className={`lg:hidden fixed inset-0 z-50 ${mobileOpen ? 'block' : 'pointer-events-none'}`} aria-hidden={!mobileOpen}>
+        {/* backdrop */}
+        <div
+          className={`absolute inset-0 bg-black/40 transition-opacity ${mobileOpen ? 'opacity-100' : 'opacity-0'}`}
+          onClick={() => onClose?.()}
+        />
+        <aside className={`absolute left-0 top-0 bottom-0 w-64 bg-bg-secondary p-3 transform transition-transform ${mobileOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+          <div className="mb-8 flex items-center">
+            <img src={Logo} width={35} className="mr-3" />
+            <H2 className='text-xl ml-3' weight='bold'>Bati'Parti</H2>
+            <button className="ml-auto p-2" onClick={() => onClose?.()} aria-label="Fermer le menu">✕</button>
+          </div>
+          <nav>
+            <ul className="space-y-1 mt-2">
+              {filtered.map(item => (
+                <li key={item.path}>
+                  <SidebarButton
+                    to={item.path}
+                    icon={item.icon}
+                    label={item.label}
+                    collapsed={false}
+                    active={location.pathname === item.path}
+                    onClick={() => onClose?.()}
+                  />
+                </li>
+              ))}
+            </ul>
+          </nav>
+          <div className="mt-auto pt-6">
+            <SidebarButton
+              to={settingsPath}
+              icon={<CogFour className='text-text-white' />}
+              label="Paramètre"
+              collapsed={false}
+              active={location.pathname === settingsPath}
+              className="mb-2"
+              onClick={() => onClose?.()}
+            />
+            <div className="mt-4">
+              <ConfirmPopover
+                title="Déconnexion"
+                message="Voulez-vous vraiment vous déconnecter de votre session ?"
+                onConfirm={() => { onClose?.(); onLogout(); }}
+                confirmText="Se déconnecter"
+                cancelText="Annuler"
+              >
+                <button className="w-full flex items-center justify-center py-2 rounded-lg text-red-600 hover:bg-red-50">
+                  <Logout size={24} />
+                </button>
+              </ConfirmPopover>
+            </div>
+          </div>
+        </aside>
+      </div>
+      </>
   )
 }

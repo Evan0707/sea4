@@ -6,6 +6,7 @@ use App\Repository\ModeleRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use App\Entity\Construire;
 
 #[ORM\Table(name: 'modele', schema: 'batiparti')]
 #[ORM\Entity(repositoryClass: ModeleRepository::class)]
@@ -25,11 +26,13 @@ class Modele
     #[ORM\OneToMany(mappedBy: 'modele', targetEntity: Chantier::class)]
     private Collection $chantiers;
 
-
+    #[ORM\OneToMany(mappedBy: 'noModele', targetEntity: Construire::class)]
+    private Collection $constructions;
 
     public function __construct()
     {
         $this->chantiers = new ArrayCollection();
+        $this->constructions = new ArrayCollection();
 
     }
 
@@ -85,6 +88,30 @@ class Modele
             }
         }
         return $this;
+    }
+
+    /**
+     * Retourne les étapes associées au modèle via la table `construire`.
+     * @return \Doctrine\Common\Collections\Collection<int, Etape>
+     */
+    public function getEtapes(): Collection
+    {
+        $etapes = new ArrayCollection();
+        foreach ($this->constructions as $constr) {
+            $etape = $constr->getNoEtape();
+            if ($etape && !$etapes->contains($etape)) {
+                $etapes->add($etape);
+            }
+        }
+        return $etapes;
+    }
+
+    /**
+     * @return Collection<int, Construire>
+     */
+    public function getConstructions(): Collection
+    {
+        return $this->constructions;
     }
 
 

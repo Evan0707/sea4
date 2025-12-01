@@ -3,6 +3,7 @@ import { useState, useRef, useEffect } from 'react';
 import { Text } from '@/shared/components/ui/Typography';
 import Skeleton from '@/shared/components/ui/Skeleton';
 import { useNavigate } from 'react-router-dom';
+import ConfirmPopover from '@/shared/components/ui/ConfirmPopover';
 
 interface ArtisanItemProps {
   noArtisan?: number;
@@ -11,6 +12,7 @@ interface ArtisanItemProps {
   adresseArtisan?: string;
   cpArtisan?: string;
   villeArtisan?: string;
+  etapes?: { noEtape: number; nomEtape: string }[];
   onEdit?: () => void;
   onDelete?: () => void;
   loading?: boolean;
@@ -23,6 +25,7 @@ const ArtisanItem = ({
   adresseArtisan,
   cpArtisan,
   villeArtisan,
+  etapes,
   onEdit,
   onDelete,
   loading = false,
@@ -69,9 +72,27 @@ const ArtisanItem = ({
       {
         !loading ?
           <>
-            <Text className="truncate w-[200px] font-medium">
-              {nomArtisan} {prenomArtisan}
-            </Text>
+            <div className="flex flex-col">
+              <Text className="truncate w-[200px] font-medium">
+                {nomArtisan} {prenomArtisan}
+              </Text>
+
+              {etapes && etapes.length > 0 && (
+                <div className="flex items-center gap-2 mt-1">
+                  {etapes.slice(0,2).map(e => (
+                    <div key={e.noEtape} className="text-sm bg-bg-secondary border border-border rounded-md px-2 py-0.5 text-text-primary">
+                      {e.nomEtape}
+                    </div>
+                  ))}
+                  {etapes.length > 2 && (
+                    <div className="w-6 h-6 rounded-full bg-primary text-white flex items-center justify-center text-xs">
+                      +{etapes.length - 2}
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+
             <Text className="truncate w-[400px] text-placeholder">
               {adresseArtisan}, {cpArtisan} {villeArtisan}
             </Text>
@@ -110,17 +131,18 @@ const ArtisanItem = ({
                 <Edit className="w-4 h-4 text-text-primary" />
                 <span className="text-sm text-text-primary">Éditer</span>
               </button>
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setIsPopoverOpen(false);
-                  onDelete?.();
-                }}
-                className="w-full rounded px-4 py-2 text-left hover:bg-red/15 text-error flex items-center gap-2 transition-colors"
-              >
-                <Trash className="w-4 h-4 text-red" />
-                <span className="text-sm text-red">Supprimer</span>
-              </button>
+              <ConfirmPopover title='Supprimer artisan' message='Êtes-vous sûr de vouloir supprimer cet artisan ? Cette action est irréversible.' onConfirm={() => {
+                setIsPopoverOpen(false);
+                onDelete?.();
+              }} onCancel={() => navigate(-1)} >
+                <button
+                 
+                  className="w-full rounded px-4 py-2 text-left hover:bg-red/15 text-error flex items-center gap-2 transition-colors"
+                >
+                  <Trash className="w-4 h-4 text-red" />
+                  <span className="text-sm text-red">Supprimer</span>
+                </button>
+             </ConfirmPopover>
             </div>
           )}
         </div>

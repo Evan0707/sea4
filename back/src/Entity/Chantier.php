@@ -33,7 +33,7 @@ class Chantier
     private string $statut = 'À compléter';
 
     #[ORM\ManyToOne(inversedBy: 'chantiers')]
-    #[ORM\JoinColumn(name: 'noClient', referencedColumnName: 'noClient', nullable: false)]
+    #[ORM\JoinColumn(name: 'noClient', referencedColumnName: 'noClient', nullable: false, onDelete: 'CASCADE')]
     private ?Client $client = null;
 
     #[ORM\ManyToOne(inversedBy: 'chantiers')]

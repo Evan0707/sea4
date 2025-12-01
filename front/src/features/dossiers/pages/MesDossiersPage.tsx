@@ -3,6 +3,7 @@ import Input from '@/shared/components/ui/Input';
 import { H1, Text } from '@/shared/components/ui/Typography';
 import { Search, ArrowDown, ArrowUp } from '@mynaui/icons-react';
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
 interface Dossier {
@@ -16,12 +17,13 @@ interface Dossier {
   status: 'À venir' | 'Terminé' | 'Complété' | 'En chantier' | 'À compléter';
 }
 
-export const DossiersListPage = () => {
+export const MesDossiersPage = () => {
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
   const [search, setSearch] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [dossiers, setDossiers] = useState<Dossier[]>([]);
   const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
   // Debounce pour la recherche
   useEffect(() => {
@@ -39,7 +41,7 @@ export const DossiersListPage = () => {
   const fetchDossiers = async () => {
     setLoading(true);
     try {
-      const response = await axios.get('http://localhost:8000/api/dossier', {
+      const response = await axios.get('/mes-dossiers', {
         params: {
           search: debouncedSearch,
           sortOrder,
@@ -59,12 +61,12 @@ export const DossiersListPage = () => {
 
   return (
     <div className="p-8 h-screen flex flex-col">
-      <H1 className="mb-6">Dossiers</H1>
+      <H1 className="mb-6">Mes dossiers</H1>
 
       <Input
         name='search'
-        width='w-[350px]'
-        className='mb-5'
+        width='w-full'
+        className='mb-5 md:w-[350px] w-full'
         type='text'
         leftIcon={<Search className='text-placeholder' />}
         value={search}
@@ -98,14 +100,11 @@ export const DossiersListPage = () => {
               <DossierItem loading={true} nom='load' prenom='load' address='load' cp='load' ville='load' start='load' status='Complété' />
               <DossierItem loading={true} nom='load' prenom='load' address='load' cp='load' ville='load' start='load' status='Complété' />
             </>
-            // <div className="flex items-center justify-center h-full">
-            //   <Text variant='body' color='text-placeholder'>Chargement...</Text>
-            // </div>
           ) : dossiers.length > 0 ? dossiers.map((dossier) => (
             <DossierItem
               key={dossier.noChantier}
               {...dossier}
-              onEdit={() => console.log('Éditer dossier', dossier.noChantier)}
+              onEdit={() => navigate(`/maitre-doeuvre/chantiers/${dossier.noChantier}/completer`)}
               onDelete={() => console.log('Supprimer dossier', dossier.noChantier)}
             />
           )) : (

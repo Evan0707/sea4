@@ -1,5 +1,5 @@
-import React, { type ReactNode } from 'react'
-import { DangerCircle, InfoCircleSolid } from '@mynaui/icons-react'
+import React, { type ReactNode, useState } from 'react'
+import { DangerCircle, InfoCircleSolid, Eye, EyeSlash } from '@mynaui/icons-react'
 import type { UseFormRegisterReturn } from 'react-hook-form'
 import Tooltip from './Tooltip'
 import { Label } from './Typography'
@@ -50,27 +50,29 @@ const Input: React.FC<InputProps> = ({
     onChange?.(e)
   }
 
+  const [showPassword, setShowPassword] = useState(false)
+
   const controlProps: React.InputHTMLAttributes<HTMLInputElement> = {
     ...(value !== undefined ? { value } : {}),
     ...(defaultValue !== undefined ? { defaultValue } : {}),
   }
 
   return (
-    <div className={`${className ?? ''} relative ${width}`}>
+    <div className={`${className ?? ''} relative ${width} mb-6`}>
       <div className='flex items-center'>
-        {label&& <Label className='m-1 text-text-primary text-[14px]' weight='bold' htmlFor={inputId}>{label}</Label>}
+        {label&& <Label className='m-1 text-text-primary' weight='bold' htmlFor={inputId}>{label}</Label>}
         {info&&
           <Tooltip content={message}>
             <InfoCircleSolid size={14} className='text-text-secondary ml-1'/>
           </Tooltip>
         }
       </div>
-      <div className={`border-[1px] ${hasError ? 'border-red' : 'border-border'} px-3 flex items-center rounded-[6px] focus-within:border-primary focus-within:outline-[1px] outline-border justify-between mt-1 mb-0 w-full"`}>
+        <div className={`border-[1px] ${hasError ? 'border-red' : 'border-border'} px-3 flex items-center rounded-[6px] focus-within:border-primary focus-within:outline-[1px] outline-border justify-between mt-1 mb-0 w-full`}>
         <div className='flex flex-row items-center flex-1'>
           {leftIcon}
           <input
             id={inputId}
-            type={type}
+            type={type === 'password' ? (showPassword ? 'text' : 'password') : type}
             placeholder={placeholder}
             aria-invalid={hasError}
             aria-describedby={describedBy}
@@ -82,12 +84,24 @@ const Input: React.FC<InputProps> = ({
             ref={reg.ref}
           />
         </div>
-        {rightIcon}
-        {hasError && <DangerCircle aria-hidden className='text-red' />}
+        <div className='flex items-center gap-2'>
+          {rightIcon}
+          {type === 'password' && (
+            <button
+              type='button'
+              aria-label={showPassword ? 'Masquer le mot de passe' : 'Afficher le mot de passe'}
+              onClick={() => setShowPassword((s) => !s)}
+              className='p-1 text-text-secondary hover:text-text-primary'
+            >
+              {showPassword ? <EyeSlash size={18} /> : <Eye size={18} />}
+            </button>
+          )}
+          {hasError && <DangerCircle aria-hidden={true} size={18} className='text-red' />}
       </div>
       {hasError && (
-        <p id={describedBy} className='text-red text-[13px] font-semibold ml-1 mt-1 absolute b-0'>{error}</p>
+        <p id={describedBy} className='text-red text-[13px] font-semibold ml-1 mt-1 absolute bottom-[-20px] left-0'>{error}</p>
       )}
+    </div>
     </div>
   )
 }

@@ -14,42 +14,13 @@ import { z } from "zod";
 export const loginSchema = z.object({
   email: z
     .string()
-    .min(1, "L'email est requis")
-    .email("Email invalide"),
+    .min(1, "L'email est requis"),
   password: z
     .string()
     .min(6, "Le mot de passe doit contenir au moins 6 caractères"),
 });
 
 export type LoginFormData = z.infer<typeof loginSchema>;
-
-/**
- * Schéma de validation pour le formulaire d'inscription
- */
-export const registerSchema = z.object({
-  username: z
-    .string()
-    .min(3, "Le nom d'utilisateur doit contenir au moins 3 caractères")
-    .max(50, "Le nom d'utilisateur ne peut pas dépasser 50 caractères"),
-  email: z
-    .string()
-    .min(1, "L'email est requis")
-    .email("Email invalide"),
-  password: z
-    .string()
-    .min(6, "Le mot de passe doit contenir au moins 6 caractères")
-    .regex(/[A-Z]/, "Le mot de passe doit contenir au moins une majuscule")
-    .regex(/[a-z]/, "Le mot de passe doit contenir au moins une minuscule")
-    .regex(/[0-9]/, "Le mot de passe doit contenir au moins un chiffre"),
-  confirmPassword: z
-    .string()
-    .min(1, "Veuillez confirmer votre mot de passe"),
-}).refine((data) => data.password === data.confirmPassword, {
-  message: "Les mots de passe ne correspondent pas",
-  path: ["confirmPassword"],
-});
-
-export type RegisterFormData = z.infer<typeof registerSchema>;
 
 /**
  * Schéma de validation pour le formulaire Client (nouveau dossier)
@@ -161,3 +132,14 @@ export const getPasswordStrength = (password: string): 'weak' | 'medium' | 'stro
 export const isPositiveNumber = (value: number): boolean => {
   return !isNaN(value) && value > 0
 }
+
+// Schéma pour la création d'un utilisateur via l'admin
+export const createUserSchema = z.object({
+  prenom: z.string().min(1, "Le prénom est requis").max(50, "Le prénom ne peut pas dépasser 50 caractères"),
+  nom: z.string().min(1, "Le nom est requis").max(50, "Le nom ne peut pas dépasser 50 caractères"),
+  login: z.string().min(3, "Le login doit contenir au moins 3 caractères").max(50, "Le login est trop long"),
+  password: z.string().min(6, "Le mot de passe doit contenir au moins 6 caractères"),
+  role: z.enum(['admin', 'commercial', 'maitre_oeuvre']),
+})
+
+export type CreateUserFormData = z.infer<typeof createUserSchema>

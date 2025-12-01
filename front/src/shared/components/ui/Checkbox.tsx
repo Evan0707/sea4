@@ -67,7 +67,7 @@ const Checkbox: React.FC<CheckboxProps> = ({
       </div>
       <label 
         htmlFor={inputId}
-        className="cursor-pointer select-none text-[14px]"
+        className="cursor-pointer text-text-primary select-none text-[14px]"
       >
         {label}
       </label>

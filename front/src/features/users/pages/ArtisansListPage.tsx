@@ -4,6 +4,9 @@ import { H1, Text } from '@/shared/components/ui/Typography';
 import { Search, ArrowDown, ArrowUp } from '@mynaui/icons-react';
 import { useState, useEffect } from 'react';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
+import { useToast } from '@/shared/hooks/useToast';
+import Button from '@/shared/components/ui/Button';
 
 interface Artisan {
   adresseArtisan: string;
@@ -12,6 +15,7 @@ interface Artisan {
   prenomArtisan: string;
   villeArtisan: string;
   noArtisan: number;
+  etapes?: { noEtape: number; nomEtape: string }[];
 }
 
 export const ArtisansListPage = () => {
@@ -20,6 +24,10 @@ export const ArtisansListPage = () => {
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [artisans, setArtisans] = useState<Artisan[]>([]);
   const [loading, setLoading] = useState(false);
+
+  const navigate = useNavigate();
+
+  const toast = useToast();
 
   // Debounce pour la recherche
   useEffect(() => {
@@ -52,12 +60,12 @@ export const ArtisansListPage = () => {
         adresseArtisan: a['"adresseArtisan"'] ?? a.adresseArtisan,
         cpArtisan: a['"cpArtisan"'] ?? a.cpArtisan,
         villeArtisan: a['"villeArtisan"'] ?? a.villeArtisan,
+        etapes: a.etapes ?? [],
       }));
       setArtisans(cleanArtisans);
-      console.log(cleanArtisans);
       
     } catch (error) {
-      console.error('Erreur lors du chargement des artisans:', error);
+      toast.addToast('Erreur lors du chargement des artisans', 'error');
     } finally {
       setLoading(false);
     }
@@ -76,14 +84,13 @@ export const ArtisansListPage = () => {
         if (error.response?.status === 400) {
           if (error.response.data?.noChantier) {
             const chantierIds = error.response.data.noChantier.join(', ');
-            alert(`${error.response.data.message}\nChantiers concernés : ${chantierIds}`);
+            toast.addToast(`${error.response.data.message}\nChantiers concernés : ${chantierIds}`, 'error');
           } else {
-            alert(error.response.data.message);
+            toast.addToast(error.response.data.message, 'error');
           }
         } else {
-          console.error('Erreur lors de la suppression de l\'artisan:', error);
-          const detailedError = error.response?.data?.error ? `\nDétails: ${error.response.data.error}` : '';
-          alert(`${error.response?.data?.message || 'Erreur lors de la suppression de l\'artisan'}${detailedError}`);
+          toast.addToast('Erreur lors de la suppression de l\'artisan', 'error');
+          // const detailedError = error.response?.data?.error ? `\nDétails: ${error.response.data.error}` : '';
         }
       }
     }
@@ -91,18 +98,25 @@ export const ArtisansListPage = () => {
 
   return (
     <div className="p-8 h-screen flex flex-col">
-      <H1 className="mb-6">Artisans</H1>
+      
+        <H1 className="mb-6">Artisans</H1>
 
-      <Input
-        name='search'
-        width='w-[350px]'
-        className='mb-5'
-        type='text'
-        rightIcon={<Search className='text-placeholder' />}
-        value={search}
-        onChange={(e) => setSearch(e.target.value)}
-        placeholder="Rechercher par nom, prénom ou ville..."
-      />
+
+      <div className='flex flex-row justify-between items-center'>
+        <Input
+          name='search'
+          width='w-[350px]'
+          className='mb-5'
+          type='text'
+          leftIcon={<Search className='text-placeholder' />}
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder="Rechercher par nom, prénom ou ville..."
+        />
+        <Button variant='Primary' onClick={() => navigate('/admin/artisans/new')}>
+            Nouveau
+          </Button>
+      </div>
 
       {/* Frame container */}
       <div className="bg-bg-secondary rounded-lg border border-border overflow-hidden flex flex-col flex-1">
@@ -132,7 +146,7 @@ export const ArtisansListPage = () => {
             <ArtisanItem
               key={artisan.noArtisan}
               {...artisan}
-              onEdit={() => console.log('Éditer artisan', artisan.noArtisan)}
+              onEdit={() => navigate(`/admin/artisans/${artisan.noArtisan}/edit`)}
               onDelete={() => handleDelete(artisan.noArtisan)}
             />
           )) : (

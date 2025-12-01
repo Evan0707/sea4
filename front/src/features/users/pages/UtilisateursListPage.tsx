@@ -4,11 +4,15 @@ import { H1, Text } from '@/shared/components/ui/Typography';
 import { Search, ArrowDown, ArrowUp } from '@mynaui/icons-react';
 import { useState, useEffect } from 'react';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
+import Button from '@/shared/components/ui/Button';
 
 interface Utilisateur {
   noUtilisateur: number;
   login: string;
-  nomRole: 'admin' | 'commercial' | 'maitre_oeuvre';
+  nom?: string | null;
+  prenom?: string | null;
+  role?: 'admin' | 'commercial' | 'maitre_oeuvre' | string | null;
 }
 
 export const UtilisateursListPage = () => {
@@ -17,6 +21,7 @@ export const UtilisateursListPage = () => {
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [utilisateurs, setUtilisateurs] = useState<Utilisateur[]>([]);
   const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
   // Debounce pour la recherche
   useEffect(() => {
@@ -34,7 +39,7 @@ export const UtilisateursListPage = () => {
   const fetchUtilisateurs = async () => {
     setLoading(true);
     try {
-      const response = await axios.get('http://localhost:8000/api/utilisateur', {
+      const response = await axios.get('http://localhost:8000/api/utilisateurs', {
         params: {
           search: debouncedSearch,
           sortOrder,
@@ -67,28 +72,34 @@ export const UtilisateursListPage = () => {
     <div className="p-8 h-screen flex flex-col">
       <H1 className="mb-6">Utilisateurs</H1>
 
-      <Input
+      <div className='flex flex-row justify-between items-center'>
+        <Input
         name='search'
         width='w-[350px]'
         className='mb-5'
         type='text'
-        rightIcon={<Search className='text-placeholder' />}
+        leftIcon={<Search className='text-placeholder' />}
         value={search}
         onChange={(e) => setSearch(e.target.value)}
         placeholder="Rechercher par login..."
       />
+      <Button variant='Primary' onClick={() => navigate('/admin/utilisateurs/new')}>Nouveau</Button>
+      </div>
 
       {/* Frame container */}
       <div className="bg-bg-secondary rounded-lg border border-border overflow-hidden flex flex-col flex-1">
 
         <div className="flex items-center justify-between py-3 pl-5 pr-15 border-b border-border flex-shrink-0 bg-bg-secondary">
-          <button
-            onClick={toggleSort}
-            className="w-[300px] flex items-center gap-1 hover:text-primary transition-colors"
-          >
-            <Text className="font-semibold text-sm">Login</Text>
-            {sortOrder === 'asc' ? <ArrowUp strokeWidth={2} className="w-4 h-4 text-placeholder" /> : <ArrowDown strokeWidth={2} className="w-4 h-4 text-placeholder" />}
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={toggleSort}
+              className="w-[200px] flex items-center gap-1 hover:text-primary transition-colors"
+            >
+              <Text className="font-semibold text-sm">Login</Text>
+              {sortOrder === 'asc' ? <ArrowUp strokeWidth={2} className="w-4 h-4 text-placeholder" /> : <ArrowDown strokeWidth={2} className="w-4 h-4 text-placeholder" />}
+            </button>
+            <Text className="w-[300px] font-semibold text-sm">Nom</Text>
+          </div>
           <Text className="w-[200px] font-semibold text-sm">Rôle</Text>
         </div>
 
@@ -96,11 +107,11 @@ export const UtilisateursListPage = () => {
         <div className="divide-y relative divide-border bg-bg-primary overflow-y-auto flex-1">
           {loading ? (
             <>
-              <UtilisateurItem loading={true} login='load' nomRole='admin' />
-              <UtilisateurItem loading={true} login='load' nomRole='admin' />
-              <UtilisateurItem loading={true} login='load' nomRole='admin' />
-              <UtilisateurItem loading={true} login='load' nomRole='admin' />
-              <UtilisateurItem loading={true} login='load' nomRole='admin' />
+              <UtilisateurItem loading={true} login='load' nom='load' prenom='load' role='admin' />
+              <UtilisateurItem loading={true} login='load' nom='load' prenom='load' role='admin' />
+              <UtilisateurItem loading={true} login='load' nom='load' prenom='load' role='admin' />
+              <UtilisateurItem loading={true} login='load' nom='load' prenom='load' role='admin' />
+              <UtilisateurItem loading={true} login='load' nom='load' prenom='load' role='admin' />
             </>
           ) : utilisateurs.length > 0 ? utilisateurs.map((utilisateur) => (
             <UtilisateurItem

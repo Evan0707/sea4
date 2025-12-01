@@ -31,7 +31,7 @@ class Artisan
     #[ORM\Column(name: 'villeArtisan', length: 50, nullable: true)]
     private ?string $ville = null;
 
-    #[ORM\ManyToMany(targetEntity: Etape::class)]
+    #[ORM\ManyToMany(targetEntity: Etape::class, inversedBy: 'artisansQualifies')]
     #[ORM\JoinTable(name: 'etre_qualifie_pour', schema: 'batiparti')]
     #[ORM\JoinColumn(name: 'noArtisan', referencedColumnName: 'noArtisan')]
     #[ORM\InverseJoinColumn(name: 'noEtape', referencedColumnName: 'noEtape')]

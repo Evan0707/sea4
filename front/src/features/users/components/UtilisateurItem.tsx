@@ -6,7 +6,9 @@ import Skeleton from '@/shared/components/ui/Skeleton';
 interface UtilisateurItemProps {
   noUtilisateur?: number;
   login: string;
-  nomRole: 'admin' | 'commercial' | 'maitre_oeuvre';
+  nom?: string | null;
+  prenom?: string | null;
+  role?: 'admin' | 'commercial' | 'maitre_oeuvre' | string | null;
   onEdit?: () => void;
   onDelete?: () => void;
   loading?: boolean;
@@ -15,7 +17,9 @@ interface UtilisateurItemProps {
 const UtilisateurItem = ({
   noUtilisateur,
   login,
-  nomRole,
+  nom,
+  prenom,
+  role,
   onEdit,
   onDelete,
   loading = false,
@@ -69,15 +73,15 @@ const UtilisateurItem = ({
       {
         !loading ?
           <>
-            <Text className="truncate w-[300px] font-medium">
-              {login}
-            </Text>
-            <Text className="truncate w-[200px] text-placeholder">
-              {getRoleLabel(nomRole)}
-            </Text>
+            <div className="flex items-center gap-2">
+              <Text className="truncate w-[200px] font-medium">{login}</Text>
+              <Text className="truncate w-[300px] text-placeholder">{(nom || '') + (prenom ? (' ' + prenom) : '')}</Text>
+            </div>
+            <Text className="truncate w-[200px] text-placeholder">{getRoleLabel(role ?? '')}</Text>
           </>
           :
           <>
+            <Skeleton className="w-[200px] h-[24px]" />
             <Skeleton className="w-[300px] h-[24px]" />
             <Skeleton className="w-[200px] h-[24px]" />
           </>

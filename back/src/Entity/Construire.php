@@ -10,7 +10,7 @@ use Doctrine\ORM\Mapping as ORM;
 class Construire
 {
     #[ORM\Id]
-    #[ORM\ManyToOne(targetEntity: Modele::class)]
+    #[ORM\ManyToOne(targetEntity: Modele::class, inversedBy: 'constructions')]
     #[ORM\JoinColumn(name: 'noModele', referencedColumnName: 'noModele', nullable: false)]
     private ?Modele $noModele = null;
 

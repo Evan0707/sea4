@@ -3,6 +3,7 @@
 namespace App\Entity;
 
 use App\Repository\UtilisateurRepository;
+use App\Entity\Admin;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
@@ -30,6 +31,9 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
 
     #[ORM\OneToOne(mappedBy: 'utilisateur', cascade: ['persist', 'remove'], targetEntity: Commercial::class)]
     private ?Commercial $commercial = null;
+
+    #[ORM\OneToOne(mappedBy: 'utilisateur', cascade: ['persist', 'remove'], targetEntity: Admin::class)]
+    private ?Admin $admin = null;
 
     public function getId(): ?int
     {
@@ -118,6 +122,24 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
         // Always include a base role
         $roles[] = 'ROLE_USER';
         return array_unique($roles);
+    }
+
+    public function getAdmin(): ?Admin
+    {
+        return $this->admin;
+    }
+
+    public function setAdmin(?Admin $admin): static
+    {
+        if ($admin === null && $this->admin !== null) {
+            $this->admin->setUtilisateur(null);
+        }
+        if ($admin !== null && $admin->getUtilisateur() !== $this) {
+            $admin->setUtilisateur($this);
+        }
+        $this->admin = $admin;
+
+        return $this;
     }
 
     public function eraseCredentials(): void

@@ -35,8 +35,8 @@ class FactureArtisan
 
     #[ORM\ManyToMany(targetEntity: EtapeChantier::class, inversedBy: 'facturesArtisan')]
     #[ORM\JoinTable(name: 'associer', schema: 'batiparti')]
-    #[ORM\JoinColumn(name: 'noFacture', referencedColumnName: 'noFacture')]
-    #[ORM\InverseJoinColumn(name: 'noEtapeChantier', referencedColumnName: 'noEtapeChantier')]
+    #[ORM\JoinColumn(name: 'noFacture', referencedColumnName: 'noFacture', onDelete: 'CASCADE')]
+    #[ORM\InverseJoinColumn(name: 'noEtapeChantier', referencedColumnName: 'noEtapeChantier', onDelete: 'CASCADE')]
     private Collection $etapeChantiers;
 
     public function __construct()

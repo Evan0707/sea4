@@ -31,7 +31,7 @@ class Client
     #[ORM\Column(name: 'villeClient', length: 50, nullable: true)]
     private ?string $ville = null;
 
-    #[ORM\OneToMany(mappedBy: 'client', targetEntity: Chantier::class)]
+    #[ORM\OneToMany(mappedBy: 'client', targetEntity: Chantier::class, orphanRemoval: true, cascade: ['remove'])]
     private Collection $chantiers;
 
     public function __construct()

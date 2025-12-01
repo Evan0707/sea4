@@ -18,7 +18,8 @@ export type SelectProps = {
   register?: UseFormRegisterReturn
   onChange?: (value: string) => void
   value?: string
-  defaultValue?: string
+  defaultValue?: string,
+  size?: 'small' | 'default'
 }
 
 const Select: React.FC<SelectProps> = ({
@@ -32,6 +33,7 @@ const Select: React.FC<SelectProps> = ({
   onChange,
   value,
   defaultValue,
+  size = 'default'
 }) => {
   const [isOpen, setIsOpen] = useState(false)
   const [selectedOption, setSelectedOption] = useState<Option | null>(() => {
@@ -75,18 +77,18 @@ const Select: React.FC<SelectProps> = ({
   }
 
   return (
-    <div className={`${className ?? ''} relative`} ref={dropdownRef}>
-      <Label className='m-1 font-bold text-[14px] text-text-primary' htmlFor={inputId}>{label}</Label>
+    <div className={`${className ?? ''} relative ${size === 'small' ? 'flex items-center' : ''}`} ref={dropdownRef}>
+      <Label className='m-1 font-bold text-text-primary' weight="bold" htmlFor={inputId}>{label}</Label>
       <div 
         onClick={() => setIsOpen(!isOpen)}
         className={`border-[1.5px] h-[40px] cursor-pointer ${hasError ? 'border-red' : 'border-border'} px-3 flex items-center rounded-[6px] hover:border-primary focus-within:border-primary focus-within:outline-[1px] outline-border justify-between mt-1 mb-0 min-h-[38px]`}
       >
-        <div className='flex flex-row items-center flex-1 py-1'>
-          <span className={`flex-1 ${!selectedOption ? 'text-placeholder' : 'text-text-primary'}`}>
+        <div className='flex flex-row items-center w-full flex-1 py-1'>
+          <span className={`flex-1 overflow-hidden w-full whitespace-nowrap ${!selectedOption ? 'text-placeholder' : 'text-text-primary'}`}>
             {selectedOption ? selectedOption.label : placeholder}
           </span>
         </div>
-        <ChevronDown className={`transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+        <ChevronDown className={`transition-transform text-text-primary ${isOpen ? 'rotate-180' : ''}`} />
         {hasError && <DangerCircle aria-hidden className='text-red ml-2' />}
       </div>
       

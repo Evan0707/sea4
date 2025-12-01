@@ -18,7 +18,7 @@ class EtapeChantier
     private ?int $id = null;
 
     #[ORM\ManyToOne(inversedBy: 'etapeChantiers')]
-    #[ORM\JoinColumn(name: 'noChantier', referencedColumnName: 'noChantier')]
+    #[ORM\JoinColumn(name: 'noChantier', referencedColumnName: 'noChantier', onDelete: 'CASCADE')]
     private ?Chantier $chantier = null;
 
     #[ORM\ManyToOne(inversedBy: 'etapeChantiers')]
@@ -51,8 +51,8 @@ class EtapeChantier
 
     #[ORM\ManyToMany(targetEntity: Artisan::class, inversedBy: 'etapeChantiers')]
     #[ORM\JoinTable(name: 'confier', schema: 'batiparti')]
-    #[ORM\JoinColumn(name: 'noEtapeChantier', referencedColumnName: 'id')]
-    #[ORM\InverseJoinColumn(name: 'noArtisan', referencedColumnName: 'id')]
+    #[ORM\JoinColumn(name: 'noEtapeChantier', referencedColumnName: 'noEtapeChantier', onDelete: 'CASCADE')]
+    #[ORM\InverseJoinColumn(name: 'noArtisan', referencedColumnName: 'noArtisan', onDelete: 'CASCADE')]
     private Collection $artisans;
 
     #[ORM\ManyToMany(targetEntity: FactureArtisan::class, mappedBy: 'etapeChantiers')]

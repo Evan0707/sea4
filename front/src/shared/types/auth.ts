@@ -4,6 +4,11 @@ export interface User {
   token: string;
 }
 
+export interface UserProfile extends User {
+  nom?: string | null;
+  prenom?: string | null;
+}
+
 export interface JWTPayload {
   username: string;
   roles: string[];

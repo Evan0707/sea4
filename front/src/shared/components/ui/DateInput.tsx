@@ -22,6 +22,7 @@ export type DateInputProps = {
   message?: string
   min?: string
   max?: string
+  size?: 'small' | 'default'
 }
 
 const DateInput: React.FC<DateInputProps> = ({
@@ -38,6 +39,7 @@ const DateInput: React.FC<DateInputProps> = ({
   message = '',
   min,
   max,
+  size = 'default'
 }) => {
   const [selectedDate, setSelectedDate] = useState<Date | null>(
     value ? new Date(value) : defaultValue ? new Date(defaultValue) : null
@@ -71,9 +73,9 @@ const DateInput: React.FC<DateInputProps> = ({
   const maxDate = max ? new Date(max) : undefined
 
   return (
-    <div className={`${className ?? ''} relative w-full`}>
+    <div className={`${className ?? ''} relative w-full ${size === 'small' ? 'flex-row max-w-[300px]' : ''}`}>
       <div className='flex items-center'>
-        <Label className='m-1 font-bold text-[14px] text-text-primary' htmlFor={inputId}>
+        <Label weight='bold' className='m-1 whitespace-nowrap text-[14px] text-text-primary' htmlFor={inputId}>
           {label}
         </Label>
         {info && (
@@ -99,7 +101,7 @@ const DateInput: React.FC<DateInputProps> = ({
           maxDate={maxDate}
           aria-invalid={hasError}
           aria-describedby={describedBy}
-          className="focus:outline-none h-[38px] px-[0px] ml-1 flex-1 bg-transparent w-full"
+          className={`focus:outline-none h-[38px] px-[0px] ml-1 flex-1 bg-transparent w-full placeholder-placeholder`}
           calendarClassName="custom-datepicker"
           showPopperArrow={false}
           onBlur={reg.onBlur}
