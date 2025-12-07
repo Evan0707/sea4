@@ -65,9 +65,9 @@ const CompleteDossierPage: React.FC = () => {
           montantTheorique: e.montantTheoriqueFacture ?? e.montantFacture ?? 0,
           reservee: e.reservee ?? false,
           openSupp: false,
-          supplement: null,
-          reduction: null,
-          supplementDesc: null,
+          supplement: e.reducSuppl && parseFloat(e.reducSuppl) > 0 ? parseFloat(e.reducSuppl) : null,
+          reduction: e.reducSuppl && parseFloat(e.reducSuppl) < 0 ? Math.abs(parseFloat(e.reducSuppl)) : null,
+          supplementDesc: e.descriptionReducSuppl || null,
         } as EtapeState));
 
         setEtapes(etapesState);
@@ -102,12 +102,39 @@ const CompleteDossierPage: React.FC = () => {
   };
 
   const handleSubmit = async () => {
+    try {
+      // Vérifier que tous les champs Artisan et Date théorique sont remplis
+      const etapesIncompletes = etapes.filter(e => !e.artisanId || !e.dateTheorique);
+      
+      if (etapesIncompletes.length > 0) {
+        addToast(`${etapesIncompletes.length} étape(s) n'ont pas d'artisan ou de date théorique`, 'error');
+        return;
+      }
 
-    console.log('Submitting completion for dossier', id, { etapes });
-    addToast('Changements enregistrés localement (simulateur)', 'success');
+      // Préparer les données pour l'API
+      const etapesPayload = etapes.map((e) => ({
+        noEtape: e.noEtape,
+        artisanId: e.artisanId ?? null,
+        dateTheorique: e.dateTheorique ?? null,
+        montantTheorique: e.montantTheorique ?? 0,
+        reservee: e.reservee ?? false,
+        supplement: e.supplement ?? null,
+        reduction: e.reduction ?? null,
+        supplementDesc: e.supplementDesc ?? null,
+      }));
 
-    // If you have a backend endpoint, you can POST here. Example:
-    // await axios.post(`/api/dossiers/${id}/complete`, { etapes }, { headers: { Authorization: `Bearer ${user?.token}` } })
+      console.log('Envoi des données:', etapesPayload);
+
+      await axios.put(`http://localhost:8000/api/chantiers/${id}/etapes`, {
+        etapes: etapesPayload,
+      });
+
+      addToast('Changements enregistrés avec succès', 'success');
+      navigate(-1);
+    } catch (error) {
+      console.error('Erreur lors de la sauvegarde:', error);
+      addToast('Erreur lors de l\'enregistrement des changements', 'error');
+    }
   };
 
   if (loading) {

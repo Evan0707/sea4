@@ -78,8 +78,8 @@ export const Login = () => {
         <p className="text-placeholder text-center text-lg mb-8">Autentifiez -vous à Bati’Parti</p>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
           <Input
-            label="Email"
-            type="email"
+            label="Login"
+            type="text"
             name="email"
             register={register("email")}
             error={errors.email?.message}

@@ -98,6 +98,7 @@ const EtapeItem: React.FC<Props> = ({ e, artisans, onChange }) => {
                     label='Description'
                     name={`supp-desc-${e.noEtape}`}
                     type='text'
+                    value={e.supplementDesc ?? ''}
                     onChange={(ev) => update({ supplementDesc: ev.target.value || null })}
                     placeholder="Description du supplément / réduction"
                 />

@@ -5,6 +5,7 @@ import { Search, ArrowDown, ArrowUp } from '@mynaui/icons-react';
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { useToast } from '@/shared/hooks/useToast';
 
 interface Dossier {
   noChantier: number;
@@ -24,6 +25,7 @@ export const MesDossiersPage = () => {
   const [dossiers, setDossiers] = useState<Dossier[]>([]);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const { addToast } = useToast();
 
   // Debounce pour la recherche
   useEffect(() => {
@@ -57,6 +59,21 @@ export const MesDossiersPage = () => {
 
   const toggleSort = () => {
     setSortOrder(prev => prev === 'asc' ? 'desc' : 'asc');
+  };
+
+  const handleDelete = async (noChantier: number) => {
+    if (!confirm('Êtes-vous sûr de vouloir supprimer ce chantier ?')) {
+      return;
+    }
+
+    try {
+      await axios.delete(`http://localhost:8000/api/chantiers/${noChantier}`);
+      addToast('Chantier supprimé avec succès', 'success');
+      fetchDossiers();
+    } catch (error) {
+      console.error('Erreur lors de la suppression:', error);
+      addToast('Erreur lors de la suppression du chantier', 'error');
+    }
   };
 
   return (
@@ -105,7 +122,7 @@ export const MesDossiersPage = () => {
               key={dossier.noChantier}
               {...dossier}
               onEdit={() => navigate(`/maitre-doeuvre/chantiers/${dossier.noChantier}/completer`)}
-              onDelete={() => console.log('Supprimer dossier', dossier.noChantier)}
+              onDelete={() => handleDelete(dossier.noChantier)}
             />
           )) : (
             <div className="flex items-center justify-center h-full">

@@ -381,6 +381,8 @@ class DossierController extends AbstractController
                 'dateFin' => $ec->getDateFin()?->format('Y-m-d'),
                 'statutEtape' => $ec->getStatut(),
                 'noArtisan' => $artisan ? $artisan->getId() : null,
+                'reducSuppl' => $ec->getReductionSupplementaire() !== null ? (float) $ec->getReductionSupplementaire() : null,
+                'descriptionReducSuppl' => $ec->getDescriptionReductionSupplementaire(),
             ];
         }
 
