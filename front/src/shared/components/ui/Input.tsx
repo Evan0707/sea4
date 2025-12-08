@@ -20,6 +20,8 @@ export type InputProps = {
   info?:boolean;
   message?:string;
   width?:string;
+  onFocus?: () => void;
+
 }
 
 const Input: React.FC<InputProps> = ({
@@ -37,7 +39,8 @@ const Input: React.FC<InputProps> = ({
   defaultValue,
   info=false,
   message='',
-  width='w-full'
+  width='w-full',
+  onFocus
 }) => {
   const hasError = Boolean(error)
   const inputId = name || label
@@ -78,6 +81,7 @@ const Input: React.FC<InputProps> = ({
             aria-describedby={describedBy}
             className={`focus:outline-none h-[38px] ${leftIcon?'px-[10px]':'px-[0px]'} text-text-primary ml-1 flex-1 bg-transparent w-full placeholder-placeholder`}
             onChange={mergedOnChange}
+            onFocus={onFocus}
             {...controlProps}
             name={reg.name ?? name}
             onBlur={reg.onBlur}
