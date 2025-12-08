@@ -318,7 +318,7 @@ class DossierController extends AbstractController
             ->where('ch.maitreOeuvre = :moe')
             ->andWhere('ch.statut IN (:statuses)')
             ->setParameter('moe', $maitre->getId())
-            ->setParameter('statuses', ['À compléter', 'Complété']);
+            ->setParameter('statuses', ['À compléter', 'À venir']);
 
         if (!empty($search)) {
             $qb->andWhere(

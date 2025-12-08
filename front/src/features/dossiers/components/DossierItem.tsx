@@ -78,7 +78,12 @@ const DossierItem = ({
             </Text>
             <Text className="truncate w-[100px] font-medium font-mono tabular-nums">{formatDate(start)}</Text>
             <div className="w-[120px] flex justify-end items-center gap-2">
-              <Status label={status} />
+              {
+                status=='À venir'?
+                  <Status label='À compléter' />
+                :
+                  <Status label={status} />
+              }
             </div>
           </>
           :
