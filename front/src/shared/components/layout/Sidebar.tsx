@@ -56,7 +56,7 @@ export function Sidebar({ user, items, onLogout, mobileOpen = false, onClose }: 
   return (
     <>
       {/* Desktop sidebar (md+) */}
-      <aside className={`${collapsed ? 'w-20' : 'w-64'} hidden lg:flex bg-bg-secondary h-screen sticky top-0 flex-col border-r-1 border-border text-white p-3 transition-all duration-300 overflow-y-auto overflow-x-hidden`}> 
+      <aside className={`${collapsed ? 'w-20' : 'w-64'} hidden lg:flex bg-bg-secondary h-screen sticky top-0 flex-col border-r border-border text-white p-3 transition-all duration-300 overflow-y-auto overflow-x-hidden`}> 
         <div className={`mb-8 absolute flex items-center w-full mt-2 ${collapsed ? 'justify-center left-0' : 'left-5'}`}>
         <img src={Logo} width={35} className={collapsed ? '' : 'mr-3'} />
         {!collapsed && <H2 className='text-xl ml-3' weight='bold'>Bati'Parti</H2>}

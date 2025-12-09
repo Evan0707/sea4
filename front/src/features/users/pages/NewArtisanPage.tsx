@@ -32,7 +32,7 @@ const NewArtisanPage = () => {
       };
       if (etapes.length) payload.etapes = etapes;
 
-      await axios.post('http://localhost:8000/api/artisan', payload);
+      await axios.post('/artisan', payload);
       alert('Artisan créé');
       navigate(-1);
     } catch (err: any) {

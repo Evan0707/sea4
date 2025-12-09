@@ -59,18 +59,12 @@ export default function NewUtilisateurPage() {
     }
   }
 
-    {/* Ajouter un toast*/}
-    const tipToast = () => {
-      const tips = "Mettez un mot de passe fort s'il vous plaît !"
-      addToast(tips, 'info');
-      }
+  {/* Ajouter un toast*/}
+  const tipToast = () => {
+    const tips = "Mettez un mot de passe fort s'il vous plaît !"
+    addToast(tips, 'info');
+  }
     
-      {/* Ajouter un pop-up comme sur le filtre */}
-      const tipPopoverPassword = () => {
-        
-      }
-    
-
   return (
     <div className="p-8 h-screen flex flex-col">
       <H1 className="mb-6">Nouvel utilisateur</H1>

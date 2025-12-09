@@ -80,14 +80,14 @@ const ArtisanItem = ({
               {etapes && etapes.length > 0 && (
                 <div className="flex items-center gap-2 mt-1">
                   {etapes.slice(0,2).map(e => (
-                    <div key={e.noEtape} className="text-sm bg-bg-secondary border border-border rounded-md px-2 py-0.5 text-text-primary">
+                    <Text variant='small' key={e.noEtape} className=" bg-bg-secondary border border-border rounded-md px-2 py-0.5 truncate max-w-[150px] ">
                       {e.nomEtape}
-                    </div>
+                    </Text>
                   ))}
                   {etapes.length > 2 && (
-                    <div className="w-6 h-6 rounded-full bg-primary text-white flex items-center justify-center text-xs">
+                    <Text variant='small' className="w-6 h-6 rounded-full border-border border bg-bg-secondary flex items-center justify-center">
                       +{etapes.length - 2}
-                    </div>
+                    </Text>
                   )}
                 </div>
               )}
@@ -99,8 +99,8 @@ const ArtisanItem = ({
           </>
           :
           <>
-            <Skeleton className="w-[200px] h-[24px]" />
-            <Skeleton className="w-[400px] h-[24px]" />
+            <Skeleton className="w-[200px] h-6" />
+            <Skeleton className="w-[400px] h-6" />
           </>
       }
 
@@ -132,11 +132,10 @@ const ArtisanItem = ({
                 <span className="text-sm text-text-primary">Éditer</span>
               </button>
               <ConfirmPopover title='Supprimer artisan' message='Êtes-vous sûr de vouloir supprimer cet artisan ? Cette action est irréversible.' onConfirm={() => {
-                setIsPopoverOpen(false);
                 onDelete?.();
+                setIsPopoverOpen(false);
               }} onCancel={() => navigate(-1)} >
                 <button
-                 
                   className="w-full rounded px-4 py-2 text-left hover:bg-red/15 text-error flex items-center gap-2 transition-colors"
                 >
                   <Trash className="w-4 h-4 text-red" />

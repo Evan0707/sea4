@@ -15,7 +15,7 @@ const Status = ({label}:statusProps) => {
   return (
     <div className='flex items-center'>
         {label=='À compléter'&&<DangerCircle size={24} className='text-red mr-1'/>}
-        <p className={`h-[24px] text-[12px] flex items-center justify-center w-[90px] rounded-2xl ${variant}`}>{label}</p>
+        <p className={`h-6 text-[12px] flex items-center justify-center w-[90px] rounded-2xl ${variant}`}>{label}</p>
     </div>
   )
 }

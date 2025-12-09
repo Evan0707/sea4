@@ -81,7 +81,7 @@ const Select: React.FC<SelectProps> = ({
       <Label className='m-1 font-bold text-text-primary' weight="bold" htmlFor={inputId}>{label}</Label>
       <div 
         onClick={() => setIsOpen(!isOpen)}
-        className={`border-[1.5px] h-[40px] cursor-pointer ${hasError ? 'border-red' : 'border-border'} px-3 flex items-center rounded-[6px] hover:border-primary focus-within:border-primary focus-within:outline-[1px] outline-border justify-between mt-1 mb-0 min-h-[38px]`}
+        className={`border-[1.5px] h-10 cursor-pointer ${hasError ? 'border-red' : 'border-border'} px-3 flex items-center rounded-md hover:border-primary focus-within:border-primary focus-within:outline-[1px] outline-border justify-between mt-1 mb-0 min-h-[38px]`}
       >
         <div className='flex flex-row items-center w-full flex-1 py-1'>
           <span className={`flex-1 overflow-hidden w-full whitespace-nowrap ${!selectedOption ? 'text-placeholder' : 'text-text-primary'}`}>
@@ -113,7 +113,7 @@ const Select: React.FC<SelectProps> = ({
 
       {/* Custom dropdown */}
       {isOpen && (
-        <div className="absolute z-50 w-full mt-1 bg-bg-primary border border-border rounded-[6px] shadow-lg max-h-60 overflow-auto">
+        <div className="absolute z-50 w-full mt-1 bg-bg-primary border border-border rounded-md shadow-lg max-h-60 overflow-auto">
           {options.map((option) => (
             <div
               key={option.value}

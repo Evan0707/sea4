@@ -136,19 +136,19 @@ const NumInput: React.FC<NumInputProps> = ({
   return (
     <div className={`${className ?? ''} ${size === 'small' ? 'flex items-center' : ''}`}>
       <label className='m-1 font-bold text-[14px]' htmlFor={inputId}>{label}</label>
-      <div className={`border-[1.5px] ${hasError ? 'border-red' : 'border-border'} flex items-center rounded-[6px] focus-within:border-primary focus-within:outline-[1px] outline-border justify-between mt-1 mb-0`}>
+      <div className={`border-[1.5px] ${hasError ? 'border-red' : 'border-border'} flex items-center rounded-md focus-within:border-primary focus-within:outline-[1px] outline-border justify-between mt-1 mb-0`}>
         <div className="flex flex-col border-l border-border">
           <button
             type="button"
             onClick={increment}
-            className="flex items-center justify-center px-2 py-0 hover:bg-gray-100 rounded-tr-[4px]"
+            className="flex items-center justify-center px-2 py-0 hover:bg-gray-100 rounded-tr-sm"
           >
             <ChevronUp className="w-5 h-5 text-placeholder" />
           </button>
           <button
             type="button"
             onClick={decrement}
-            className="flex items-center justify-center px-2 py-0 hover:bg-gray-100 rounded-br-[4px] "
+            className="flex items-center justify-center px-2 py-0 hover:bg-gray-100 rounded-br-sm "
           >
             <ChevronDown className="w-5 h-5 text-placeholder" />
           </button>

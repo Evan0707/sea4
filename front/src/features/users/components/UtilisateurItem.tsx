@@ -75,15 +75,15 @@ const UtilisateurItem = ({
           <>
             <div className="flex items-center gap-2">
               <Text className="truncate w-[200px] font-medium">{login}</Text>
-              <Text className="truncate w-[300px] text-placeholder">{(nom || '') + (prenom ? (' ' + prenom) : '')}</Text>
             </div>
+            <Text className="truncate w-[300px] text-placeholder">{(nom || '') + (prenom ? (' ' + prenom) : '')}</Text>
             <Text className="truncate w-[200px] text-placeholder">{getRoleLabel(role ?? '')}</Text>
           </>
           :
           <>
-            <Skeleton className="w-[200px] h-[24px]" />
-            <Skeleton className="w-[300px] h-[24px]" />
-            <Skeleton className="w-[200px] h-[24px]" />
+            <Skeleton className="w-[200px] h-6" />
+            <Skeleton className="w-[300px] h-6" />
+            <Skeleton className="w-[200px] h-6" />
           </>
       }
 

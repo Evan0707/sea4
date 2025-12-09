@@ -78,8 +78,12 @@ export const ArtisansListPage = () => {
   const handleDelete = async (noArtisan: number) => {
     if (window.confirm('Êtes-vous sûr de vouloir supprimer cet artisan ?')) {
       try {
-        await axios.delete(`http://localhost:8000/api/artisan/${noArtisan}/delete`);
+        const data = await axios.delete(`http://localhost:8000/api/artisan/${noArtisan}/delete`);
         fetchArtisans();
+
+        console.log(data);
+        
+     
       } catch (error: any) {
         if (error.response?.status === 400) {
           if (error.response.data?.noChantier) {
@@ -121,7 +125,7 @@ export const ArtisansListPage = () => {
       {/* Frame container */}
       <div className="bg-bg-secondary rounded-lg border border-border overflow-hidden flex flex-col flex-1">
 
-        <div className="flex items-center justify-between py-3 pl-5 pr-15 border-b border-border flex-shrink-0 bg-bg-secondary">
+        <div className="flex items-center justify-between py-3 pl-5 pr-15 border-b border-border shrink-0 bg-bg-secondary">
           <button
             onClick={toggleSort}
             className="w-[200px] flex items-center gap-1 hover:text-primary transition-colors"
@@ -157,7 +161,7 @@ export const ArtisansListPage = () => {
         </div>
 
         {/* Nombre de résultats */}
-        <div className="py-2 px-5 border-t border-border bg-bg-secondary flex-shrink-0">
+        <div className="py-2 px-5 border-t border-border bg-bg-secondary shrink-0">
           <Text className="text-sm text-placeholder">
             {artisans.length} résultat{artisans.length > 1 ? 's' : ''}
           </Text>

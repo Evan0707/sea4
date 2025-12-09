@@ -70,7 +70,7 @@ const Input: React.FC<InputProps> = ({
           </Tooltip>
         }
       </div>
-        <div className={`border-[1px] ${hasError ? 'border-red' : 'border-border'} px-3 flex items-center rounded-[6px] focus-within:border-primary focus-within:outline-[1px] outline-border justify-between mt-1 mb-0 w-full`}>
+        <div className={`border ${hasError ? 'border-red' : 'border-border'} px-3 flex items-center rounded-md focus-within:border-primary focus-within:outline-[1px] outline-border justify-between mt-1 mb-0 w-full`}>
         <div className='flex flex-row items-center flex-1'>
           {leftIcon}
           <input
@@ -79,7 +79,7 @@ const Input: React.FC<InputProps> = ({
             placeholder={placeholder}
             aria-invalid={hasError}
             aria-describedby={describedBy}
-            className={`focus:outline-none h-[38px] ${leftIcon?'px-[10px]':'px-[0px]'} text-text-primary ml-1 flex-1 bg-transparent w-full placeholder-placeholder`}
+            className={`focus:outline-none h-[38px] ${leftIcon?'px-1.5':'px-0'} text-text-primary ml-1 flex-1 bg-transparent w-full placeholder-placeholder`}
             onChange={mergedOnChange}
             onFocus={onFocus}
             {...controlProps}
@@ -103,7 +103,7 @@ const Input: React.FC<InputProps> = ({
           {hasError && <DangerCircle aria-hidden={true} size={18} className='text-red' />}
       </div>
       {hasError && (
-        <p id={describedBy} className='text-red text-[13px] font-semibold ml-1 mt-1 absolute bottom-[-20px] left-0'>{error}</p>
+        <p id={describedBy} className='text-red text-[13px] font-semibold ml-1 mt-1 absolute bottom-5 left-0'>{error}</p>
       )}
     </div>
     </div>

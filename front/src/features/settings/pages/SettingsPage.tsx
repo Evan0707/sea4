@@ -85,7 +85,7 @@ export const SettingsPage = () => {
                         : 'border-border hover:border-primary/20'
                     }`}
                   >
-                    <img src={LIGHT} className={`box-border ${theme === 'light'&&'border-[2px] rounded-md border-bg-secondary'}`}/>
+                    <img src={LIGHT} className={`box-border ${theme === 'light'&&'border-2 rounded-md border-bg-secondary'}`}/>
                     {theme === 'light'&&
                       <div className='p-2 bg-primary rounded-[100%] absolute bottom-2 right-2'>
                         <Check className='text-white'/>
@@ -101,7 +101,7 @@ export const SettingsPage = () => {
                         : 'border-border hover:border-primary/20'
                     }`}
                   >
-                    <img src={DARK} className={`box-border ${theme === 'dark'&&'border-[2px] rounded-md border-bg-secondary'}`}/>
+                    <img src={DARK} className={`box-border ${theme === 'dark'&&'border-2 rounded-md border-bg-secondary'}`}/>
                     {theme === 'dark'&&
                       <div className='p-2 bg-primary rounded-[100%] absolute bottom-2 right-2'>
                         <Check className='text-white'/>
@@ -117,7 +117,7 @@ export const SettingsPage = () => {
                         : 'border-border hover:border-primary/20'
                     }`}
                   >
-                    <img src={SYSTEM} className={`box-border ${theme === 'system'&&'border-[2px] rounded-md border-bg-secondary'}`}/>
+                    <img src={SYSTEM} className={`box-border ${theme === 'system'&&'border-2 rounded-md border-bg-secondary'}`}/>
                     {theme === 'system'&&
                       <div className='p-2 bg-primary rounded-[100%] absolute bottom-2 right-2'>
                         <Check className='text-white'/>

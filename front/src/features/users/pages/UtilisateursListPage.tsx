@@ -89,7 +89,7 @@ export const UtilisateursListPage = () => {
       {/* Frame container */}
       <div className="bg-bg-secondary rounded-lg border border-border overflow-hidden flex flex-col flex-1">
 
-        <div className="flex items-center justify-between py-3 pl-5 pr-15 border-b border-border flex-shrink-0 bg-bg-secondary">
+        <div className="flex items-center justify-between py-3 pl-5 pr-15 border-b border-border shrink-0 bg-bg-secondary">
           <div className="flex items-center gap-2">
             <button
               onClick={toggleSort}
@@ -98,8 +98,8 @@ export const UtilisateursListPage = () => {
               <Text className="font-semibold text-sm">Login</Text>
               {sortOrder === 'asc' ? <ArrowUp strokeWidth={2} className="w-4 h-4 text-placeholder" /> : <ArrowDown strokeWidth={2} className="w-4 h-4 text-placeholder" />}
             </button>
-            <Text className="w-[300px] font-semibold text-sm">Nom</Text>
           </div>
+          <Text className="w-[300px] font-semibold text-sm">Nom</Text>
           <Text className="w-[200px] font-semibold text-sm">Rôle</Text>
         </div>
 
@@ -128,7 +128,7 @@ export const UtilisateursListPage = () => {
         </div>
 
         {/* Nombre de résultats */}
-        <div className="py-2 px-5 border-t border-border bg-bg-secondary flex-shrink-0">
+        <div className="py-2 px-5 border-t border-border bg-bg-secondary shrink-0">
           <Text className="text-sm text-placeholder">
             {utilisateurs.length} résultat{utilisateurs.length > 1 ? 's' : ''}
           </Text>

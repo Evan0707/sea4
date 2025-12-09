@@ -87,7 +87,7 @@ const ConfirmPopover = ({
         <>
           {/* Overlay assombri */}
           <div 
-            className={`fixed inset-0 bg-black/50 z-[99999] transition-opacity duration-200 ${
+            className={`fixed inset-0 bg-black/50 z-99999 transition-opacity duration-200 ${
               isAnimating && !isClosing ? 'opacity-100' : 'opacity-0'
             }`}
             onClick={closePopover}
@@ -95,7 +95,7 @@ const ConfirmPopover = ({
           
           {/* Popover centrée */}
           <div 
-            className="fixed inset-0 z-[99999] flex items-center justify-center"
+            className="fixed inset-0 z-99999 flex items-center justify-center"
             onClick={closePopover}
           >
             <div 

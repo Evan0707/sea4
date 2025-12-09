@@ -87,7 +87,7 @@ const DateInput: React.FC<DateInputProps> = ({
       <div
         className={`border-[1.5px] ${
           hasError ? 'border-red' : 'border-border'
-        } px-3 flex items-center rounded-[6px] focus-within:border-primary focus-within:outline-[1px] text-text-primary outline-border justify-between mt-1 mb-0 w-full`}
+        } px-3 flex items-center rounded-md focus-within:border-primary focus-within:outline-[1px] text-text-primary outline-border justify-between mt-1 mb-0 w-full`}
       >
         <ReactDatePicker
           ref={datePickerRef}
@@ -101,7 +101,7 @@ const DateInput: React.FC<DateInputProps> = ({
           maxDate={maxDate}
           aria-invalid={hasError}
           aria-describedby={describedBy}
-          className={`focus:outline-none h-[38px] px-[0px] ml-1 flex-1 bg-transparent w-full placeholder-placeholder`}
+          className={`focus:outline-none h-[38px] px-0 ml-1 flex-1 bg-transparent w-full placeholder-placeholder`}
           calendarClassName="custom-datepicker"
           showPopperArrow={false}
           onBlur={reg.onBlur}

@@ -4,6 +4,7 @@ import { H1, Text } from '@/shared/components/ui/Typography';
 import { Search, ArrowDown, ArrowUp } from '@mynaui/icons-react';
 import { useState, useEffect } from 'react';
 import axios from 'axios';
+import Skeleton from '@/shared/components/ui/Skeleton';
 
 interface Dossier {
   noChantier: number;
@@ -75,7 +76,7 @@ export const DossiersListPage = () => {
       {/* Frame container */}
       <div className="bg-bg-secondary rounded-lg border border-border  overflow-hidden flex flex-col flex-1">
 
-        <div className="flex items-center justify-between py-3 pl-5 pr-15 border-b border-border flex-shrink-0 bg-bg-secondary">
+        <div className="flex items-center justify-between py-3 pl-5 pr-15 border-b border-border shrink-0 bg-bg-secondary">
           <Text className="w-[150px] font-semibold text-sm">Nom Prénom</Text>
           <Text className="w-[300px] font-semibold text-sm">Adresse</Text>
           <button
@@ -116,10 +117,13 @@ export const DossiersListPage = () => {
         </div>
 
         {/* Nombre de résultats */}
-        <div className="py-2 px-5 border-t border-border bg-bg-secondary flex-shrink-0">
-          <Text className="text-sm text-placeholder">
-            {dossiers.length} résultat{dossiers.length > 1 ? 's' : ''}
-          </Text>
+        <div className="py-2 px-5 border-t border-border bg-bg-secondary shrink-0">
+          {
+            !loading?
+            <Text className="text-sm text-placeholder">{dossiers.length} résultat{dossiers.length > 1 ? 's' : ''}</Text>
+            : 
+            <Skeleton className='w-30 h-4'/>
+          }
         </div>
       </div>
     </div>

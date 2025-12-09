@@ -1,4 +1,3 @@
-import { useEffect, useState } from 'react'
 import type { User } from '@/shared/types/auth'
 import { formatRole } from '@/shared/utils/formatters'
 import profile from '@/shared/assets/Profile.png'
@@ -14,7 +13,7 @@ export function HeaderBar({ user, onMenu }: HeaderBarProps) {
   const displayName = (user as any)?.nom || (user as any)?.prenom ? `${(user as any)?.nom ?? ''}${(user as any)?.prenom ? ' ' + (user as any).prenom : ''}` : user?.username
 
   return (
-    <header className="relative z-[10] flex items-center justify-between  sm:justify-end sm:w-full">
+    <header className="relative z-10 flex items-center justify-between  sm:justify-end sm:w-full">
       <div className='absolute top-0 pr-10 pt-8 right-0'>
         <button
           onClick={() => onMenu?.()}

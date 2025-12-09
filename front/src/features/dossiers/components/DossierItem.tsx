@@ -88,10 +88,10 @@ const DossierItem = ({
           </>
           :
           <>
-            <Skeleton className="w-[150px] h-[24px]" />
-            <Skeleton className="w-[300px] h-[24px]" />
-            <Skeleton className="w-[100px] h-[24px]" />
-            <Skeleton className="w-[120px] h-[24px]" />
+            <Skeleton className="w-[150px] h-6" />
+            <Skeleton className="w-[300px] h-6" />
+            <Skeleton className="w-[100px] h-6" />
+            <Skeleton className="w-[120px] h-6" />
           </>
       }
 

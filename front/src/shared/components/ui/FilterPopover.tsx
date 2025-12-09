@@ -90,7 +90,7 @@ const FilterPopover = ({
               top: `${position.top}px`,
               left: `${position.left}px`,
             }}
-            className="z-[99999] bg-bg-primary rounded-lg shadow-lg border border-border p-4 min-w-[300px] animate-in fade-in zoom-in-95 duration-200"
+            className="z-99999 bg-bg-primary rounded-lg shadow-lg border border-border p-4 min-w-[300px] animate-in fade-in zoom-in-95 duration-200"
           >
             <H3 >Filtres</H3>
             

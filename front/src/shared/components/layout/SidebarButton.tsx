@@ -23,7 +23,7 @@ export const SidebarButton: React.FC<SidebarButtonProps> = ({
   return (
     <Link
       to={to}
-      className={`px-3 flex overflow-hidden justify-start items-center py-2 rounded-[6px] transition-colors ${
+      className={`px-3 flex overflow-hidden justify-start items-center py-2 rounded-md transition-colors ${
         active
           ? 'bg-border/45 text-text-primary text-[14px] font-medium'
           : 'text-text-secondary font-medium text-[14px] hover:bg-border/30 border-transparent'

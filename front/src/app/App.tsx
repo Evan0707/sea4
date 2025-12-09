@@ -139,6 +139,10 @@ function AppRoutes() {
           <Route path="/admin/artisans" element={withDashboard(<ArtisansListPage />)} />
           <Route path="/admin/artisans/:id/edit" element={withDashboard(<EditArtisanPage />)} />
           <Route path='/admin/artisans/new' element={withDashboard(<NewArtisanPage />)} />
+          <Route
+            path="/admin/settings"
+            element={withDashboard(<SettingsPage />)}
+          />
         </Route>
 
         {/* Redirect root to login */}

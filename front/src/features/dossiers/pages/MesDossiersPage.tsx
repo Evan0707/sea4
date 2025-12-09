@@ -94,7 +94,7 @@ export const MesDossiersPage = () => {
       {/* Frame container */}
       <div className="bg-bg-secondary rounded-lg border border-border  overflow-hidden flex flex-col flex-1">
 
-        <div className="flex items-center justify-between py-3 pl-5 pr-15 border-b border-border flex-shrink-0 bg-bg-secondary">
+        <div className="flex items-center justify-between py-3 pl-5 pr-15 border-b border-border shrink-0 bg-bg-secondary">
           <Text className="w-[150px] font-semibold text-sm">Nom Prénom</Text>
           <Text className="w-[300px] font-semibold text-sm">Adresse</Text>
           <button
@@ -132,7 +132,7 @@ export const MesDossiersPage = () => {
         </div>
 
         {/* Nombre de résultats */}
-        <div className="py-2 px-5 border-t border-border bg-bg-secondary flex-shrink-0">
+        <div className="py-2 px-5 border-t border-border bg-bg-secondary shrink-0">
           <Text className="text-sm text-placeholder">
             {dossiers.length} résultat{dossiers.length > 1 ? 's' : ''}
           </Text>

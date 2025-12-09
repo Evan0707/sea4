@@ -384,9 +384,9 @@ export const EditDossierPage = () => {
                 <div className="space-y-2">
                   {loadingEtapes ? (
                     <>
-                      <Skeleton className="h-[48px] w-full rounded-lg" />
-                      <Skeleton className="h-[48px] w-full rounded-lg" />
-                      <Skeleton className="h-[48px] w-full rounded-lg" />
+                      <Skeleton className="h-12 w-full rounded-lg" />
+                      <Skeleton className="h-12 w-full rounded-lg" />
+                      <Skeleton className="h-12 w-full rounded-lg" />
                     </>
                   ) : etapesModele.length > 0 ? (
                     etapesModele.map((etape, i) => (

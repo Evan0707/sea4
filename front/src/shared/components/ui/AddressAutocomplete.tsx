@@ -175,7 +175,7 @@ export const AddressAutocomplete: React.FC<AddressAutocompleteProps> = ({
         )}
       </div>
       
-      {error && <Text className='text-[13px] text-red absolute ml-1 mt-1 absolute bottom-[-23px] text-red' weight='semibold' color='text-red'>{error}</Text>}
+      {error && <Text className='text-[13px] text-red absolute ml-1 mt-1 bottom-[-23px]' weight='semibold' color='text-red'>{error}</Text>}
     </div>
   );
 };

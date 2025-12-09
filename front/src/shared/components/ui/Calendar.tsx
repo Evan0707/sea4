@@ -50,7 +50,7 @@ const Calendar: React.FC<CalendarProps> = ({
   return (
     <div className={`${className ?? ''}`}>
       <label className='m-1 font-bold text-[14px]' htmlFor={inputId}>{label}</label>
-      <div className={`border-[1.5px] ${hasError ? 'border-red' : 'border-border'} px-3 flex items-center rounded-[6px] focus-within:border-primary focus-within:outline-[1px] outline-border justify-between mt-1 mb-0`}>
+      <div className={`border-[1.5px] ${hasError ? 'border-red' : 'border-border'} px-3 flex items-center rounded-md focus-within:border-primary focus-within:outline-[1px] outline-border justify-between mt-1 mb-0`}>
         <div className='flex flex-row items-center flex-1 relative'>
           <input
             id={inputId}

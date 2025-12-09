@@ -109,7 +109,7 @@ const PopoverItem = ({ variant = 'default', children, icon: Icon, onClick }: Pop
       onClick={onClick}
       className={`w-full px-4 py-2 rounded text-left text-sm flex items-center gap-2 transition-colors ${variants[variant]}`}
     >
-      {Icon && <Icon size={16} className="flex-shrink-0" />}
+      {Icon && <Icon size={16} className="shrink-0" />}
       <span className="flex-1">{children}</span>
     </button>
   )

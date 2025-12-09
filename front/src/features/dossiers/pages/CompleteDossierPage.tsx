@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { H1, H2, H3, Text } from '@/shared/components/ui/Typography';
+import { H1, H3, Text } from '@/shared/components/ui/Typography';
 import Button from '@/shared/components/ui/Button';
 import EtapeItem from '../components/EtapeItem';
 import { useToast } from '@/shared/hooks/useToast';
