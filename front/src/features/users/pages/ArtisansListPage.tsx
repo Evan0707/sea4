@@ -1,12 +1,59 @@
 import ArtisanItem from '../components/ArtisanItem';
 import Input from '@/shared/components/ui/Input';
 import { H1, Text } from '@/shared/components/ui/Typography';
-import { Search, ArrowDown, ArrowUp } from '@mynaui/icons-react';
-import { useState, useEffect } from 'react';
+import { Search, ArrowDown, ArrowUp, X } from '@mynaui/icons-react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/shared/hooks/useToast';
 import Button from '@/shared/components/ui/Button';
+
+interface CsvArtisan {
+  nom: string;
+  prenom: string;
+  adresse: string;
+  cp: string;
+  ville: string;
+  qualifications: string;
+}
+
+const parseCSV = (text: string): CsvArtisan[] => {
+  const lines = text.split(/\r?\n/).filter(line => line.trim());
+  if (lines.length < 2) return [];
+  
+  const headerLine = lines[0].toLowerCase();
+  const separator = headerLine.includes(';') ? ';' : headerLine.includes(',') ? ',' : '\t';
+  const headers = headerLine.split(separator).map(h => h.trim().replace(/"/g, ''));
+  
+  const findHeader = (possibleNames: string[]): number => {
+    return headers.findIndex(h => possibleNames.some(name => h.includes(name)));
+  };
+  
+  const nomIdx = findHeader(['nom', 'name', 'lastname']);
+  const prenomIdx = findHeader(['prenom', 'prénom', 'firstname']);
+  const adresseIdx = findHeader(['adresse', 'address', 'rue']);
+  const cpIdx = findHeader(['cp', 'code postal', 'postal', 'zip']);
+  const villeIdx = findHeader(['ville', 'city']);
+  const qualIdx = findHeader(['qualification', 'etape', 'métier', 'metier', 'skill']);
+  
+  const artisans: CsvArtisan[] = [];
+  
+  for (let i = 1; i < lines.length; i++) {
+    const values = lines[i].split(separator).map(v => v.trim().replace(/"/g, ''));
+    if (values.length < 2) continue;
+    
+    artisans.push({
+      nom: nomIdx >= 0 ? values[nomIdx] || '' : '',
+      prenom: prenomIdx >= 0 ? values[prenomIdx] || '' : '',
+      adresse: adresseIdx >= 0 ? values[adresseIdx] || '' : '',
+      cp: cpIdx >= 0 ? values[cpIdx] || '' : '',
+      ville: villeIdx >= 0 ? values[villeIdx] || '' : '',
+      qualifications: qualIdx >= 0 ? values[qualIdx] || '' : '',
+    });
+  }
+  
+  return artisans;
+};
 
 interface Artisan {
   adresseArtisan: string;
@@ -24,10 +71,70 @@ export const ArtisansListPage = () => {
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [artisans, setArtisans] = useState<Artisan[]>([]);
   const [loading, setLoading] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
+  const [csvArtisans, setCsvArtisans] = useState<CsvArtisan[]>([]);
+  const [showCsvPopup, setShowCsvPopup] = useState(false);
+  const dragCounter = useRef(0);
 
   const navigate = useNavigate();
 
   const toast = useToast();
+
+  const handleDragEnter = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    dragCounter.current++;
+    if (e.dataTransfer.items && e.dataTransfer.items.length > 0) {
+      setIsDragging(true);
+    }
+  }, []);
+
+  const handleDragOver = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+  }, []);
+
+  const handleDragLeave = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    dragCounter.current--;
+    if (dragCounter.current === 0) {
+      setIsDragging(false);
+    }
+  }, []);
+
+  const handleDrop = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+    dragCounter.current = 0;
+
+    const files = e.dataTransfer.files;
+    if (files.length === 0) return;
+
+    const file = files[0];
+    if (!file.name.endsWith('.csv')) {
+      toast.addToast('Veuillez déposer un fichier CSV', 'error');
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      try {
+        const text = event.target?.result as string;
+        const parsed = parseCSV(text);
+        if (parsed.length === 0) {
+          toast.addToast('Aucun artisan trouvé dans le fichier', 'error');
+          return;
+        }
+        setCsvArtisans(parsed);
+        setShowCsvPopup(true);
+      } catch {
+        toast.addToast('Erreur lors de la lecture du fichier', 'error');
+      }
+    };
+    reader.readAsText(file);
+  }, [toast]);
 
   // Debounce pour la recherche
   useEffect(() => {
@@ -101,7 +208,81 @@ export const ArtisansListPage = () => {
   };
 
   return (
-    <div className="p-8 h-screen flex flex-col">
+    <div 
+      className="p-8 h-screen flex flex-col relative"
+      onDragEnter={handleDragEnter}
+      onDragOver={handleDragOver}
+      onDragLeave={handleDragLeave}
+      onDrop={handleDrop}
+    >
+      {isDragging && (
+        <div 
+          className="absolute inset-0 bg-primary/10 border-2 border-dashed border-primary rounded-lg z-50 flex items-center justify-center pointer-events-none"
+        >
+          <Text className="text-xl font-semibold text-primary">Déposez votre fichier CSV ici</Text>
+        </div>
+      )}
+
+      {showCsvPopup && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+          <div className="bg-bg-primary rounded-xl border border-border max-w-4xl w-full max-h-[85vh] flex flex-col shadow-2xl">
+            <div className="flex items-center justify-between p-5 border-b border-border">
+              <div>
+                <H1 className="text-xl">Import d'artisans</H1>
+                <Text className="text-sm text-placeholder mt-1">{csvArtisans.length} artisan{csvArtisans.length > 1 ? 's' : ''} trouvé{csvArtisans.length > 1 ? 's' : ''} dans le fichier</Text>
+              </div>
+              <button onClick={() => setShowCsvPopup(false)} className="text-placeholder hover:text-primary transition-colors p-1">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="overflow-auto flex-1">
+              <div className="divide-y divide-border">
+                {csvArtisans.map((artisan, idx) => (
+                  <div key={idx} className="p-4 hover:bg-bg-secondary transition-colors">
+                    <div className="flex items-start justify-between gap-4">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-1">
+                          <Text className="font-semibold text-base">
+                            {artisan.nom || 'Sans nom'} {artisan.prenom}
+                          </Text>
+                        </div>
+                        <Text className="text-sm text-placeholder">
+                          {[artisan.adresse, artisan.cp, artisan.ville].filter(Boolean).join(', ') || 'Adresse non renseignée'}
+                        </Text>
+                      </div>
+                      <div className="flex flex-wrap gap-1.5 max-w-[300px] justify-end">
+                        {artisan.qualifications ? (
+                          artisan.qualifications.split(/[,;]/).map((qual, qIdx) => (
+                            <span 
+                              key={qIdx} 
+                              className="px-2.5 py-1 text-xs font-medium rounded-full bg-primary/10 text-primary border border-primary/20"
+                            >
+                              {qual.trim()}
+                            </span>
+                          ))
+                        ) : (
+                          <span className="px-2.5 py-1 text-xs rounded-full bg-bg-secondary text-placeholder">
+                            Aucune qualification
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div className="flex justify-between items-center gap-3 p-5 border-t border-border bg-bg-secondary rounded-b-xl">
+              <Text className="text-sm text-placeholder">
+                Les artisans seront ajoutés à la liste existante
+              </Text>
+              <div className="flex gap-3">
+                <Button variant='Secondary' onClick={() => setShowCsvPopup(false)}>Annuler</Button>
+                <Button variant='Primary' onClick={() => setShowCsvPopup(false)}>Importer {csvArtisans.length} artisan{csvArtisans.length > 1 ? 's' : ''}</Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
       
         <H1 className="mb-6">Artisans</H1>
 
