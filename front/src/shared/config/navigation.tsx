@@ -18,6 +18,8 @@ export const NAV_ITEMS: NavItem[] = [
   { label: 'Accueil', path: '/admin', roles: ['ROLE_ADMIN'], icon: <Home strokeWidth={1.5} size={22} /> },
   { label: 'Dossiers', path: '/admin/dossiers', roles: ['ROLE_ADMIN'], icon: <Inbox strokeWidth={1.5} size={22} /> },
   { label: 'Chantiers', path: '/admin/chantiers', roles: ['ROLE_ADMIN'], icon: <Grid strokeWidth={1.5} size={22} /> },
+
   { label: 'Utilisateurs', path: '/admin/utilisateurs', roles: ['ROLE_ADMIN'], icon: <Users strokeWidth={1.5} size={22} /> },
-  { label: 'Artisans', path: '/admin/artisans', roles: ['ROLE_ADMIN'], icon: <Tool strokeWidth={1.5} size={22} /> }
+  { label: 'Artisans', path: '/admin/artisans', roles: ['ROLE_ADMIN'], icon: <Tool strokeWidth={1.5} size={22} /> },
+  { label: 'Modèles', path: '/admin/modeles', roles: ['ROLE_ADMIN'], icon: <Grid strokeWidth={1.5} size={22} /> }
 ]

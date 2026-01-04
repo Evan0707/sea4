@@ -58,6 +58,9 @@ class EtapeChantier
     #[ORM\ManyToMany(targetEntity: FactureArtisan::class, mappedBy: 'etapeChantiers')]
     private Collection $facturesArtisan;
 
+    #[ORM\Column(name: 'nbJoursPrevu', type: 'integer', nullable: true)]
+    private ?int $nbJoursPrevu = null;
+
     public function __construct()
     {
         $this->artisans = new ArrayCollection();
@@ -229,6 +232,17 @@ class EtapeChantier
         if ($this->facturesArtisan->removeElement($factureArtisan)) {
             $factureArtisan->removeEtapeChantier($this);
         }
+        return $this;
+    }
+
+    public function getNbJoursPrevu(): ?int
+    {
+        return $this->nbJoursPrevu;
+    }
+
+    public function setNbJoursPrevu(?int $nbJoursPrevu): static
+    {
+        $this->nbJoursPrevu = $nbJoursPrevu;
         return $this;
     }
 }

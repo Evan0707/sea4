@@ -1,131 +1,181 @@
-import DossierItem from '../components/DossierItem';
-import Input from '@/shared/components/ui/Input';
-import { H1, Text } from '@/shared/components/ui/Typography';
-import { Search, ArrowDown, ArrowUp } from '@mynaui/icons-react';
-import { useState, useEffect } from 'react';
-import axios from 'axios';
-import Skeleton from '@/shared/components/ui/Skeleton';
-
-interface Dossier {
-  noChantier: number;
-  nom: string;
-  prenom: string;
-  address: string;
-  cp: string;
-  ville: string;
-  start: string;
-  status: 'À venir' | 'Terminé' | 'Complété' | 'En chantier' | 'À compléter';
-}
+import { useState, useEffect, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { DataList, type Column } from '@/shared/components/ui/DataList';
+import { StatusBadge } from '@/shared/components/ui/StatusBadge';
+import SearchBar from '@/shared/components/ui/SearchBar';
+import Button from '@/shared/components/ui/Button';
+import { Text } from '@/shared/components/ui/Typography';
+import { Eye, Download, Trash } from '@mynaui/icons-react';
+import Popover from '@/shared/components/ui/Popover';
+import { useDossiers } from '../hooks/useDossiers';
+import type { Dossier } from '../types';
+import { exportToCSV, type CsvColumn } from '@/shared/utils/csvExporter';
+import { formatDate } from '@/shared/utils/dateFormatter';
+import { usePageHeader } from '@/shared/context/LayoutContext';
+import ConfirmModal from '@/shared/components/ui/ConfirmModal';
 
 export const DossiersListPage = () => {
-  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
   const [search, setSearch] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
-  const [dossiers, setDossiers] = useState<Dossier[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
+  const [dossierToDelete, setDossierToDelete] = useState<number | null>(null);
 
-  // Debounce pour la recherche
+  const { dossiers, loading, error, deleteDossier } = useDossiers({
+    search: debouncedSearch,
+    sortOrder,
+  });
+
+  const confirmDelete = async () => {
+    if (dossierToDelete) {
+      await deleteDossier(dossierToDelete);
+      setDossierToDelete(null);
+    }
+  };
+
+  // Debounce search
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedSearch(search);
     }, 500);
-
     return () => clearTimeout(timer);
   }, [search]);
 
-  useEffect(() => {
-    fetchDossiers();
-  }, [sortOrder, debouncedSearch]);
-
-  const fetchDossiers = async () => {
-    setLoading(true);
-    try {
-      const response = await axios.get('http://localhost:8000/api/dossier', {
-        params: {
-          search: debouncedSearch,
-          sortOrder,
-        },
-      });
-      setDossiers(response.data);
-    } catch (error) {
-      console.error('Erreur lors du chargement des dossiers:', error);
-    } finally {
-      setLoading(false);
-    }
+  const handleExport = () => {
+    const exportColumns: CsvColumn<Dossier>[] = [
+      { key: 'nom', header: 'Nom' },
+      { key: 'prenom', header: 'Prénom' },
+      { key: 'address', header: 'Adresse' },
+      { key: 'cp', header: 'Code Postal' },
+      { key: 'ville', header: 'Ville' },
+      { key: 'start', header: 'Date début', formatter: (val) => formatDate(val) },
+      { key: 'status', header: 'Statut' },
+    ];
+    exportToCSV(dossiers, exportColumns, 'dossiers');
   };
 
-  const toggleSort = () => {
-    setSortOrder(prev => prev === 'asc' ? 'desc' : 'asc');
-  };
+  const navigate = useNavigate();
+
+  const headerActions = useMemo(() => (
+    <Button variant="Secondary" icon={Download} onClick={handleExport}>
+      Exporter CSV
+    </Button>
+  ), []);
+
+  usePageHeader(
+    'Dossiers',
+    headerActions,
+    'Gérez les dossiers clients et suivez leur avancement.'
+  );
+
+  const columns: Column<Dossier>[] = [
+    {
+      key: 'nom',
+      header: 'Nom Prénom',
+      // ... (rest of columns)
+      width: 'flex-1 md:w-[200px] md:flex-none',
+      render: (d) => (
+        <Text className="font-semibold text-sm">
+          {d.nom} {d.prenom}
+        </Text>
+      ),
+    },
+    {
+      key: 'address',
+      header: 'Adresse',
+      width: 'hidden md:block flex-1',
+      render: (d) => (
+        <div>
+          <Text className="text-sm font-semibold">{d.address}</Text>
+          <Text className="text-xs text-placeholder">
+            {d.cp} {d.ville}
+          </Text>
+        </div>
+      ),
+    },
+    {
+      key: 'start',
+      header: 'Date début',
+      width: 'hidden md:flex w-[150px]',
+      sortable: true,
+      render: (d) => (
+        <Text className="text-sm">
+          {formatDate(d.start)}
+        </Text>
+      )
+    },
+    {
+      key: 'status',
+      header: 'Statut',
+      width: 'hidden md:flex w-[150px]',
+      align: 'right',
+      render: (d) => <StatusBadge status={d.status} />,
+    },
+    {
+      key: 'actions',
+      header: '',
+      width: 'w-[50px]',
+      align: 'right',
+      render: (d) => (
+        <div onClick={(e) => e.stopPropagation()}>
+          <Popover>
+            <Popover.Item
+              onClick={() => navigate(`/maitre-doeuvre/chantiers/${d.noChantier}`)}
+              icon={Eye}
+            >
+              Voir détails
+            </Popover.Item>
+            <Popover.Item
+              variant="destructive"
+              onClick={() => setDossierToDelete(d.noChantier)}
+              icon={Trash}
+            >
+              Supprimer
+            </Popover.Item>
+          </Popover>
+        </div>
+      )
+    },
+  ];
 
   return (
-    <div className="p-8 h-screen flex flex-col">
-      <H1 className="mb-6">Dossiers</H1>
+    <div className="p-4 md:p-8 h-full flex flex-col">
+      {/* PageHeader moved to Layout */}
 
-      <Input
-        name='search'
-        width='w-[350px]'
-        className='mb-5'
-        type='text'
-        leftIcon={<Search className='text-placeholder' />}
-        value={search}
-        onChange={(e) => setSearch(e.target.value)}
-        placeholder="Rechercher par nom, prénom ou ville..."
+      <div className="mb-5 flex items-center justify-between">
+        <SearchBar
+          value={search}
+          onChange={setSearch}
+          placeholder="Rechercher par nom, prénom ou ville..."
+        />
+        {/* Can add a Create button here later */}
+      </div>
+
+      {error && (
+        <div className="mb-4 p-4 bg-red-50 text-red-600 rounded-md">
+          {error}
+        </div>
+      )}
+
+      <DataList
+        data={dossiers}
+        columns={columns}
+        loading={loading}
+        sortColumn="start"
+        sortDirection={sortOrder}
+        onSort={() => setSortOrder(prev => prev === 'asc' ? 'desc' : 'asc')}
+        keyExtractor={(item) => item.noChantier}
+        onRowClick={(item) => navigate(`/maitre-doeuvre/chantiers/${item.noChantier}`)}
+        emptyMessage="Aucun dossier trouvé"
       />
 
-      {/* Frame container */}
-      <div className="bg-bg-secondary rounded-lg border border-border  overflow-hidden flex flex-col flex-1">
-
-        <div className="flex items-center justify-between py-3 pl-5 pr-15 border-b border-border shrink-0 bg-bg-secondary">
-          <Text className="w-[150px] font-semibold text-sm">Nom Prénom</Text>
-          <Text className="w-[300px] font-semibold text-sm">Adresse</Text>
-          <button
-            onClick={toggleSort}
-            className="w-[100px] flex items-center gap-1 hover:text-primary transition-colors"
-          >
-            <Text className="font-semibold text-sm">Date début</Text>
-            {sortOrder === 'asc' ? <ArrowUp strokeWidth={2} className="w-4 h-4 text-placeholder" /> : <ArrowDown strokeWidth={2} className="w-4 h-4 text-placeholder" />}
-          </button>
-          <Text className="w-[120px] font-semibold text-right text-sm">Statut</Text>
-        </div>
-
-        {/* Liste des dossiers */}
-        <div className="divide-y relative  divide-border bg-bg-primary overflow-y-auto flex-1">
-          {loading ? (
-            <>
-              <DossierItem loading={true} nom='load' prenom='load' address='load' cp='load' ville='load' start='load' status='Complété' />
-              <DossierItem loading={true} nom='load' prenom='load' address='load' cp='load' ville='load' start='load' status='Complété' />
-              <DossierItem loading={true} nom='load' prenom='load' address='load' cp='load' ville='load' start='load' status='Complété' />
-              <DossierItem loading={true} nom='load' prenom='load' address='load' cp='load' ville='load' start='load' status='Complété' />
-              <DossierItem loading={true} nom='load' prenom='load' address='load' cp='load' ville='load' start='load' status='Complété' />
-            </>
-            // <div className="flex items-center justify-center h-full">
-            //   <Text variant='body' color='text-placeholder'>Chargement...</Text>
-            // </div>
-          ) : dossiers.length > 0 ? dossiers.map((dossier) => (
-            <DossierItem
-              key={dossier.noChantier}
-              {...dossier}
-              onEdit={() => console.log('Éditer dossier', dossier.noChantier)}
-              onDelete={() => console.log('Supprimer dossier', dossier.noChantier)}
-            />
-          )) : (
-            <div className="flex items-center justify-center h-full">
-              <Text variant='body' color='text-placeholder'>Aucun dossier trouvé</Text>
-            </div>
-          )}
-        </div>
-
-        {/* Nombre de résultats */}
-        <div className="py-2 px-5 border-t border-border bg-bg-secondary shrink-0">
-          {
-            !loading?
-            <Text className="text-sm text-placeholder">{dossiers.length} résultat{dossiers.length > 1 ? 's' : ''}</Text>
-            : 
-            <Skeleton className='w-30 h-4'/>
-          }
-        </div>
-      </div>
+      <ConfirmModal
+        isOpen={!!dossierToDelete}
+        onClose={() => setDossierToDelete(null)}
+        onConfirm={confirmDelete}
+        title="Supprimer le dossier"
+        message="Êtes-vous sûr de vouloir supprimer ce dossier ? Cette action est irréversible."
+        confirmText="Supprimer"
+      />
     </div>
   );
 };

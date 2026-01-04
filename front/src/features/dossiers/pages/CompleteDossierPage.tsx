@@ -1,12 +1,17 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import axios from 'axios';
-import { H1, H3, Text } from '@/shared/components/ui/Typography';
+import { H1, Text } from '@/shared/components/ui/Typography';
 import Button from '@/shared/components/ui/Button';
 import EtapeItem from '../components/EtapeItem';
 import { useToast } from '@/shared/hooks/useToast';
 import Skeleton from '@/shared/components/ui/Skeleton';
 import type { DossierResponse, Etape } from '@/shared/types/dossier';
+import { AvailabilitySelector } from '../../users/components/AvailabilitySelector';
+import type { Artisan } from '../../users/types';
+import apiClient from '@/shared/api/client';
+import { Card, CardHeader, CardTitle, CardContent } from '@/shared/components/ui/Card';
+import { useDossier, useDossierEtapes } from '../hooks/useDossiers';
+import { useArtisans } from '../../users/hooks/useArtisans';
 
 interface EtapeState extends Etape {
   // valeurs d'édition locales
@@ -18,6 +23,7 @@ interface EtapeState extends Etape {
   supplement?: number | null;
   reduction?: number | null;
   supplementDesc?: string | null;
+  nbJours?: number;
 }
 
 const CompleteDossierPage: React.FC = () => {
@@ -25,67 +31,71 @@ const CompleteDossierPage: React.FC = () => {
   const navigate = useNavigate();
   const { addToast } = useToast();
 
-  const [loading, setLoading] = useState(true);
-  const [dossier, setDossier] = useState<DossierResponse | null>(null);
+  const { data: dossierData, isLoading: loadingDossier } = useDossier(id);
+  const { data: etapesData = [], isLoading: loadingEtapes } = useDossierEtapes(id);
+  const { artisans: artisansList, loading: loadingArtisans } = useArtisans({}); // Fetch all artisans
+
   const [etapes, setEtapes] = useState<EtapeState[]>([]);
-  const [artisans, setArtisans] = useState<Array<{ noArtisan: number; nomArtisan: string; prenomArtisan?: string }>>([]);
 
+  // Effect to sync etapes state when data loads
   useEffect(() => {
-    const fetchData = async () => {
-      setLoading(true);
-      try {
-        const [dRes, artisansRes] = await Promise.all([
-          axios.get(`http://localhost:8000/api/dossiers/${id}`),
-          axios.get('http://localhost:8000/api/artisans'),
-        ]);
+    if (etapesData.length > 0) {
+      const etapesState = etapesData.map((e: any) => ({
+        noEtape: e.noEtape || e.noEtapeChantier || e.id,
+        nomEtape: e.nomEtape || e.nom || 'Étape',
+        reservable: !!e.reservable,
+        artisanId: e.noArtisan || null,
+        dateTheorique: e.dateDebutTheorique || null,
+        montantTheorique: e.montantTheoriqueFacture ?? e.montantFacture ?? 0,
+        reservee: e.reservee ?? false,
+        openSupp: false,
+        supplement: e.reducSuppl && parseFloat(e.reducSuppl) > 0 ? parseFloat(e.reducSuppl) : null,
+        reduction: e.reducSuppl && parseFloat(e.reducSuppl) < 0 ? Math.abs(parseFloat(e.reducSuppl)) : null,
+        supplementDesc: e.descriptionReducSuppl || null,
+        nbJours: e.nbJours || 0,
+      } as EtapeState));
+      setEtapes(etapesState);
+    }
+  }, [etapesData]);
 
-        setDossier(dRes.data);
+  const dossier = dossierData as DossierResponse | undefined;
+  const artisans = artisansList as Array<{ noArtisan: number; nomArtisan: string; prenomArtisan?: string }>; // Cast to match local interface if needed
+  const loading = loadingDossier || loadingEtapes || loadingArtisans;
 
-        let etapesData: any[] = [];
-        try {
-          const etRes = await axios.get(`http://localhost:8000/api/dossiers/${id}/etapes`);
-          etapesData = etRes.data;
-        } catch (e) {
-     
-          try {
-            const etRes2 = await axios.get(`http://localhost:8000/api/chantier/${id}/etape-chantiers`);
-            etapesData = etRes2.data;
-          } catch (e2) {
-
-            etapesData = [];
-          }
-        }
-
-        const etapesState = etapesData.map((e: any) => ({
-          noEtape: e.noEtape || e.noEtapeChantier || e.id,
-          nomEtape: e.nomEtape || e.nom || 'Étape',
-          reservable: !!e.reservable,
-          artisanId: e.noArtisan || null,
-          dateTheorique: e.dateDebutTheorique || null,
-          montantTheorique: e.montantTheoriqueFacture ?? e.montantFacture ?? 0,
-          reservee: e.reservee ?? false,
-          openSupp: false,
-          supplement: e.reducSuppl && parseFloat(e.reducSuppl) > 0 ? parseFloat(e.reducSuppl) : null,
-          reduction: e.reducSuppl && parseFloat(e.reducSuppl) < 0 ? Math.abs(parseFloat(e.reducSuppl)) : null,
-          supplementDesc: e.descriptionReducSuppl || null,
-        } as EtapeState));
-
-        setEtapes(etapesState);
-
-        setArtisans(artisansRes.data || []);
-      } catch (error) {
-        console.error(error);
-        addToast('Erreur lors du chargement du dossier', 'error');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    if (id) fetchData();
-  }, [id, addToast]);
+  const [selectionModalOpen, setSelectionModalOpen] = useState(false);
+  const [selectedEtapeForAssignment, setSelectedEtapeForAssignment] = useState<EtapeState | null>(null);
 
   const updateEtape = (noEtape: number, patch: Partial<EtapeState>) => {
     setEtapes((prev) => prev.map((e) => e.noEtape === noEtape ? { ...e, ...patch } : e));
+  };
+
+  const handleOpenAvailability = (etape: EtapeState) => {
+    setSelectedEtapeForAssignment(etape);
+    setSelectionModalOpen(true);
+  };
+
+  const handleSelectArtisan = (artisan: Artisan, startDate: string, endDate: string) => {
+    if (selectedEtapeForAssignment) {
+      const updates: Partial<EtapeState> = { artisanId: artisan.noArtisan };
+
+      if (startDate) {
+        updates.dateTheorique = startDate;
+      }
+
+      if (startDate && endDate) {
+        const start = new Date(startDate);
+        const end = new Date(endDate);
+        const diffTime = Math.abs(end.getTime() - start.getTime());
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+
+        updates.nbJours = diffDays === 0 ? (selectedEtapeForAssignment.nbJours || 0) : diffDays;
+      }
+
+      updateEtape(selectedEtapeForAssignment.noEtape, updates);
+      setSelectionModalOpen(false);
+      setSelectedEtapeForAssignment(null);
+    }
   };
 
   const computeTotals = () => {
@@ -101,13 +111,44 @@ const CompleteDossierPage: React.FC = () => {
     return { coutTheorique, total };
   };
 
+  const [errors, setErrors] = useState<Set<number>>(new Set());
+
   const handleSubmit = async () => {
+    setErrors(new Set());
     try {
-      // Vérifier que tous les champs Artisan et Date théorique sont remplis
+      // 1. Check for missing required fields
       const etapesIncompletes = etapes.filter(e => !e.artisanId || !e.dateTheorique);
-      
       if (etapesIncompletes.length > 0) {
         addToast(`${etapesIncompletes.length} étape(s) n'ont pas d'artisan ou de date théorique`, 'error');
+        // Add to errors
+        const newErrors = new Set<number>();
+        etapesIncompletes.forEach(e => newErrors.add(e.noEtape));
+        setErrors(newErrors);
+        return;
+      }
+
+      // 2. Validate Chronological Order
+      // User request: "date etape 1 > etape 2" -> verify Step N date >= Step N-1 date + duration (or just date).
+      // Let's assume the array order `etapes` is the correct sequence order.
+      const sequenceErrors = new Set<number>();
+      for (let i = 1; i < etapes.length; i++) {
+        const current = etapes[i];
+        const previous = etapes[i - 1];
+
+        if (current.dateTheorique && previous.dateTheorique) {
+          const prevDate = new Date(previous.dateTheorique);
+          const currDate = new Date(current.dateTheorique);
+
+          // Check if Current starts BEFORE Previous
+          if (currDate < prevDate) {
+            sequenceErrors.add(current.noEtape);
+            addToast(`L'étape "${current.nomEtape}" ne peut pas commencer avant l'étape "${previous.nomEtape}"`, 'error');
+          }
+        }
+      }
+
+      if (sequenceErrors.size > 0) {
+        setErrors(sequenceErrors);
         return;
       }
 
@@ -121,11 +162,10 @@ const CompleteDossierPage: React.FC = () => {
         supplement: e.supplement ?? null,
         reduction: e.reduction ?? null,
         supplementDesc: e.supplementDesc ?? null,
+        nbJours: e.nbJours ?? null,
       }));
 
-      console.log('Envoi des données:', etapesPayload);
-
-      await axios.put(`http://localhost:8000/api/chantiers/${id}/etapes`, {
+      await apiClient.put(`/chantiers/${id}/etapes`, {
         etapes: etapesPayload,
       });
 
@@ -161,63 +201,82 @@ const CompleteDossierPage: React.FC = () => {
   return (
     <div className="p-10 max-w-[1500px] mx-auto">
 
-        <H1>Compléter le dossier</H1>
- 
+      <H1>Compléter le dossier</H1>
+
 
       {/* Client info */}
-      <div className="p-6 rounded-lg mb-0 flex flex-row">
-        <H3 className="mb-3 w-70">Informations client</H3>
-        <div className="grid grid-cols-3 gap-4 flex-1 pl-10">
-          <div>
-            <Text className="font-medium">Nom</Text>
-            <Text>{dossier.client.nomClient}</Text>
+      <Card className="mb-6">
+        <CardHeader>
+          <CardTitle className="text-xl">Informations client</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-3 gap-4">
+            <div>
+              <Text className="font-medium">Nom</Text>
+              <Text>{dossier.client.nomClient}</Text>
+            </div>
+            <div>
+              <Text className="font-medium">Prénom</Text>
+              <Text>{dossier.client.prenomClient}</Text>
+            </div>
+            <div>
+              <Text className="font-medium">Adresse</Text>
+              <Text className="text-placeholder">{dossier.client.adresseClient ?? '—'}</Text>
+              <Text className="text-placeholder">{dossier.client.cpClient ?? ''} {dossier.client.villeClient ?? ''}</Text>
+            </div>
           </div>
-          <div>
-            <Text className="font-medium">Prénom</Text>
-            <Text>{dossier.client.prenomClient}</Text>
-          </div>
-          <div >
-            <Text className="font-medium">Adresse</Text>
-            <Text className="text-placeholder">{dossier.client.adresseClient ?? '—'}</Text>
-            <Text className="text-placeholder">{dossier.client.cpClient ?? ''} {dossier.client.villeClient ?? ''}</Text>
-          </div>
-        </div>
-      </div>
+        </CardContent>
+      </Card>
 
       {/* Chantier info */}
-      <div className="p-6 pt-0 rounded-lg mb-0 flex flex-row">
-        <H3 className="mb-3 w-70">Informations chantier</H3>
-        <div className="grid grid-cols-3 gap-4 flex-1 pl-10">
-          <div>
-            <Text className="font-medium">Adresse</Text>
-            <Text>{dossier.chantier.adresseChantier ?? '—'} {dossier.chantier.cpChantier ?? ''} {dossier.chantier.villeChantier ?? ''}</Text>
+      <Card className="mb-6">
+        <CardHeader>
+          <CardTitle className="text-xl">Informations chantier</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-3 gap-4">
+            <div>
+              <Text className="font-medium">Adresse</Text>
+              <Text>{dossier.chantier.adresseChantier ?? '—'} {dossier.chantier.cpChantier ?? ''} {dossier.chantier.villeChantier ?? ''}</Text>
+            </div>
+            <div>
+              <Text className="font-medium">Date création</Text>
+              <Text>{dossier.chantier.dateCreation}</Text>
+            </div>
+            <div>
+              <Text className="font-medium">Maître d'œuvre</Text>
+              <Text className="text-placeholder">—</Text>
+            </div>
           </div>
-          <div>
-            <Text className="font-medium">Date création</Text>
-            <Text>{dossier.chantier.dateCreation}</Text>
-          </div>
-          <div>
-            <Text className="font-medium">Maître d'œuvre</Text>
-            <Text className="text-placeholder">—</Text>
-          </div>
-        </div>
-      </div>
+        </CardContent>
+      </Card>
 
       {/* Étapes */}
-      <div className="bg-bg-secondary rounded-lg border border-border mb-6 overflow-hidden">
-        <H3 className="mb-0 p-3">Étapes à compléter</H3>
-        <div className="divide-y relative divide-border bg-bg-primary overflow-y-auto max-h-[60vh]">
-          {etapes.length === 0 && (
-            <div className="p-6">
-              <Text className="text-placeholder">Aucune étape trouvée pour ce dossier.</Text>
-            </div>
-          )}
+      <Card className="mb-6 overflow-hidden" padding="none">
+        <CardHeader className="p-6 pb-4">
+          <CardTitle className="text-xl">Étapes à compléter</CardTitle>
+        </CardHeader>
+        <CardContent className="p-0">
+          <div className="divide-y relative divide-border bg-bg-primary overflow-y-auto max-h-[60vh]">
+            {etapes.length === 0 && (
+              <div className="p-6">
+                <Text className="text-placeholder">Aucune étape trouvée pour ce dossier.</Text>
+              </div>
+            )}
 
-          {etapes.map((e) => (
-            <EtapeItem key={e.noEtape} e={e} artisans={artisans} onChange={updateEtape} />
-          ))}
-        </div>
-      </div>
+            {etapes.map((e) => (
+              <EtapeItem
+                key={e.noEtape}
+                e={e}
+                artisans={artisans}
+                onChange={updateEtape}
+                onOpenAvailability={handleOpenAvailability}
+                hasError={errors.has(e.noEtape)}
+              />
+            ))}
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Totals */}
       <div className="mt-6 border-t border-border pt-4 flex justify-between items-center gap-8">
@@ -237,8 +296,24 @@ const CompleteDossierPage: React.FC = () => {
 
         </div>
       </div>
+
+      {selectionModalOpen && selectedEtapeForAssignment && (
+        <AvailabilitySelector
+          isOpen={selectionModalOpen}
+          onClose={() => setSelectionModalOpen(false)}
+          onSelect={handleSelectArtisan}
+          etape={{
+            noEtape: selectedEtapeForAssignment.noEtape,
+            nomEtape: selectedEtapeForAssignment.nomEtape,
+            dateDebutTheorique: selectedEtapeForAssignment.dateTheorique || null,
+            nbJours: selectedEtapeForAssignment.nbJours || 0
+          }}
+          currentArtisanId={selectedEtapeForAssignment.artisanId || undefined}
+        />
+      )}
     </div>
   );
 };
+
 
 export default CompleteDossierPage;

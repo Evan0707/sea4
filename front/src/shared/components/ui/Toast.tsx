@@ -16,8 +16,8 @@ export function useToast() {
       ...prev,
       { id: Date.now(), message, variant }
     ])
-    console.log(toasts);
-    
+
+
   }, [])
 
   const removeToast = useCallback((id: number) => {

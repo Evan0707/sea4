@@ -15,7 +15,6 @@ interface UtilisateurItemProps {
 }
 
 const UtilisateurItem = ({
-  noUtilisateur,
   login,
   nom,
   prenom,

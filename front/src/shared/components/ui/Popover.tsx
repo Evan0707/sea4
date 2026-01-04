@@ -1,3 +1,5 @@
+import { motion, AnimatePresence } from 'framer-motion'
+import { ANIMATIONS } from '../../constants/animations'
 import { DotsVerticalSolid } from '@mynaui/icons-react'
 import { useState, useRef, useEffect } from 'react'
 import type { ReactNode, ComponentType } from 'react'
@@ -46,7 +48,7 @@ const Popover = ({ children, icon: Icon = DotsVerticalSolid, iconSize = 28 }: Po
     const calculatePosition = () => {
       const triggerRect = triggerRef.current!.getBoundingClientRect()
       const contentRect = contentRef.current!.getBoundingClientRect()
-      
+
       const spaceBelow = window.innerHeight - triggerRect.bottom
       const spaceAbove = triggerRect.top
       const popoverHeight = contentRect.height || 200 // Fallback si pas encore rendu
@@ -84,16 +86,21 @@ const Popover = ({ children, icon: Icon = DotsVerticalSolid, iconSize = 28 }: Po
         <Icon size={iconSize} className="text-gray-700" />
       </button>
 
-      {isOpen && (
-        <div
-          ref={contentRef}
-          className={`absolute right-2 w-48 bg-white/70 backdrop-blur-sm rounded-lg shadow-lg border-[1.5px] border-border/40 z-50 py-1 px-1 ${
-            position === 'top' ? 'bottom-full mb-2' : 'top-full mt-2'
-          }`}
-        >
-          {children}
-        </div>
-      )}
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            variants={ANIMATIONS.scaleIn}
+            initial="hidden"
+            animate="show"
+            exit="exit"
+            ref={contentRef}
+            className={`absolute right-2 w-48 bg-white/70 backdrop-blur-sm rounded-[var(--radius)] shadow-lg border-[1.5px] border-border/40 z-50 py-1 px-1 ${position === 'top' ? 'bottom-full mb-2' : 'top-full mt-2'
+              }`}
+          >
+            {children}
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   )
 }

@@ -1,3 +1,5 @@
+import { motion, AnimatePresence } from 'framer-motion'
+import { ANIMATIONS } from '../../constants/animations'
 import { useState, useRef, useEffect, type ReactNode } from 'react'
 
 interface TooltipProps {
@@ -17,7 +19,7 @@ export default function Tooltip({ children, content, position = 'top' }: Tooltip
 
     const triggerRect = triggerRef.current.getBoundingClientRect()
     const tooltipRect = tooltipRef.current.getBoundingClientRect()
-    
+
     let top = 0
     let left = 0
 
@@ -65,26 +67,31 @@ export default function Tooltip({ children, content, position = 'top' }: Tooltip
         {children}
       </div>
 
-      {isVisible && (
-        <div
-          ref={tooltipRef}
-          className="fixed z-50 px-3 py-1.5 text-sm max-w-[300px] text-white bg-black rounded-md shadow-lg pointer-events-none animate-[fade-in_0.25s_ease]"
-          style={{
-            top: `${tooltipPosition.top}px`,
-            left: `${tooltipPosition.left}px`,
-          }}
-        >
-          {content}
-          <div
-            className={`absolute w-2 h-2 bg-black rotate-45 ${
-              position === 'top' ? 'bottom-[-4px] left-1/2 -translate-x-1/2' :
-              position === 'bottom' ? 'top-[-4px] left-1/2 -translate-x-1/2' :
-              position === 'left' ? 'right-[-4px] top-1/2 -translate-y-1/2' :
-              'left-[-4px] top-1/2 -translate-y-1/2'
-            }`}
-          />
-        </div>
-      )}
+      <AnimatePresence>
+        {isVisible && (
+          <motion.div
+            variants={ANIMATIONS.fadeIn}
+            initial="hidden"
+            animate="show"
+            exit="exit"
+            ref={tooltipRef}
+            className="fixed z-50 px-3 py-1.5 text-sm max-w-[300px] text-white bg-black rounded-[var(--radius-sm)] shadow-lg pointer-events-none"
+            style={{
+              top: `${tooltipPosition.top}px`,
+              left: `${tooltipPosition.left}px`,
+            }}
+          >
+            {content}
+            <div
+              className={`absolute w-2 h-2 bg-black rotate-45 ${position === 'top' ? 'bottom-[-4px] left-1/2 -translate-x-1/2' :
+                position === 'bottom' ? 'top-[-4px] left-1/2 -translate-x-1/2' :
+                  position === 'left' ? 'right-[-4px] top-1/2 -translate-y-1/2' :
+                    'left-[-4px] top-1/2 -translate-y-1/2'
+                }`}
+            />
+          </motion.div>
+        )}
+      </AnimatePresence>
     </>
   )
 }

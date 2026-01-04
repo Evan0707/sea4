@@ -1,36 +1,53 @@
 import { useState, useEffect } from 'react';
 import { H3, H2, Text, Label } from '@/shared/components/ui/Typography';
-import { User, Bell, Shield, CogFour, Lock, Trash, Check, Map } from '@mynaui/icons-react';
+import { User, CogFour, Download, Check, Map } from '@mynaui/icons-react';
 import { useThemeContext } from '@/shared/context/ThemeProvider';
 import { useAuth } from '@/features/auth/context/AuthContext';
 import { DepartementAutocomplete } from '@/shared/components/ui/DepartementAutocomplete';
+import { useToast } from '@/shared/hooks/useToast';
+import Button from '@/shared/components/ui/Button';
+import Input from '@/shared/components/ui/Input';
+import axios from 'axios';
 import SYSTEM from '@/shared/assets/SYSTEM.png'
 import DARK from '@/shared/assets/DARK.png'
 import LIGHT from '@/shared/assets/LIGHT.png'
 
-type SettingSection = 'profil' | 'preferences' | 'notifications' | 'securite' | 'confidentialite' | 'zone' | 'danger';
+type SettingSection = 'profil' | 'preferences' | 'zone' | 'export';
 type DateFormat = 'dd/MM/yyyy' | 'MM/dd/yyyy' | 'yyyy-MM-dd';
 
 export const SettingsPage = () => {
   const [activeSection, setActiveSection] = useState<SettingSection>('profil');
   const { theme, setTheme } = useThemeContext();
   const { user } = useAuth();
+  const { addToast } = useToast();
+  
+  // Profil state
+  const [nom, setNom] = useState('');
+  const [prenom, setPrenom] = useState('');
+  const [profilLoading, setProfilLoading] = useState(false);
+  const [profilSaving, setProfilSaving] = useState(false);
+  
+  // Export state
+  const [exportLoading, setExportLoading] = useState(false);
+
+  // Date format state
   const [dateFormat, setDateFormat] = useState<DateFormat>(() => {
     const saved = localStorage.getItem('dateFormat');
     return (saved as DateFormat) || 'dd/MM/yyyy';
   });
+
   const [selectedDepartements, setSelectedDepartements] = useState<string[]>(() => {
     const saved = localStorage.getItem('preferredZones');
     return saved ? JSON.parse(saved) : [];
   });
 
   useEffect(() => {
-    localStorage.setItem('dateFormat', dateFormat);
-  }, [dateFormat]);
-
-  useEffect(() => {
     localStorage.setItem('preferredZones', JSON.stringify(selectedDepartements));
   }, [selectedDepartements]);
+
+  useEffect(() => {
+    localStorage.setItem('dateFormat', dateFormat);
+  }, [dateFormat]);
 
   const formatExampleDate = (format: DateFormat) => {
     const date = new Date('2025-11-05');
@@ -48,14 +65,61 @@ export const SettingsPage = () => {
     }
   };
 
+  // Charger les infos du profil
+  useEffect(() => {
+    const fetchProfil = async () => {
+      setProfilLoading(true);
+      try {
+        const response = await axios.get('http://localhost:8000/api/profil');
+        setNom(response.data.nom || '');
+        setPrenom(response.data.prenom || '');
+      } catch (error) {
+        console.error('Erreur chargement profil:', error);
+      } finally {
+        setProfilLoading(false);
+      }
+    };
+    fetchProfil();
+  }, []);
+
+  const handleSaveProfil = async () => {
+    setProfilSaving(true);
+    try {
+      await axios.put('http://localhost:8000/api/profil', { nom, prenom });
+      addToast('Profil mis à jour', 'success');
+    } catch (error) {
+      addToast('Erreur lors de la mise à jour', 'error');
+    } finally {
+      setProfilSaving(false);
+    }
+  };
+
+  const handleExportChantiers = async () => {
+    setExportLoading(true);
+    try {
+      const response = await axios.get('http://localhost:8000/api/mes-chantiers/export', {
+        responseType: 'blob'
+      });
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `chantiers_${new Date().toISOString().split('T')[0]}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      addToast('Export téléchargé', 'success');
+    } catch (error) {
+      addToast('Erreur lors de l\'export', 'error');
+    } finally {
+      setExportLoading(false);
+    }
+  };
+
   const sections = [
     { id: 'profil' as const, label: 'Profil', icon: User },
     { id: 'preferences' as const, label: 'Préférences', icon: CogFour },
     ...(user?.roles.includes('ROLE_COMMERCIAL') ? [{ id: 'zone' as const, label: 'Zone géographique', icon: Map }] : []),
-    { id: 'notifications' as const, label: 'Notifications', icon: Bell },
-    { id: 'securite' as const, label: 'Sécurité', icon: Shield },
-    { id: 'confidentialite' as const, label: 'Confidentialité', icon: Lock },
-    { id: 'danger' as const, label: 'Zone dangereuse', icon: Trash },
+    ...(user?.roles.includes('ROLE_MAITRE_OEUVRE') ? [{ id: 'export' as const, label: 'Export de données', icon: Download }] : []),
   ];
 
   const renderSection = () => {
@@ -63,8 +127,38 @@ export const SettingsPage = () => {
       case 'profil':
         return (
           <div>
-            <H2 className="mb-4">Mon profil</H2>
-            <Text className="text-text-secondary">Section profil à compléter</Text>
+            <H2 className="mb-6">Mon profil</H2>
+            {profilLoading ? (
+              <Text className="text-placeholder">Chargement...</Text>
+            ) : (
+              <div className="space-y-4 max-w-md">
+                <Input
+                  label="Nom"
+                  value={nom}
+                  type='text'
+                  name='nom'
+                  onChange={(e) => setNom(e.target.value)}
+                  placeholder="Votre nom"
+                />
+                <Input
+                  label="Prénom"
+                  value={prenom}
+                  type='text'
+                  name='prenom'
+                  onChange={(e) => setPrenom(e.target.value)}
+                  placeholder="Votre prénom"
+                />
+                <div className="pt-4">
+                  <Button 
+                    variant="Primary" 
+                    onClick={handleSaveProfil}
+                    loading={profilSaving}
+                  >
+                    Enregistrer
+                  </Button>
+                </div>
+              </div>
+            )}
           </div>
         );
       case 'preferences':
@@ -131,7 +225,7 @@ export const SettingsPage = () => {
                 </Text>
               </div>
 
-              {/* Autres préférences à ajouter */}
+              {/* Format de date */}
               <div className="pt-6 border-t border-border">
                 <Label className="mb-3 block">Format de date</Label>
                 <div className="space-y-2">
@@ -195,32 +289,34 @@ export const SettingsPage = () => {
             )}
           </div>
         );
-      case 'notifications':
+      case 'export':
         return (
           <div>
-            <H2 className="mb-4 text-text-primary">Notifications</H2>
-            <Text className="text-text-secondary">Section notifications à compléter</Text>
-          </div>
-        );
-      case 'securite':
-        return (
-          <div>
-            <H2 className="mb-4 text-text-primary">Sécurité</H2>
-            <Text className="text-text-secondary">Section sécurité à compléter</Text>
-          </div>
-        );
-      case 'confidentialite':
-        return (
-          <div>
-            <H2 className="mb-4 text-text-primary">Confidentialité</H2>
-            <Text className="text-text-secondary">Section confidentialité à compléter</Text>
-          </div>
-        );
-      case 'danger':
-        return (
-          <div>
-            <H2 className="mb-4 text-text-primary">Zone dangereuse</H2>
-            <Text className="text-red">Actions irréversibles à compléter</Text>
+            <H2 className="mb-6">Export de données</H2>
+            <Text className="text-text-secondary mb-6">
+              Téléchargez vos données au format CSV pour les analyser ou les archiver.
+            </Text>
+            
+            <div className="space-y-4">
+              <div className="p-4 bg-bg-primary rounded-lg border border-border">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <Text weight="semibold">Export des chantiers</Text>
+                    <Text variant="small" className="text-placeholder mt-1">
+                      Télécharge la liste de tous vos chantiers avec leur statut et montants
+                    </Text>
+                  </div>
+                  <Button 
+                    variant="Secondary" 
+                    onClick={handleExportChantiers}
+                    loading={exportLoading}
+                  >
+                    <Download className="w-4 h-4 mr-2" />
+                    Télécharger CSV
+                  </Button>
+                </div>
+              </div>
+            </div>
           </div>
         );
       default:
@@ -244,8 +340,6 @@ export const SettingsPage = () => {
                 className={`w-full flex items-center gap-3 px-4 py-2 rounded-lg transition-colors ${
                   isActive
                     ? 'bg-border/60 text-text-primary'
-                    : section.id === 'danger'
-                    ? 'hover:bg-red-bg text-red border-transparent'
                     : 'hover:bg-border/35 text-text-secondary border-transparent'
                 }`}
               >

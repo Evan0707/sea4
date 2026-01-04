@@ -137,4 +137,62 @@ class UtilisateurController extends AbstractController
 
         return $this->json(['success' => true]);
     }
+
+    #[Route('/profil', name: 'profil_get', methods: ['GET'])]
+    public function getProfil(): JsonResponse
+    {
+        /** @var Utilisateur|null $u */
+        $u = $this->getUser();
+        if (!$u instanceof Utilisateur) {
+            return $this->json(['error' => 'Not authenticated'], 401);
+        }
+
+        $nom = null;
+        $prenom = null;
+        if ($c = $u->getCommercial()) {
+            $nom = $c->getNom();
+            $prenom = $c->getPrenom();
+        } elseif ($m = $u->getMaitreOeuvre()) {
+            $nom = $m->getNom();
+            $prenom = $m->getPrenom();
+        } elseif ($a = $u->getAdmin()) {
+            $nom = $a->getNom();
+            $prenom = $a->getPrenom();
+        }
+
+        return $this->json([
+            'nom' => $nom,
+            'prenom' => $prenom,
+            'login' => $u->getLogin(),
+        ]);
+    }
+
+    #[Route('/profil', name: 'profil_update', methods: ['PUT'])]
+    public function updateProfil(Request $request, EntityManagerInterface $em): JsonResponse
+    {
+        /** @var Utilisateur|null $u */
+        $u = $this->getUser();
+        if (!$u instanceof Utilisateur) {
+            return $this->json(['error' => 'Not authenticated'], 401);
+        }
+
+        $data = json_decode($request->getContent(), true);
+        $nom = $data['nom'] ?? null;
+        $prenom = $data['prenom'] ?? null;
+
+        if ($c = $u->getCommercial()) {
+            if ($nom !== null) $c->setNom($nom);
+            if ($prenom !== null) $c->setPrenom($prenom);
+        } elseif ($m = $u->getMaitreOeuvre()) {
+            if ($nom !== null) $m->setNom($nom);
+            if ($prenom !== null) $m->setPrenom($prenom);
+        } elseif ($a = $u->getAdmin()) {
+            if ($nom !== null) $a->setNom($nom);
+            if ($prenom !== null) $a->setPrenom($prenom);
+        }
+
+        $em->flush();
+
+        return $this->json(['success' => true, 'message' => 'Profil mis à jour']);
+    }
 }

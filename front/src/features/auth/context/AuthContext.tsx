@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useState } from 'react';
 import type { ReactNode } from 'react';
-import axios from 'axios'
+import apiClient from '@/shared/api/client';
 import { jwtDecode } from 'jwt-decode';
 import type { JWTPayload, UserProfile } from '@/shared/types/auth';
 
@@ -36,9 +36,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   // When a token is present, try to fetch the user profile (/api/me)
   useEffect(() => {
     let mounted = true
-    const fetchProfile = async (token: string) => {
+    const fetchProfile = async () => {
       try {
-        const res = await axios.get('/me')
+        const res = await apiClient.get('/me')
         if (!mounted) return
         setUser(prev => prev ? ({ ...prev, nom: res.data.nom ?? null, prenom: res.data.prenom ?? null }) : null)
       } catch (e) {
@@ -47,7 +47,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
 
     if (user?.token) {
-      fetchProfile(user.token)
+      fetchProfile()
     }
 
     return () => { mounted = false }
@@ -69,7 +69,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       // fetch profile immediately
       (async () => {
         try {
-          const res = await axios.get('/me')
+          const res = await apiClient.get('/me')
           setUser(prev => prev ? ({ ...prev, nom: res.data.nom ?? null, prenom: res.data.prenom ?? null }) : prev)
         } catch (e) {
           // ignore

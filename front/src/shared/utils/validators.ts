@@ -66,12 +66,12 @@ export const chantierFormSchema = z.object({
     .string()
     .min(1, "La ville est requise")
     .max(50, "La ville ne peut pas dépasser 50 caractères"),
+  latitude: z.number().optional().nullable(),
+  longitude: z.number().optional().nullable(),
   dateCreation: z.string().min(1, "La date de création est requise"),
   statutChantier: z.enum(['À compléter', 'À venir', 'En chantier', 'Terminé']),
-  noMOE: z.string().min(1, "Le maître d'œuvre est requis"),
-  noModele: z.number({
-    message: "Le modèle est requis",
-  }).min(1, "Le modèle est requis"),
+  noMOE: z.number().optional().refine((v) => v !== undefined && v !== null, { message: "Le maître d'œuvre est requis" }),
+  noModele: z.number().optional().refine((v) => v !== undefined && v !== null, { message: "Le modèle est requis" }),
 });
 
 export type ChantierFormData = z.infer<typeof chantierFormSchema>;
@@ -101,7 +101,7 @@ export const isValidPostalCode = (code: string): boolean => {
 // SIRET
 export const isValidSiret = (siret: string): boolean => {
   if (!/^\d{14}$/.test(siret)) return false
-  
+
   // Algorithme de Luhn
   let sum = 0
   for (let i = 0; i < 14; i++) {

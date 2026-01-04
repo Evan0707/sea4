@@ -1,139 +1,163 @@
-import UtilisateurItem from '../components/UtilisateurItem';
-import Input from '@/shared/components/ui/Input';
-import { H1, Text } from '@/shared/components/ui/Typography';
-import { Search, ArrowDown, ArrowUp } from '@mynaui/icons-react';
-import { useState, useEffect } from 'react';
-import axios from 'axios';
+import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { DataList, type Column } from '@/shared/components/ui/DataList';
 import Button from '@/shared/components/ui/Button';
-
-interface Utilisateur {
-  noUtilisateur: number;
-  login: string;
-  nom?: string | null;
-  prenom?: string | null;
-  role?: 'admin' | 'commercial' | 'maitre_oeuvre' | string | null;
-}
+import SearchBar from '@/shared/components/ui/SearchBar';
+import { Text } from '@/shared/components/ui/Typography';
+import { Trash, Download, Pencil } from '@mynaui/icons-react';
+import Popover from '@/shared/components/ui/Popover';
+import { useUtilisateurs } from '../hooks/useUtilisateurs';
+import type { Utilisateur } from '../types';
+import { exportToCSV, type CsvColumn } from '@/shared/utils/csvExporter';
+import { usePageHeader } from '@/shared/context/LayoutContext';
+import ConfirmModal from '@/shared/components/ui/ConfirmModal';
 
 export const UtilisateursListPage = () => {
-  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
+  const navigate = useNavigate();
   const [search, setSearch] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
-  const [utilisateurs, setUtilisateurs] = useState<Utilisateur[]>([]);
-  const [loading, setLoading] = useState(false);
-  const navigate = useNavigate();
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
+  const [userToDelete, setUserToDelete] = useState<number | null>(null);
 
-  // Debounce pour la recherche
+  const { utilisateurs, loading, deleteUtilisateur } = useUtilisateurs({
+    search: debouncedSearch,
+    sortOrder,
+  });
+
+  // Recherche avec tampon (debounce)
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedSearch(search);
     }, 500);
-
     return () => clearTimeout(timer);
   }, [search]);
 
-  useEffect(() => {
-    fetchUtilisateurs();
-  }, [sortOrder, debouncedSearch]);
 
-  const fetchUtilisateurs = async () => {
-    setLoading(true);
-    try {
-      const response = await axios.get('http://localhost:8000/api/utilisateurs', {
-        params: {
-          search: debouncedSearch,
-          sortOrder,
-        },
-      });
-      setUtilisateurs(response.data);
-    } catch (error) {
-      console.error('Erreur lors du chargement des utilisateurs:', error);
-    } finally {
-      setLoading(false);
+  const confirmDelete = async () => {
+    if (userToDelete) {
+      await deleteUtilisateur(userToDelete);
+      setUserToDelete(null);
     }
   };
 
-  const toggleSort = () => {
-    setSortOrder(prev => prev === 'asc' ? 'desc' : 'asc');
+  const handleExport = () => {
+    const exportColumns: CsvColumn<Utilisateur>[] = [
+      { key: 'login', header: 'Login' },
+      { key: 'nom', header: 'Nom' },
+      { key: 'prenom', header: 'Prénom' },
+      { key: 'role', header: 'Rôle' },
+    ];
+    exportToCSV(utilisateurs, exportColumns, 'utilisateurs');
   };
 
-  const handleDelete = async (noUtilisateur: number) => {
-    if (window.confirm('Êtes-vous sûr de vouloir supprimer cet utilisateur ?')) {
-      try {
-        await axios.delete(`http://localhost:8000/api/utilisateur/${noUtilisateur}/delete`);
-        fetchUtilisateurs();
-      } catch (error) {
-        console.error('Erreur lors de la suppression de l\'utilisateur:', error);
-      }
+  const headerActions = useMemo(() => (
+    <div className="flex items-center gap-2">
+      <Button variant="Secondary" icon={Download} onClick={handleExport}>
+        Exporter CSV
+      </Button>
+      <Button variant='Primary' onClick={() => navigate('/admin/utilisateurs/new')}>
+        Nouveau
+      </Button>
+    </div>
+  ), []);
+
+  usePageHeader(
+    'Utilisateurs',
+    headerActions,
+    "Gérez les comptes utilisateurs de l'application."
+  );
+
+  const columns: Column<Utilisateur>[] = [
+    {
+      key: 'login',
+      // ...
+      header: 'Login',
+      sortable: true,
+      width: 'w-[200px]',
+      render: (u) => (
+        <div className="flex items-center gap-2">
+          {/* Avatar placeholder or icon could go here */}
+          <Text className="font-semibold text-sm">{u.login}</Text>
+        </div>
+      )
+    },
+    {
+      key: 'nom',
+      header: 'Nom',
+      width: 'flex-1',
+      render: (u) => (
+        <Text className="text-sm">{(u.nom || '') + ' ' + (u.prenom || '')}</Text>
+      )
+    },
+    {
+      key: 'role',
+      header: 'Rôle',
+      width: 'hidden md:flex w-[200px]',
+      render: (u) => (
+        <span className="px-2 py-0.5 bg-bg-secondary border border-border rounded text-xs text-text-secondary whitespace-nowrap capitalize">
+          {u.role ? u.role.replace('_', ' ') : 'N/A'}
+        </span>
+      )
+    },
+    {
+      key: 'actions',
+      header: '',
+      width: 'w-[50px]',
+      align: 'right',
+      render: (u) => (
+        <div onClick={(e) => e.stopPropagation()}>
+          <Popover>
+            {/* Edit could be added here if edit page exists/is required */}
+            <Popover.Item
+              onClick={() => navigate(`/admin/utilisateurs/${u.noUtilisateur}/edit`)}
+              icon={Pencil}
+            >
+              Modifier
+            </Popover.Item>
+            <Popover.Item
+              variant="destructive"
+              onClick={() => setUserToDelete(u.noUtilisateur)}
+              icon={Trash}
+            >
+              Supprimer
+            </Popover.Item>
+          </Popover>
+        </div>
+      )
     }
-  };
+  ];
 
   return (
-    <div className="p-8 h-screen flex flex-col">
-      <H1 className="mb-6">Utilisateurs</H1>
+    <div className="p-4 md:p-8 h-full flex flex-col">
+      {/* PageHeader moved to Layout */}
 
-      <div className='flex flex-row justify-between items-center'>
-        <Input
-        name='search'
-        width='w-[350px]'
-        className='mb-5'
-        type='text'
-        leftIcon={<Search className='text-placeholder' />}
+      <SearchBar
         value={search}
-        onChange={(e) => setSearch(e.target.value)}
+        onChange={setSearch}
         placeholder="Rechercher par login..."
+        className="mb-5"
       />
-      <Button variant='Primary' onClick={() => navigate('/admin/utilisateurs/new')}>Nouveau</Button>
-      </div>
 
-      {/* Frame container */}
-      <div className="bg-bg-secondary rounded-lg border border-border overflow-hidden flex flex-col flex-1">
+      <DataList
+        data={utilisateurs}
+        columns={columns}
+        loading={loading}
+        sortColumn="login"
+        sortDirection={sortOrder}
+        onSort={() => setSortOrder(prev => prev === 'asc' ? 'desc' : 'asc')}
+        keyExtractor={(item) => item.noUtilisateur}
+        onRowClick={(item) => navigate(`/admin/utilisateurs/${item.noUtilisateur}`)}
+        emptyMessage="Aucun utilisateur trouvé"
+      />
 
-        <div className="flex items-center justify-between py-3 pl-5 pr-15 border-b border-border shrink-0 bg-bg-secondary">
-          <div className="flex items-center gap-2">
-            <button
-              onClick={toggleSort}
-              className="w-[200px] flex items-center gap-1 hover:text-primary transition-colors"
-            >
-              <Text className="font-semibold text-sm">Login</Text>
-              {sortOrder === 'asc' ? <ArrowUp strokeWidth={2} className="w-4 h-4 text-placeholder" /> : <ArrowDown strokeWidth={2} className="w-4 h-4 text-placeholder" />}
-            </button>
-          </div>
-          <Text className="w-[300px] font-semibold text-sm">Nom</Text>
-          <Text className="w-[200px] font-semibold text-sm">Rôle</Text>
-        </div>
-
-        {/* Liste des utilisateurs */}
-        <div className="divide-y relative divide-border bg-bg-primary overflow-y-auto flex-1">
-          {loading ? (
-            <>
-              <UtilisateurItem loading={true} login='load' nom='load' prenom='load' role='admin' />
-              <UtilisateurItem loading={true} login='load' nom='load' prenom='load' role='admin' />
-              <UtilisateurItem loading={true} login='load' nom='load' prenom='load' role='admin' />
-              <UtilisateurItem loading={true} login='load' nom='load' prenom='load' role='admin' />
-              <UtilisateurItem loading={true} login='load' nom='load' prenom='load' role='admin' />
-            </>
-          ) : utilisateurs.length > 0 ? utilisateurs.map((utilisateur) => (
-            <UtilisateurItem
-              key={utilisateur.noUtilisateur}
-              {...utilisateur}
-              onEdit={() => console.log('Éditer utilisateur', utilisateur.noUtilisateur)}
-              onDelete={() => handleDelete(utilisateur.noUtilisateur)}
-            />
-          )) : (
-            <div className="flex items-center justify-center h-full">
-              <Text variant='body' color='text-placeholder'>Aucun utilisateur trouvé</Text>
-            </div>
-          )}
-        </div>
-
-        {/* Nombre de résultats */}
-        <div className="py-2 px-5 border-t border-border bg-bg-secondary shrink-0">
-          <Text className="text-sm text-placeholder">
-            {utilisateurs.length} résultat{utilisateurs.length > 1 ? 's' : ''}
-          </Text>
-        </div>
-      </div>
+      <ConfirmModal
+        isOpen={!!userToDelete}
+        onClose={() => setUserToDelete(null)}
+        onConfirm={confirmDelete}
+        title="Supprimer l'utilisateur"
+        message="Êtes-vous sûr de vouloir supprimer cet utilisateur ? Cette action est irréversible."
+        confirmText="Supprimer"
+      />
     </div>
   );
 };

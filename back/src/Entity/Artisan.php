@@ -3,6 +3,7 @@
 namespace App\Entity;
 
 use App\Repository\ArtisanRepository;
+use App\Entity\IndisponibiliteArtisan;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
@@ -31,6 +32,15 @@ class Artisan
     #[ORM\Column(name: 'villeArtisan', length: 50, nullable: true)]
     private ?string $ville = null;
 
+    #[ORM\Column(name: 'emailArtisan', length: 100, nullable: true)]
+    private ?string $email = null;
+
+    #[ORM\Column(name: 'telArtisan', length: 15, nullable: true)]
+    private ?string $telephone = null;
+
+    #[ORM\Column(name: 'actif', type: 'boolean', options: ['default' => true])]
+    private bool $actif = true;
+
     #[ORM\ManyToMany(targetEntity: Etape::class, inversedBy: 'artisansQualifies')]
     #[ORM\JoinTable(name: 'etre_qualifie_pour', schema: 'batiparti')]
     #[ORM\JoinColumn(name: 'noArtisan', referencedColumnName: 'noArtisan')]
@@ -43,11 +53,45 @@ class Artisan
     #[ORM\ManyToMany(targetEntity: EtapeChantier::class, mappedBy: 'artisans')]
     private Collection $etapeChantiers;
 
+    #[ORM\OneToMany(mappedBy: 'artisan', targetEntity: IndisponibiliteArtisan::class, orphanRemoval: true)]
+    private Collection $indisponibilites;
+
     public function __construct()
     {
         $this->etapesQualifiees = new ArrayCollection();
         $this->factures = new ArrayCollection();
         $this->etapeChantiers = new ArrayCollection();
+        $this->indisponibilites = new ArrayCollection();
+    }
+
+    // ... getters/setters ...
+
+    /**
+     * @return Collection<int, IndisponibiliteArtisan>
+     */
+    public function getIndisponibilites(): Collection
+    {
+        return $this->indisponibilites;
+    }
+
+    public function addIndisponibilite(IndisponibiliteArtisan $indisponibilite): static
+    {
+        if (!$this->indisponibilites->contains($indisponibilite)) {
+            $this->indisponibilites->add($indisponibilite);
+            $indisponibilite->setArtisan($this);
+        }
+        return $this;
+    }
+
+    public function removeIndisponibilite(IndisponibiliteArtisan $indisponibilite): static
+    {
+        if ($this->indisponibilites->removeElement($indisponibilite)) {
+            // set the owning side to null (unless already changed)
+            if ($indisponibilite->getArtisan() === $this) {
+                $indisponibilite->setArtisan(null);
+            }
+        }
+        return $this;
     }
 
     public function getId(): ?int
@@ -107,6 +151,39 @@ class Artisan
     public function setVille(?string $ville): static
     {
         $this->ville = $ville;
+        return $this;
+    }
+
+    public function getEmail(): ?string
+    {
+        return $this->email;
+    }
+
+    public function setEmail(?string $email): static
+    {
+        $this->email = $email;
+        return $this;
+    }
+
+    public function getTelephone(): ?string
+    {
+        return $this->telephone;
+    }
+
+    public function setTelephone(?string $telephone): static
+    {
+        $this->telephone = $telephone;
+        return $this;
+    }
+
+    public function isActif(): bool
+    {
+        return $this->actif;
+    }
+
+    public function setActif(bool $actif): static
+    {
+        $this->actif = $actif;
         return $this;
     }
 

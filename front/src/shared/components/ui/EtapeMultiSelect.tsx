@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { InfoCircleSolid } from '@mynaui/icons-react';
 import Tooltip from './Tooltip';
 import { Label, Text } from './Typography';
-import axios from 'axios';
+import apiClient from '@/shared/api/client';
 
 interface Etape {
   noEtape: number;
@@ -16,6 +16,7 @@ interface Props {
   placeholder?: string;
   info?: string;
   minChars?: number;
+  disabled?: boolean;
 }
 
 const EtapeMultiSelect: React.FC<Props> = ({
@@ -25,6 +26,7 @@ const EtapeMultiSelect: React.FC<Props> = ({
   placeholder = 'Rechercher une étape...',
   info,
   minChars = 2,
+  disabled = false,
 }) => {
   const [query, setQuery] = useState('');
   const [suggestions, setSuggestions] = useState<Etape[]>([]);
@@ -53,7 +55,7 @@ const EtapeMultiSelect: React.FC<Props> = ({
     setIsLoading(true);
     try {
       // Try a backend endpoint first; fallback to an in-memory filter if missing
-      const res = await axios.get(`http://localhost:8000/api/etapes`, { params: { q, limit: 10 } });
+      const res = await apiClient.get<Etape[]>('/etapes', { params: { q, limit: 10 } });
       // Expect array of { noEtape, nomEtape }
       setSuggestions(res.data || []);
       setIsOpen((res.data || []).length > 0);
@@ -110,7 +112,8 @@ const EtapeMultiSelect: React.FC<Props> = ({
           value={query}
           onChange={handleInputChange}
           placeholder={placeholder}
-          className={`w-full px-3 py-2 border-[1.5px] border-border rounded-md focus-within:border-primary focus-within:outline-[1px] outline-border placeholder-placeholder text-text-primary`}
+          disabled={disabled}
+          className={`w-full px-3 py-2 border-[1.5px] border-border rounded-md focus-within:border-primary focus-within:outline-[1px] outline-border placeholder-placeholder text-text-primary ${disabled ? 'bg-bg-secondary opacity-50 cursor-not-allowed' : ''}`}
         />
 
         {isLoading && (
@@ -140,7 +143,7 @@ const EtapeMultiSelect: React.FC<Props> = ({
         {value.map(v => (
           <div key={v.noEtape} className="inline-flex items-center gap-2 bg-bg-secondary border border-border rounded-md px-2 py-1">
             <Text className="text-sm">{v.nomEtape}</Text>
-            <button type="button" onClick={() => handleRemove(v.noEtape)} className="text-sm text-red-500">×</button>
+            {!disabled && <button type="button" onClick={() => handleRemove(v.noEtape)} className="text-sm text-red-500">×</button>}
           </div>
         ))}
       </div>

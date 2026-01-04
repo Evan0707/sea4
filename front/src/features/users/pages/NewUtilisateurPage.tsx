@@ -3,13 +3,13 @@ import { useNavigate } from 'react-router-dom'
 import Input from '@/shared/components/ui/Input'
 import Button from '@/shared/components/ui/Button'
 import { H1 } from '@/shared/components/ui/Typography'
-import axios from 'axios'
+import apiClient from '@/shared/api/client'
 import { useToast } from '@/shared/hooks/useToast'
 import Select from '@/shared/components/ui/Select'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { createUserSchema, type CreateUserFormData } from '@/shared/utils/validators'
-import Popover from '@/shared/components/ui/Popover'
+
 
 const roles = [
   { value: 'admin', label: 'Administrateur' },
@@ -29,9 +29,9 @@ export default function NewUtilisateurPage() {
 
   const slugify = (s: string) => {
     return s
-      .normalize('NFD') 
-      .replace(/\p{Diacritic}/gu, '') 
-      .replace(/[^\p{L}\p{N}]+/gu, '.') 
+      .normalize('NFD')
+      .replace(/\p{Diacritic}/gu, '')
+      .replace(/[^\p{L}\p{N}]+/gu, '.')
       .replace(/(^\.|\.$)/g, '')
       .toLowerCase();
   }
@@ -50,7 +50,7 @@ export default function NewUtilisateurPage() {
 
   const onSubmit = async (data: CreateUserFormData) => {
     try {
-      await axios.post('/admin/utilisateurs', data)
+      await apiClient.post('/admin/utilisateurs', data)
       addToast('Utilisateur créé', 'success')
       navigate('/admin/utilisateurs')
     } catch (err: any) {
@@ -59,89 +59,54 @@ export default function NewUtilisateurPage() {
     }
   }
 
-  {/* Ajouter un toast*/}
-  const tipToast = () => {
-    const tips = "Mettez un mot de passe fort s'il vous plaît !"
-    addToast(tips, 'info');
-  }
-    
+
+
   return (
-    <div className="p-8 h-screen flex flex-col">
+    <div className="p-4 md:p-8 h-screen flex flex-col">
       <H1 className="mb-6">Nouvel utilisateur</H1>
 
-          {/*Début du formulaire*/}
-    
-    {
-      /*
-        Objectif :
-        - Faire en sorte que le nom et le prénom sois
-          côte à côte et que lorsque l'écran est trop petit, les
-          mettre l'un au-dessus de l'autre
-        
-        - Faire en sorte que lorsque l'on saisi un mot de passe,
-          un pop-up apparaît pour donner un conseil
-      */
-    }
+      {/*Début du formulaire*/}
 
-      <form onSubmit={handleSubmit(onSubmit)} className="max-w-3/5 space-y-4 bg-bg-secondary p-6 rounded-lg">
-        <Input
-          label="Prénom"
-          name="prenom"
-          type="text"
-          placeholder="Entrez votre nom s'il vous plaît"
-          register={register('prenom')} error={errors.prenom?.message as string | undefined}
-        />
+      <form onSubmit={handleSubmit(onSubmit)} className="w-full max-w-3xl mx-auto space-y-4 bg-bg-secondary p-4 md:p-6 rounded-lg border border-border">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <Input
+            label="Prénom"
+            name="prenom"
+            type="text"
+            placeholder="John"
+            register={register('prenom')}
+            error={errors.prenom?.message as string | undefined}
+          />
 
-        <Input
-          label="Nom"
-          name="nom"
-          type="text"
-          placeholder="Entrez votre prénom s'il vous plaît"
-          register={register('nom')} error={errors.nom?.message as string | undefined}
-        />
+          <Input
+            label="Nom"
+            name="nom"
+            type="text"
+            placeholder="Doe"
+            register={register('nom')}
+            error={errors.nom?.message as string | undefined}
+          />
+        </div>
 
         <Input
           label="Login"
           name="login"
           type="text"
-          register={register('login')} onChange={() => setIsLoginEdited(true)} error={errors.login?.message as string | undefined}
+          register={register('login')}
+          onChange={() => setIsLoginEdited(true)}
+          error={errors.login?.message as string | undefined}
         />
-
-        <Input
-          label="Mot de passe"
-          name="password"
-          type="password"
-          onFocus={tipToast}
-          register={register('password')} error={errors.password?.message as string | undefined}
-        />
-
-        {/* Test pour le Popover */}
 
         <div className="relative">
-          <div className="flex items-center gap-2">
-            <Input 
-              label="Mot de passe" 
-              name="password" 
-              type="password" 
-              register={register('password')} 
-              error={errors.password?.message as string | undefined} 
-            />
-            <Popover>
-              <div className="p-3 bg-white rounded shadow-lg max-w-xs">
-              <p className="font-semibold mb-2">Conseils pour un mot de passe fort :</p>
-                <ul className="list-disc list-inside text-sm space-y-1">
-                  <li>Au moins 12 caractères</li>
-                  <li>Majuscules et minuscules</li>
-                  <li>Chiffres et caractères spéciaux</li>
-                  <li>Privilégiez quelque chose de long
-                    plutôt que quelque chose de compliqué</li>
-                </ul>
-              </div>
-            </Popover>
-          </div>
+          <Input
+            label="Mot de passe"
+            name="password"
+            type="password"
+            register={register('password')}
+            error={errors.password?.message as string | undefined}
+          />
+          {/* Popover could be added here properly if needed, but removing broken test code for now */}
         </div>
-
-        {/* Fin de test pour le Popover */}
 
 
         <div>

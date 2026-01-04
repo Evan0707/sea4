@@ -1,7 +1,6 @@
 import { useState, useRef, useEffect, type ReactNode } from 'react'
 import { createPortal } from 'react-dom'
 import Button from './Button'
-import { FilterOne } from '@mynaui/icons-react'
 import { H3, Label, Text } from './Typography'
 
 interface FilterPopoverProps {
@@ -78,7 +77,7 @@ const FilterPopover = ({
   return (
     <>
       <div ref={buttonRef} onClick={handleToggle}>
-        <FilterOne size={28}/>
+        {trigger}
       </div>
 
       {isOpen &&
@@ -93,11 +92,11 @@ const FilterPopover = ({
             className="z-99999 bg-bg-primary rounded-lg shadow-lg border border-border p-4 min-w-[300px] animate-in fade-in zoom-in-95 duration-200"
           >
             <H3 >Filtres</H3>
-            
+
             <div className="space-y-4 mb-4">
               {children}
             </div>
-            <FilterSeparator/>
+            <FilterSeparator />
             <div className="flex gap-3 justify-end pt-4  border-border">
               <Button variant="Secondary" onClick={handleReset} classname="px-4 py-2">
                 {resetText}
@@ -182,14 +181,14 @@ interface FilterRangeProps {
   showValue?: boolean
 }
 
-const FilterRange = ({ 
-  label, 
-  min, 
-  max, 
-  value, 
-  onChange, 
+const FilterRange = ({
+  label,
+  min,
+  max,
+  value,
+  onChange,
   step = 1,
-  showValue = true 
+  showValue = true
 }: FilterRangeProps) => {
   // Calculer la position du tooltip en pourcentage
   const percentage = ((value - min) / (max - min)) * 100
@@ -202,7 +201,7 @@ const FilterRange = ({
       <div className="relative pt-6 pb-2">
         {/* Tooltip qui suit le curseur */}
         {showValue && (
-          <div 
+          <div
             className="absolute -top-1 transform -translate-x-1/2 transition-all duration-100"
             style={{ left: `${percentage}%` }}
           >

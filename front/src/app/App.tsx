@@ -5,17 +5,24 @@ import { Login } from '../features/auth/pages/LoginPage';
 import Error404 from './pages/Error404Page';
 import { ProtectedRoute } from '../features/auth/components/ProtectedRoute';
 import { DashboardLayout } from '../shared/components/layout/DashboardLayout';
-import { DashboardPage } from '../features/dashboard/pages/DashboardPage';
+import { CommercialDashboardPage } from '../features/dashboard/pages/CommercialDashboardPage';
+import { AdminDashboardPage } from '../features/dashboard/pages/AdminDashboardPage';
+import { MoeDashboardPage } from '../features/dashboard/pages/MoeDashboardPage';
 import EditArtisanPage from '@/features/users/pages/EditArtisanPage';
 import { DossiersListPage } from '../features/dossiers/pages/DossiersListPage';
 import { MesDossiersPage } from '../features/dossiers/pages/MesDossiersPage';
 import { NouveauDossierPage } from '../features/dossiers/pages/NouveauDossierPage';
 import { EditDossierPage } from '../features/dossiers/pages/EditDossierPage';
 import CompleteDossierPage from '../features/dossiers/pages/CompleteDossierPage';
-import { ProjetsListPage } from '../features/chantiers/pages/ProjetsListPage';
+import { AdminChantiersListPage } from '../features/chantiers/pages/AdminChantiersListPage';
+import { AdminChantierDetailPage } from '../features/chantiers/pages/AdminChantierDetailPage';
+import { MesProjetsListPage } from '../features/chantiers/pages/MesProjetsListPage';
+import { ChantierDetailPage } from '../features/chantiers/pages/ChantierDetailPage';
 import { UtilisateursListPage } from '../features/users/pages/UtilisateursListPage';
 import { ArtisansListPage } from '../features/users/pages/ArtisansListPage';
+import ArtisanDetailsPage from '@/features/users/pages/ArtisanDetailsPage';
 import NewUtilisateurPage from '@/features/users/pages/NewUtilisateurPage';
+import UserDetailPage from '@/features/users/pages/UserDetailPage';
 import { SettingsPage } from '../features/settings/pages/SettingsPage';
 import { AuthProvider, useAuth } from '../features/auth/context/AuthContext';
 import { ToastProvider } from '../shared/context/ToastProvider';
@@ -23,6 +30,11 @@ import { OnlineProvider } from '../shared/context/OnlineProvider';
 import { ThemeProvider } from '../shared/context/ThemeProvider';
 import Unauthorized from './pages/Unauthorized';
 import NewArtisanPage from '@/features/users/pages/NewArtisanPage';
+import { LayoutProvider } from '@/shared/context/LayoutContext';
+
+import { ChantiersMapPage } from '../features/dashboard/pages/ChantiersMapPage';
+import { ModelesListPage } from '../features/chantiers/pages/ModelesListPage';
+import { ModeleEditPage } from '../features/chantiers/pages/ModeleEditPage';
 
 function App() {
   return (
@@ -30,9 +42,11 @@ function App() {
       <ThemeProvider>
         <OnlineProvider>
           <AuthProvider>
-            <ToastProvider>
-              <AppRoutes />
-            </ToastProvider>
+            <LayoutProvider>
+              <ToastProvider>
+                <AppRoutes />
+              </ToastProvider>
+            </LayoutProvider>
           </AuthProvider>
         </OnlineProvider>
       </ThemeProvider>
@@ -44,113 +58,127 @@ function AppRoutes() {
   const { user } = useAuth();
   const isAuthenticated = !!user;
 
-  // Wraps content in dashboard layout for authenticated routes
-  const withDashboard = (component: React.ReactNode) => (
-    <DashboardLayout user={user}>{component}</DashboardLayout>
-  );
-
   return (
     <Routes>
-        {/* Public Routes */}
-        <Route path="/login" element={<Login />} />
-        <Route path="/unauthorized" element={<Unauthorized/>} />
+      {/* Public Routes */}
+      <Route path="/login" element={<Login />} />
+      <Route path="/unauthorized" element={<Unauthorized />} />
 
-        {/* Commercial Routes */}
-        <Route
-          element={
-            <ProtectedRoute
-              isAuthenticated={isAuthenticated}
-              userRoles={user?.roles ?? []}
-              allowedRoles={['ROLE_COMMERCIAL']}
-            />
-          }
-        >
-          <Route path="/commercial" element={withDashboard(<DashboardPage />)} />
-          <Route path="/commercial/dossiers" element={withDashboard(<DossiersListPage />)} />
+      {/* Commercial Routes */}
+      <Route
+        element={
+          <ProtectedRoute
+            isAuthenticated={isAuthenticated}
+            userRoles={user?.roles ?? []}
+            allowedRoles={['ROLE_COMMERCIAL']}
+          />
+        }
+      >
+        <Route element={<DashboardLayout />}>
+          <Route path="/commercial" element={<CommercialDashboardPage />} />
+          <Route path="/commercial/dossiers" element={<DossiersListPage />} />
           <Route
             path="/commercial/nouveau-dossier"
-            element={withDashboard(<NouveauDossierPage />)}
+            element={<NouveauDossierPage />}
           />
           <Route
             path="/commercial/dossiers/:id/edit"
-            element={withDashboard(<EditDossierPage />)}
+            element={<EditDossierPage />}
           />
           <Route
             path="/commercial/settings"
-            element={withDashboard(<SettingsPage />)}
+            element={<SettingsPage />}
           />
         </Route>
+      </Route>
 
-        {/* Maitre d'oeuvre Routes */}
-        <Route
-          element={
-            <ProtectedRoute
-              isAuthenticated={isAuthenticated}
-              userRoles={user?.roles ?? []}
-              allowedRoles={['ROLE_MAITRE_OEUVRE']}
-            />
-          }
-        >
-          <Route path="/maitre-doeuvre" element={withDashboard(<DashboardPage />)} />
+      {/* Maitre d'oeuvre Routes */}
+      <Route
+        element={
+          <ProtectedRoute
+            isAuthenticated={isAuthenticated}
+            userRoles={user?.roles ?? []}
+            allowedRoles={['ROLE_MAITRE_OEUVRE']}
+          />
+        }
+      >
+        <Route element={<DashboardLayout />}>
+          <Route path="/maitre-doeuvre" element={<MoeDashboardPage />} />
           <Route
             path="/maitre-doeuvre/dossiers"
-            element={withDashboard(<MesDossiersPage />)}
+            element={<MesDossiersPage />}
           />
           <Route
             path="/maitre-doeuvre/dossiers/:id"
-            element={withDashboard(<div>Détails du dossier</div>)}
+            element={<div>Détails du dossier</div>}
           />
           <Route
             path="/maitre-doeuvre/chantiers/:id/completer"
-            element={withDashboard(<CompleteDossierPage />)}
+            element={<CompleteDossierPage />}
           />
           <Route
             path="/maitre-doeuvre/chantiers"
-            element={withDashboard(<ProjetsListPage />)}
+            element={<MesProjetsListPage />}
           />
           <Route
             path="/maitre-doeuvre/chantiers/:id"
-            element={withDashboard(<div>Détails du chantier</div>)}
+            element={<ChantierDetailPage />}
           />
           <Route
             path="/maitre-doeuvre/settings"
-            element={withDashboard(<SettingsPage />)}
+            element={<SettingsPage />}
           />
         </Route>
+      </Route>
 
-        {/* Admin Routes */}
-        <Route
-          element={
-            <ProtectedRoute
-              isAuthenticated={isAuthenticated}
-              userRoles={user?.roles ?? []}
-              allowedRoles={['ROLE_ADMIN']}
-            />
-          }
-        >
-          <Route path="/admin" element={withDashboard(<DashboardPage />)} />
-          <Route path="/admin/dossiers" element={withDashboard(<DossiersListPage />)} />
-          <Route path="/admin/chantiers" element={withDashboard(<ProjetsListPage />)} />
+      {/* Admin Routes */}
+      <Route
+        element={
+          <ProtectedRoute
+            isAuthenticated={isAuthenticated}
+            userRoles={user?.roles ?? []}
+            allowedRoles={['ROLE_ADMIN']}
+          />
+        }
+      >
+        <Route element={<DashboardLayout />}>
+          <Route path="/admin" element={<AdminDashboardPage />} />
+          <Route path="/admin/dossiers" element={<DossiersListPage />} />
+          <Route path="/admin/chantiers" element={<AdminChantiersListPage />} />
+          <Route path="/admin/chantiers/map" element={<ChantiersMapPage />} />
+          <Route path="/admin/chantiers/:id" element={<AdminChantierDetailPage />} />
           <Route
             path="/admin/utilisateurs"
-            element={withDashboard(<UtilisateursListPage />)}
+            element={<UtilisateursListPage />}
           />
-          <Route path="/admin/utilisateurs/new" element={withDashboard(<NewUtilisateurPage />)} />
-          <Route path="/admin/artisans" element={withDashboard(<ArtisansListPage />)} />
-          <Route path="/admin/artisans/:id/edit" element={withDashboard(<EditArtisanPage />)} />
-          <Route path='/admin/artisans/new' element={withDashboard(<NewArtisanPage />)} />
+          <Route path="/admin/utilisateurs/new" element={<NewUtilisateurPage />} />
+          <Route path="/admin/utilisateurs/:id" element={<UserDetailPage />} />
+          <Route path="/admin/utilisateurs/:id/edit" element={<div>Page d'édition à venir</div>} />
+
+
+          <Route path="/admin/artisans" element={<ArtisansListPage />} />
+          <Route path='/admin/artisans/new' element={<NewArtisanPage />} />
+          <Route path="/admin/artisans/:id/edit" element={<EditArtisanPage />} />
+          <Route path="/admin/artisans/:id" element={<ArtisanDetailsPage />} />
+          <Route path="/admin/artisans/:id" element={<ArtisanDetailsPage />} />
+
+          <Route path="/admin/modeles" element={<ModelesListPage />} />
+          <Route path="/admin/modeles/new" element={<ModeleEditPage />} />
+          <Route path="/admin/modeles/:id/edit" element={<ModeleEditPage />} />
+
           <Route
             path="/admin/settings"
-            element={withDashboard(<SettingsPage />)}
+            element={<SettingsPage />}
           />
         </Route>
+      </Route>
 
-        {/* Redirect root to login */}
-        <Route path="/" element={<Navigate to="/login" replace />} />
+      {/* Redirect root to login */}
+      <Route path="/" element={<Navigate to="/login" replace />} />
 
-        {/* Catch all route for 404 */}
-        <Route path="*" element={<Error404 />} />
-      </Routes>
+      {/* Catch all route for 404 */}
+      <Route path="*" element={<Error404 />} />
+    </Routes>
   );
 }
 

@@ -9,6 +9,7 @@ import { jwtDecode } from 'jwt-decode';
 import type { JWTPayload } from '@/shared/types/auth';
 import logo from '@/shared/assets/Logo.svg'
 import { loginSchema, type LoginFormData } from "@/shared/utils/validators";
+import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '@/shared/components/ui/Card';
 
 
 export const Login = () => {
@@ -70,38 +71,42 @@ export const Login = () => {
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-bg-primary">
       <div className="flex flex-col items-center mb-10">
-        <img src={logo} alt="" width={60}/>
+        <img src={logo} alt="" width={60} />
         <h3 className="text-4xl text-text-primary font-bold mt-2">Bati’parti</h3>
       </div>
-      <div className="max-w-[500px] w-full flex justify-center flex-col relative p-8 bg-bg-secondary rounded-[14px] shadow-lg">
-        <h2 className="text-3xl font-bold items-center text-center text-text-primary mb-4">Autentifiez -vous a Bati’Parti</h2>
-        <p className="text-placeholder text-center text-lg mb-8">Autentifiez -vous à Bati’Parti</p>
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-          <Input
-            label="Login"
-            type="text"
-            name="email"
-            register={register("email")}
-            error={errors.email?.message}
-          />
-          <Input
-            label="Mot de passe"
-            type="password"
-            name="password"
-            register={register("password")}
-            error={errors.password?.message}
-          />
-          {/* <Link to={'/login'} className="text-sm text-primary font-bold w-full">{'Identifant oublié ? Contactez l’administrateur >'}</Link> */}
-          <Button
-            variant="Primary"
-            classname="w-full mt-4"
-            loading={isSubmitting}
-            onClick={handleSubmit(onSubmit)}
-          >
-            Se connecter
-          </Button>
-        </form>
-      </div>
+      <Card className="max-w-[500px] w-full relative">
+        <CardHeader>
+          <CardTitle className="text-3xl text-center mb-2">Autentifiez -vous a Bati’Parti</CardTitle>
+          <CardDescription className="text-center text-lg">Autentifiez -vous à Bati’Parti</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+            <Input
+              label="Login"
+              type="text"
+              name="email"
+              register={register("email")}
+              error={errors.email?.message}
+            />
+            <Input
+              label="Mot de passe"
+              type="password"
+              name="password"
+              register={register("password")}
+              error={errors.password?.message}
+            />
+            {/* <Link to={'/login'} className="text-sm text-primary font-bold w-full">{'Identifant oublié ? Contactez l’administrateur >'}</Link> */}
+            <Button
+              variant="Primary"
+              classname="w-full mt-4"
+              loading={isSubmitting}
+              onClick={handleSubmit(onSubmit)}
+            >
+              Se connecter
+            </Button>
+          </form>
+        </CardContent>
+      </Card>
     </div>
   );
 };

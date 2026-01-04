@@ -1,5 +1,5 @@
 import { InfoCircleSolid, Calendar } from '@mynaui/icons-react'
-import { useRef, useState } from 'react'
+import { useRef, useState, useEffect } from 'react'
 import type { UseFormRegisterReturn } from 'react-hook-form'
 import Tooltip from './Tooltip'
 import ReactDatePicker from 'react-datepicker'
@@ -46,6 +46,14 @@ const DateInput: React.FC<DateInputProps> = ({
   )
   const datePickerRef = useRef<ReactDatePicker>(null)
 
+  useEffect(() => {
+    if (value) {
+      setSelectedDate(new Date(value))
+    } else if (defaultValue) {
+      setSelectedDate(new Date(defaultValue))
+    }
+  }, [value, defaultValue])
+
   const hasError = Boolean(error)
   const inputId = name || label
   const describedBy = hasError ? `${inputId}-error` : undefined
@@ -53,9 +61,12 @@ const DateInput: React.FC<DateInputProps> = ({
   const reg = register ?? ({} as UseFormRegisterReturn)
 
   const handleDateChange = (date: Date | null) => {
+    // Only update local state if controlled component logic is not interfering, 
+    // but since we sync via useEffect, we can set it here too for immediate feedback.
     setSelectedDate(date)
-    
+
     if (date) {
+      // ... same logic
       const formattedDate = format(date, 'yyyy-MM-dd')
       const event = {
         target: {
@@ -63,7 +74,7 @@ const DateInput: React.FC<DateInputProps> = ({
           value: formattedDate,
         },
       } as React.ChangeEvent<HTMLInputElement>
-      
+
       reg.onChange?.(event)
       onChange?.(event)
     }
@@ -85,9 +96,8 @@ const DateInput: React.FC<DateInputProps> = ({
         )}
       </div>
       <div
-        className={`border-[1.5px] ${
-          hasError ? 'border-red' : 'border-border'
-        } px-3 flex items-center rounded-md focus-within:border-primary focus-within:outline-[1px] text-text-primary outline-border justify-between mt-1 mb-0 w-full`}
+        className={`border-[1.5px] ${hasError ? 'border-red' : 'border-border'
+          } px-3 flex items-center rounded-md focus-within:border-primary focus-within:outline-[1px] text-text-primary outline-border justify-between mt-1 mb-0 w-full`}
       >
         <ReactDatePicker
           ref={datePickerRef}
@@ -105,6 +115,7 @@ const DateInput: React.FC<DateInputProps> = ({
           calendarClassName="custom-datepicker"
           showPopperArrow={false}
           onBlur={reg.onBlur}
+          popperClassName="!z-[100]"
         />
         <button
           type="button"

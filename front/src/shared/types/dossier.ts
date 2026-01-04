@@ -71,6 +71,7 @@ export interface Modele {
   noModele: number;
   nomModele: string;
   descriptionModele?: string;
+  etapes?: { noEtape: number; nomEtape: string; reservable?: boolean }[];
 }
 
 // ============================================

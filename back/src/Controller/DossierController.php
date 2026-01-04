@@ -60,6 +60,8 @@ class DossierController extends AbstractController
         $chantier->setAdresse($data['chantier']['adresseChantier'] ?? null);
         $chantier->setCodePostal($data['chantier']['cpChantier'] ?? null);
         $chantier->setVille($data['chantier']['villeChantier'] ?? null);
+        $chantier->setLatitude($data['chantier']['latitude'] ?? null);
+        $chantier->setLongitude($data['chantier']['longitude'] ?? null);
         $chantier->setDateCreation(new \DateTime($data['chantier']['dateCreation']));
         $chantier->setStatut($data['chantier']['statutChantier']);
         $chantier->setClient($client);
@@ -169,6 +171,8 @@ class DossierController extends AbstractController
             $chantier->setAdresse($data['chantier']['adresseChantier'] ?? null);
             $chantier->setCodePostal($data['chantier']['cpChantier'] ?? null);
             $chantier->setVille($data['chantier']['villeChantier'] ?? null);
+            $chantier->setLatitude($data['chantier']['latitude'] ?? null);
+            $chantier->setLongitude($data['chantier']['longitude'] ?? null);
             $chantier->setDateCreation(new \DateTime($data['chantier']['dateCreation']));
             $chantier->setStatut($data['chantier']['statutChantier']);
 
@@ -220,6 +224,8 @@ class DossierController extends AbstractController
                 'adresseChantier' => $chantier->getAdresse(),
                 'cpChantier' => $chantier->getCodePostal(),
                 'villeChantier' => $chantier->getVille(),
+                'latitude' => $chantier->getLatitude(),
+                'longitude' => $chantier->getLongitude(),
                 'dateCreation' => $chantier->getDateCreation()?->format('Y-m-d'),
                 'statutChantier' => $chantier->getStatut(),
                 'noMOE' => $chantier->getMaitreOeuvre()?->getId(),
@@ -281,6 +287,8 @@ class DossierController extends AbstractController
                 'address' => $chantier->getAdresse(),
                 'cp' => $chantier->getCodePostal(),
                 'ville' => $chantier->getVille(),
+                'latitude' => $chantier->getLatitude(),
+                'longitude' => $chantier->getLongitude(),
                 'start' => $chantier->getDateCreation()?->format('Y-m-d'),
                 'status' => $chantier->getStatut(),
                 'noClient' => $client->getId(),
@@ -345,6 +353,8 @@ class DossierController extends AbstractController
                 'address' => $chantier->getAdresse(),
                 'cp' => $chantier->getCodePostal(),
                 'ville' => $chantier->getVille(),
+                'latitude' => $chantier->getLatitude(),
+                'longitude' => $chantier->getLongitude(),
                 'start' => $chantier->getDateCreation()?->format('Y-m-d'),
                 'status' => $chantier->getStatut(),
                 'noClient' => $client->getId(),
@@ -365,10 +375,26 @@ class DossierController extends AbstractController
         }
 
         $etapeChantiers = $chantier->getEtapeChantiers();
+        $construireRepo = $entityManager->getRepository(\App\Entity\Construire::class);
+        $modele = $chantier->getModele();
+
         $result = [];
         foreach ($etapeChantiers as $ec) {
             /** @var EtapeChantier $ec */
             $artisan = $ec->getArtisan();
+
+            // Récupérer la durée théorique depuis le modèle
+            $nbJours = 0;
+            if ($modele && $ec->getEtape()) {
+                $construire = $construireRepo->findOneBy([
+                    'noModele' => $modele,
+                    'noEtape' => $ec->getEtape()
+                ]);
+                if ($construire) {
+                    $nbJours = $construire->getNbJoursRealisation() ?? 0;
+                }
+            }
+
             $result[] = [
                 'noEtapeChantier' => $ec->getId(),
                 'noEtape' => $ec->getEtape()?->getId(),
@@ -383,6 +409,7 @@ class DossierController extends AbstractController
                 'noArtisan' => $artisan ? $artisan->getId() : null,
                 'reducSuppl' => $ec->getReductionSupplementaire() !== null ? (float) $ec->getReductionSupplementaire() : null,
                 'descriptionReducSuppl' => $ec->getDescriptionReductionSupplementaire(),
+                'nbJours' => $nbJours,
             ];
         }
 
@@ -464,5 +491,106 @@ class DossierController extends AbstractController
         $entityManager->flush();
 
         return $this->json(['message' => 'Étapes mises à jour']);
+    }
+
+    #[Route('/api/commercial/stats', name: 'api_commercial_stats', methods: ['GET'])]
+    public function getCommercialStats(EntityManagerInterface $entityManager): JsonResponse
+    {
+        /** @var \App\Entity\Utilisateur|null $user */
+        $user = $this->getUser();
+        if (!$user) {
+            return $this->json(['message' => 'Non authentifié'], 401);
+        }
+
+        $commercial = $user->getCommercial();
+        if (!$commercial) {
+            return $this->json(['message' => 'Utilisateur non associé à un commercial'], 403);
+        }
+
+        // Récupérer tous les chantiers (le commercial voit tous les dossiers)
+        $chantiers = $entityManager->getRepository(Chantier::class)
+            ->createQueryBuilder('ch')
+            ->leftJoin('ch.client', 'cl')
+            ->addSelect('cl')
+            ->orderBy('ch.dateCreation', 'DESC')
+            ->getQuery()
+            ->getResult();
+
+        $totalDossiers = count($chantiers);
+        $dossiersACompleter = 0;
+        $dossiersAVenir = 0;
+        $dossiersEnChantier = 0;
+        $dossiersTermines = 0;
+
+        // Stats par mois (12 derniers mois)
+        $dossiersByMonth = [];
+        $now = new \DateTime();
+        
+        for ($i = 11; $i >= 0; $i--) {
+            $date = (clone $now)->modify("-{$i} months");
+            $key = $date->format('Y-m');
+            $dossiersByMonth[$key] = 0;
+        }
+
+        foreach ($chantiers as $chantier) {
+            switch ($chantier->getStatut()) {
+                case 'À compléter':
+                    $dossiersACompleter++;
+                    break;
+                case 'À venir':
+                    $dossiersAVenir++;
+                    break;
+                case 'En chantier':
+                    $dossiersEnChantier++;
+                    break;
+                case 'Terminé':
+                    $dossiersTermines++;
+                    break;
+            }
+
+            $monthKey = $chantier->getDateCreation()?->format('Y-m');
+            if ($monthKey && isset($dossiersByMonth[$monthKey])) {
+                $dossiersByMonth[$monthKey]++;
+            }
+        }
+
+        // Formatage des données pour les graphiques
+        $monthLabels = [];
+        $dossierData = [];
+        
+        foreach ($dossiersByMonth as $month => $count) {
+            $date = \DateTime::createFromFormat('Y-m', $month);
+            $monthLabels[] = $date->format('M Y');
+            $dossierData[] = $count;
+        }
+
+        // Dossiers récents
+        $recentDossiers = array_slice($chantiers, 0, 5);
+        $recent = [];
+        foreach ($recentDossiers as $ch) {
+            $client = $ch->getClient();
+            $recent[] = [
+                'noChantier' => $ch->getId(),
+                'client' => $client ? $client->getNom() . ' ' . $client->getPrenom() : 'N/A',
+                'ville' => $ch->getVille(),
+                'statut' => $ch->getStatut(),
+                'dateCreation' => $ch->getDateCreation()?->format('Y-m-d'),
+            ];
+        }
+
+        return $this->json([
+            'general' => [
+                'totalDossiers' => $totalDossiers,
+                'dossiersACompleter' => $dossiersACompleter,
+                'dossiersAVenir' => $dossiersAVenir,
+                'dossiersEnChantier' => $dossiersEnChantier,
+                'dossiersTermines' => $dossiersTermines,
+            ],
+            'charts' => [
+                'monthLabels' => $monthLabels,
+                'dossiersByMonth' => $dossierData,
+            ],
+            'recentDossiers' => $recent,
+        ]);
     }
 }

@@ -7,7 +7,7 @@ import { Label } from './Typography'
 export type InputProps = {
   name: string
   label?: string
-  type: 'password' | 'text' | 'email'
+  type: 'password' | 'text' | 'email' | 'tel' | 'date' | 'number'
   placeholder?: string
   className?: string
   leftIcon?: ReactNode
@@ -17,11 +17,17 @@ export type InputProps = {
   onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void
   value?: string
   defaultValue?: string
-  info?:boolean;
-  message?:string;
-  width?:string;
+  info?: boolean;
+  message?: string;
+  width?: string;
   onFocus?: () => void;
-
+  disabled?: boolean;
+  readOnly?: boolean;
+  onClick?: () => void;
+  required?: boolean;
+  step?: string | number;
+  min?: string | number;
+  max?: string | number;
 }
 
 const Input: React.FC<InputProps> = ({
@@ -37,10 +43,17 @@ const Input: React.FC<InputProps> = ({
   onChange,
   value,
   defaultValue,
-  info=false,
-  message='',
-  width='w-full',
-  onFocus
+  info = false,
+  message = '',
+  width = 'w-full',
+  onFocus,
+  disabled,
+  readOnly,
+  onClick,
+  required,
+  step,
+  min,
+  max
 }) => {
   const hasError = Boolean(error)
   const inputId = name || label
@@ -63,14 +76,14 @@ const Input: React.FC<InputProps> = ({
   return (
     <div className={`${className ?? ''} relative ${width} mb-6`}>
       <div className='flex items-center'>
-        {label&& <Label className='m-1 text-text-primary' weight='bold' htmlFor={inputId}>{label}</Label>}
-        {info&&
+        {label && <Label className='m-1 text-text-primary' weight='bold' htmlFor={inputId}>{label}</Label>}
+        {info &&
           <Tooltip content={message}>
-            <InfoCircleSolid size={14} className='text-text-secondary ml-1'/>
+            <InfoCircleSolid size={14} className='text-text-secondary ml-1' />
           </Tooltip>
         }
       </div>
-        <div className={`border ${hasError ? 'border-red' : 'border-border'} px-3 flex items-center rounded-md focus-within:border-primary focus-within:outline-[1px] outline-border justify-between mt-1 mb-0 w-full`}>
+      <div className={`border ${hasError ? 'border-red' : 'border-border'} px-3 flex items-center rounded-md focus-within:border-primary focus-within:outline-[1px] outline-border justify-between mt-1 mb-0 w-full ${disabled ? 'bg-bg-secondary cursor-not-allowed' : ''}`}>
         <div className='flex flex-row items-center flex-1'>
           {leftIcon}
           <input
@@ -79,9 +92,16 @@ const Input: React.FC<InputProps> = ({
             placeholder={placeholder}
             aria-invalid={hasError}
             aria-describedby={describedBy}
-            className={`focus:outline-none h-[38px] ${leftIcon?'px-1.5':'px-0'} text-text-primary ml-1 flex-1 bg-transparent w-full placeholder-placeholder`}
+            className={`focus:outline-none h-[38px] ${leftIcon ? 'px-1.5' : 'px-0'} text-text-primary ml-1 flex-1 bg-transparent w-full placeholder-placeholder ${disabled ? 'cursor-not-allowed text-text-secondary' : ''}`}
             onChange={mergedOnChange}
             onFocus={onFocus}
+            onClick={onClick}
+            disabled={disabled}
+            readOnly={readOnly}
+            required={required}
+            step={step}
+            min={min}
+            max={max}
             {...controlProps}
             name={reg.name ?? name}
             onBlur={reg.onBlur}
@@ -101,11 +121,11 @@ const Input: React.FC<InputProps> = ({
             </button>
           )}
           {hasError && <DangerCircle aria-hidden={true} size={18} className='text-red' />}
+        </div>
+        {hasError && (
+          <p id={describedBy} className='text-red text-[13px] font-semibold ml-1 mt-1 absolute bottom-5 left-0'>{error}</p>
+        )}
       </div>
-      {hasError && (
-        <p id={describedBy} className='text-red text-[13px] font-semibold ml-1 mt-1 absolute bottom-5 left-0'>{error}</p>
-      )}
-    </div>
     </div>
   )
 }

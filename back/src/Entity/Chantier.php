@@ -26,6 +26,12 @@ class Chantier
     #[ORM\Column(name: 'villeChantier', length: 50, nullable: true)]
     private ?string $ville = null;
 
+    #[ORM\Column(name: 'latitude', type: Types::FLOAT, nullable: true)]
+    private ?float $latitude = null;
+
+    #[ORM\Column(name: 'longitude', type: Types::FLOAT, nullable: true)]
+    private ?float $longitude = null;
+
     #[ORM\Column(name: 'dateCreation', type: Types::DATE_MUTABLE)]
     private ?\DateTimeInterface $dateCreation = null;
 
@@ -44,23 +50,62 @@ class Chantier
     #[ORM\JoinColumn(name: 'noModele', referencedColumnName: 'noModele')]
     private ?Modele $modele = null;
 
-    #[ORM\OneToMany(mappedBy: 'chantier', targetEntity: EtapeChantier::class)]
+    #[ORM\OneToMany(mappedBy: 'chantier', targetEntity: EtapeChantier::class, cascade: ['remove'], orphanRemoval: true)]
     private Collection $etapeChantiers;
 
-    #[ORM\OneToMany(mappedBy: 'chantier', targetEntity: Appel::class)]
+    #[ORM\OneToMany(mappedBy: 'chantier', targetEntity: Appel::class, cascade: ['remove'], orphanRemoval: true)]
     private Collection $appels;
+
+    #[ORM\OneToMany(mappedBy: 'chantier', targetEntity: Devis::class, cascade: ['remove'], orphanRemoval: true)]
+    private Collection $devis;
 
     public function __construct()
     {
         $this->dateCreation = new \DateTime();
         $this->etapeChantiers = new ArrayCollection();
         $this->appels = new ArrayCollection();
+        $this->devis = new ArrayCollection();
     }
+
+
+
 
     public function getId(): ?int
     {
         return $this->id;
     }
+    // ... existing getters ...
+
+    /**
+     * @return Collection<int, Devis>
+     */
+    public function getDevis(): Collection
+    {
+        return $this->devis;
+    }
+
+    public function addDevis(Devis $devis): static
+    {
+        if (!$this->devis->contains($devis)) {
+            $this->devis->add($devis);
+            $devis->setChantier($this);
+        }
+
+        return $this;
+    }
+
+    public function removeDevis(Devis $devis): static
+    {
+        if ($this->devis->removeElement($devis)) {
+            // set the owning side to null (unless already changed)
+            if ($devis->getChantier() === $this) {
+                $devis->setChantier(null);
+            }
+        }
+
+        return $this;
+    }
+
 
     public function getAdresse(): ?string
     {
@@ -92,6 +137,28 @@ class Chantier
     public function setVille(?string $ville): static
     {
         $this->ville = $ville;
+        return $this;
+    }
+
+    public function getLatitude(): ?float
+    {
+        return $this->latitude;
+    }
+
+    public function setLatitude(?float $latitude): static
+    {
+        $this->latitude = $latitude;
+        return $this;
+    }
+
+    public function getLongitude(): ?float
+    {
+        return $this->longitude;
+    }
+
+    public function setLongitude(?float $longitude): static
+    {
+        $this->longitude = $longitude;
         return $this;
     }
 
@@ -202,5 +269,10 @@ class Chantier
             }
         }
         return $this;
+    }
+    public function getNomChantier(): string
+    {
+        $clientName = $this->getClient() ? ($this->getClient()->getNom() . ' ' . $this->getClient()->getPrenom()) : 'Client inconnu';
+        return 'Chantier ' . $clientName . ' (' . ($this->getVille() ?? '?') . ')';
     }
 }

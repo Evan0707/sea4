@@ -19,7 +19,6 @@ interface ArtisanItemProps {
 }
 
 const ArtisanItem = ({
-  noArtisan,
   nomArtisan,
   prenomArtisan,
   adresseArtisan,
@@ -58,10 +57,10 @@ const ArtisanItem = ({
     }
   }, [isHovered, isPopoverOpen]);
 
-  useEffect(()=>{
-    console.log(nomArtisan);
-    
-  },[])
+  useEffect(() => {
+
+
+  }, [])
 
   return (
     <div
@@ -79,7 +78,7 @@ const ArtisanItem = ({
 
               {etapes && etapes.length > 0 && (
                 <div className="flex items-center gap-2 mt-1">
-                  {etapes.slice(0,2).map(e => (
+                  {etapes.slice(0, 2).map(e => (
                     <Text variant='small' key={e.noEtape} className=" bg-bg-secondary border border-border rounded-md px-2 py-0.5 truncate max-w-[150px] ">
                       {e.nomEtape}
                     </Text>
@@ -141,7 +140,7 @@ const ArtisanItem = ({
                   <Trash className="w-4 h-4 text-red" />
                   <span className="text-sm text-red">Supprimer</span>
                 </button>
-             </ConfirmPopover>
+              </ConfirmPopover>
             </div>
           )}
         </div>
