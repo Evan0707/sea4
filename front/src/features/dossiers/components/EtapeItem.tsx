@@ -66,6 +66,8 @@ const EtapeItem: React.FC<Props> = ({ e, artisans, onChange, onOpenAvailability,
               onChange={(ev: React.ChangeEvent<HTMLInputElement>) => update({ dateTheorique: ev.target.value })}
             />
 
+
+
             {e.reservable && (
               <Checkbox
                 className='absolute right-4'

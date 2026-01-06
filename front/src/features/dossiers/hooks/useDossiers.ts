@@ -52,7 +52,7 @@ export const useDossier = (id: string | undefined) => {
   queryKey: ['dossier', id],
   queryFn: async () => {
    if (!id) return null;
-   const response = await apiClient.get<DossierResponse>(`/dossier/${id}`);
+   const response = await apiClient.get<DossierResponse>(`/dossiers/${id}`);
    return response.data;
   },
   enabled: !!id,

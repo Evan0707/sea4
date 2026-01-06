@@ -75,7 +75,7 @@ export const ChantierStep = ({ form }: ChantierStepProps) => {
             error={errors.dateCreation?.message}
             info={true}
             message="Date de début du chantier"
-            min={new Date().toISOString().split('T')[0]}
+          // min={new Date().toISOString().split('T')[0]}
           />
           <div>
             <Select

@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { Save, Check } from '@mynaui/icons-react';
 import { H1, Text } from '@/shared/components/ui/Typography';
 import Button from '@/shared/components/ui/Button';
 import EtapeItem from '../components/EtapeItem';
@@ -40,23 +41,47 @@ const CompleteDossierPage: React.FC = () => {
   // Effect to sync etapes state when data loads
   useEffect(() => {
     if (etapesData.length > 0) {
-      const etapesState = etapesData.map((e: any) => ({
-        noEtape: e.noEtape || e.noEtapeChantier || e.id,
-        nomEtape: e.nomEtape || e.nom || 'Étape',
-        reservable: !!e.reservable,
-        artisanId: e.noArtisan || null,
-        dateTheorique: e.dateDebutTheorique || null,
-        montantTheorique: e.montantTheoriqueFacture ?? e.montantFacture ?? 0,
-        reservee: e.reservee ?? false,
-        openSupp: false,
-        supplement: e.reducSuppl && parseFloat(e.reducSuppl) > 0 ? parseFloat(e.reducSuppl) : null,
-        reduction: e.reducSuppl && parseFloat(e.reducSuppl) < 0 ? Math.abs(parseFloat(e.reducSuppl)) : null,
-        supplementDesc: e.descriptionReducSuppl || null,
-        nbJours: e.nbJours || 0,
-      } as EtapeState));
+      // Sort etapes by noEtape just in case
+      const sortedEtapes = [...etapesData].sort((a: any, b: any) => {
+        const idA = a.noEtape || a.noEtapeChantier || a.id;
+        const idB = b.noEtape || b.noEtapeChantier || b.id;
+        return idA - idB;
+      });
+
+      let currentDate = dossierData?.chantier?.dateCreation
+        ? new Date(dossierData.chantier.dateCreation)
+        : new Date();
+
+      const etapesState = sortedEtapes.map((e: any) => {
+        // Force calculation to fix "all same dates" issue
+        // We assume the desired state is a perfect chain based on duration
+        const startDate = new Date(currentDate);
+
+        const duration = e.nbJours || 0;
+
+        // Prepare date for next step
+        const nextDate = new Date(startDate);
+        nextDate.setDate(nextDate.getDate() + duration);
+        currentDate = nextDate;
+
+        return {
+          noEtape: e.noEtape || e.noEtapeChantier || e.id,
+          nomEtape: e.nomEtape || e.nom || 'Étape',
+          reservable: !!e.reservable,
+          artisanId: e.noArtisan || null,
+          dateTheorique: startDate.toISOString().split('T')[0],
+          montantTheorique: e.montantTheoriqueFacture ?? e.montantFacture ?? 0,
+          reservee: e.reservee ?? false,
+          openSupp: false,
+          supplement: e.reducSuppl && parseFloat(e.reducSuppl) > 0 ? parseFloat(e.reducSuppl) : null,
+          reduction: e.reducSuppl && parseFloat(e.reducSuppl) < 0 ? Math.abs(parseFloat(e.reducSuppl)) : null,
+          supplementDesc: e.descriptionReducSuppl || null,
+          nbJours: duration,
+        } as EtapeState;
+      });
       setEtapes(etapesState);
     }
-  }, [etapesData]);
+  }, [etapesData, dossierData]); // Add dossierData dependency
 
   const dossier = dossierData as DossierResponse | undefined;
   const artisans = artisansList as Array<{ noArtisan: number; nomArtisan: string; prenomArtisan?: string }>; // Cast to match local interface if needed
@@ -113,14 +138,47 @@ const CompleteDossierPage: React.FC = () => {
 
   const [errors, setErrors] = useState<Set<number>>(new Set());
 
-  const handleSubmit = async () => {
+  const saveEtapes = async () => {
+    // Préparer les données pour l'API
+    const etapesPayload = etapes.map((e) => ({
+      noEtape: e.noEtape,
+      artisanId: e.artisanId ?? null,
+      dateTheorique: e.dateTheorique ?? null,
+      montantTheorique: e.montantTheorique ?? 0,
+      reservee: e.reservee ?? false,
+      supplement: e.supplement ?? null,
+      reduction: e.reduction ?? null,
+      supplementDesc: e.supplementDesc ?? null,
+      nbJours: e.nbJours ?? null,
+    }));
+
+    await apiClient.put(`/chantiers/${id}/etapes`, {
+      etapes: etapesPayload,
+    });
+  };
+
+  const handleSaveDraft = async () => {
+    try {
+      await saveEtapes();
+      addToast('Brouillon sauvegardé', 'success');
+      // On ne quitte pas la page forcément, ou on peut navigate(-1) si voulu. 
+      // Le client demande "possibilité de ne pas tout compléter", implicitement pour y revenir.
+      // On peut rester sur la page ou sortir. Restons sur la page pour l'instant ou retour?
+      // "mais ducoup passe pas à a venir" -> implicite : on garde l'état courant.
+      navigate('/commercial/dossiers');
+    } catch (error) {
+      console.error('Erreur lors de la sauvegarde:', error);
+      addToast('Erreur lors de la sauvegarde du brouillon', 'error');
+    }
+  }
+
+  const handleComplete = async () => {
     setErrors(new Set());
     try {
       // 1. Check for missing required fields
       const etapesIncompletes = etapes.filter(e => !e.artisanId || !e.dateTheorique);
       if (etapesIncompletes.length > 0) {
         addToast(`${etapesIncompletes.length} étape(s) n'ont pas d'artisan ou de date théorique`, 'error');
-        // Add to errors
         const newErrors = new Set<number>();
         etapesIncompletes.forEach(e => newErrors.add(e.noEtape));
         setErrors(newErrors);
@@ -128,8 +186,6 @@ const CompleteDossierPage: React.FC = () => {
       }
 
       // 2. Validate Chronological Order
-      // User request: "date etape 1 > etape 2" -> verify Step N date >= Step N-1 date + duration (or just date).
-      // Let's assume the array order `etapes` is the correct sequence order.
       const sequenceErrors = new Set<number>();
       for (let i = 1; i < etapes.length; i++) {
         const current = etapes[i];
@@ -139,7 +195,6 @@ const CompleteDossierPage: React.FC = () => {
           const prevDate = new Date(previous.dateTheorique);
           const currDate = new Date(current.dateTheorique);
 
-          // Check if Current starts BEFORE Previous
           if (currDate < prevDate) {
             sequenceErrors.add(current.noEtape);
             addToast(`L'étape "${current.nomEtape}" ne peut pas commencer avant l'étape "${previous.nomEtape}"`, 'error');
@@ -152,28 +207,19 @@ const CompleteDossierPage: React.FC = () => {
         return;
       }
 
-      // Préparer les données pour l'API
-      const etapesPayload = etapes.map((e) => ({
-        noEtape: e.noEtape,
-        artisanId: e.artisanId ?? null,
-        dateTheorique: e.dateTheorique ?? null,
-        montantTheorique: e.montantTheorique ?? 0,
-        reservee: e.reservee ?? false,
-        supplement: e.supplement ?? null,
-        reduction: e.reduction ?? null,
-        supplementDesc: e.supplementDesc ?? null,
-        nbJours: e.nbJours ?? null,
-      }));
+      // Save steps first
+      await saveEtapes();
 
-      await apiClient.put(`/chantiers/${id}/etapes`, {
-        etapes: etapesPayload,
+      // Update status to 'À venir' explicitly
+      await apiClient.put(`/dossiers/${id}`, {
+        chantier: { statutChantier: 'À venir' }
       });
 
-      addToast('Changements enregistrés avec succès', 'success');
-      navigate(-1);
+      addToast('Dossier validé et passé à "À venir"', 'success');
+      navigate('/commercial/dossiers');
     } catch (error) {
-      console.error('Erreur lors de la sauvegarde:', error);
-      addToast('Erreur lors de l\'enregistrement des changements', 'error');
+      console.error('Erreur lors de la validation:', error);
+      addToast('Erreur lors de la validation du dossier', 'error');
     }
   };
 
@@ -281,8 +327,9 @@ const CompleteDossierPage: React.FC = () => {
       {/* Totals */}
       <div className="mt-6 border-t border-border pt-4 flex justify-between items-center gap-8">
         <div className="flex gap-2 justify-start items-start">
-          <Button variant="Secondary" onClick={() => navigate(-1)}>Retour</Button>
-          <Button variant="Primary" onClick={handleSubmit}>Enregistrer</Button>
+          <Button variant="Secondary" onClick={() => navigate(-1)}>Annuler</Button>
+          <Button variant="Secondary" icon={Save} onClick={handleSaveDraft}>Sauvegarder (brouillon)</Button>
+          <Button variant="Primary" icon={Check} onClick={handleComplete}>Valider le dossier</Button>
         </div>
         <div className='flex flex-row items-center'>
           <div className="text-right text-text-primary">

@@ -43,7 +43,7 @@ export const ChantiersMapPage = () => {
     // Fetch list of dossiers (chantiers)
     // We might need a specific endpoint or just use the list endpoint and filter client-side if needed.
     // Assuming /api/dossier returns chantiers with lat/long as updated in controller.
-    const response = await apiClient.get('/dossier');
+    const response = await apiClient.get('/chantiers');
     const data = response.data;
 
     const getStatusColor = (status: string) => {

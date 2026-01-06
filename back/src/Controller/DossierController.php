@@ -105,7 +105,45 @@ class DossierController extends AbstractController
         $entityManager->persist($chantier);
         $entityManager->flush();
 
-        // Les étapes seront créées automatiquement par le trigger de la base de données
+        // Les étapes sont créées automatiquement par le trigger DB
+        // On récupère les étapes via le repository pour être sûr de les avoir (bypass cache collection potentielle)
+        $etapesChantier = $entityManager->getRepository(EtapeChantier::class)->findBy(['chantier' => $chantier]);
+        $construireRepo = $entityManager->getRepository(\App\Entity\Construire::class);
+
+        // Convertir en tableau pour trier (findBy retourne déjà un array, mais gardons la logique de tri)
+        $etapesArray = $etapesChantier;
+        usort($etapesArray, function ($a, $b) {
+            return $a->getEtape()->getId() <=> $b->getEtape()->getId();
+        });
+
+        $currentDate = clone $chantier->getDateCreation();
+
+        foreach ($etapesArray as $ec) {
+            /** @var EtapeChantier $ec */
+            if ($chantier->getModele() && $ec->getEtape()) {
+                $construire = $construireRepo->findOneBy([
+                    'noModele' => $chantier->getModele(),
+                    'noEtape' => $ec->getEtape()
+                ]);
+
+                if ($construire) {
+                    $ec->setMontantTheoriqueFacture($construire->getMontantFacture());
+                    $ec->setNbJoursPrevu($construire->getNbJoursRealisation());
+                }
+            }
+
+            // Définir la date de début théorique
+            $ec->setDateDebutTheorique(clone $currentDate);
+
+            // Calculer la date pour la prochaine étape
+            $duration = $ec->getNbJoursPrevu() ?? 0;
+            if ($duration > 0) {
+                $currentDate->modify("+{$duration} days");
+            }
+            
+            $entityManager->persist($ec);
+        }
+        $entityManager->flush();
 
         return $this->json([
             'message' => 'Dossier créé avec succès',
@@ -147,11 +185,11 @@ class DossierController extends AbstractController
 
         // MAJ client
         if (isset($data['client'])) {
-            $client->setNom($data['client']['nomClient']);
-            $client->setPrenom($data['client']['prenomClient']);
-            $client->setAdresse($data['client']['adresseClient'] ?? null);
-            $client->setCodePostal($data['client']['cpClient'] ?? null);
-            $client->setVille($data['client']['villeClient'] ?? null);
+            if (array_key_exists('nomClient', $data['client'])) $client->setNom($data['client']['nomClient']);
+            if (array_key_exists('prenomClient', $data['client'])) $client->setPrenom($data['client']['prenomClient']);
+            if (array_key_exists('adresseClient', $data['client'])) $client->setAdresse($data['client']['adresseClient']);
+            if (array_key_exists('cpClient', $data['client'])) $client->setCodePostal($data['client']['cpClient']);
+            if (array_key_exists('villeClient', $data['client'])) $client->setVille($data['client']['villeClient']);
 
             $errorsClient = $validator->validate($client);
             if (count($errorsClient) > 0) {
@@ -168,26 +206,32 @@ class DossierController extends AbstractController
 
         // MAJ chantier
         if (isset($data['chantier'])) {
-            $chantier->setAdresse($data['chantier']['adresseChantier'] ?? null);
-            $chantier->setCodePostal($data['chantier']['cpChantier'] ?? null);
-            $chantier->setVille($data['chantier']['villeChantier'] ?? null);
-            $chantier->setLatitude($data['chantier']['latitude'] ?? null);
-            $chantier->setLongitude($data['chantier']['longitude'] ?? null);
-            $chantier->setDateCreation(new \DateTime($data['chantier']['dateCreation']));
-            $chantier->setStatut($data['chantier']['statutChantier']);
+            if (array_key_exists('adresseChantier', $data['chantier'])) $chantier->setAdresse($data['chantier']['adresseChantier']);
+            if (array_key_exists('cpChantier', $data['chantier'])) $chantier->setCodePostal($data['chantier']['cpChantier']);
+            if (array_key_exists('villeChantier', $data['chantier'])) $chantier->setVille($data['chantier']['villeChantier']);
+            if (array_key_exists('latitude', $data['chantier'])) $chantier->setLatitude($data['chantier']['latitude']);
+            if (array_key_exists('longitude', $data['chantier'])) $chantier->setLongitude($data['chantier']['longitude']);
+            if (array_key_exists('dateCreation', $data['chantier'])) $chantier->setDateCreation(new \DateTime($data['chantier']['dateCreation']));
+            if (array_key_exists('statutChantier', $data['chantier'])) $chantier->setStatut($data['chantier']['statutChantier']);
 
             // Maître d'œuvre
-            if (isset($data['chantier']['noMOE'])) {
-                $maitreOeuvre = $entityManager->getRepository(\App\Entity\MaitreOeuvre::class)
-                    ->find($data['chantier']['noMOE']);
-                $chantier->setMaitreOeuvre($maitreOeuvre ?: null);
+            if (array_key_exists('noMOE', $data['chantier'])) {
+                $maitreOeuvre = null;
+                if ($data['chantier']['noMOE']) {
+                    $maitreOeuvre = $entityManager->getRepository(\App\Entity\MaitreOeuvre::class)
+                        ->find($data['chantier']['noMOE']);
+                }
+                $chantier->setMaitreOeuvre($maitreOeuvre);
             }
 
             // Modèle
-            if (isset($data['chantier']['noModele'])) {
-                $modele = $entityManager->getRepository(\App\Entity\Modele::class)
-                    ->find($data['chantier']['noModele']);
-                $chantier->setModele($modele ?: null);
+            if (array_key_exists('noModele', $data['chantier'])) {
+                $modele = null;
+                if ($data['chantier']['noModele']) {
+                    $modele = $entityManager->getRepository(\App\Entity\Modele::class)
+                        ->find($data['chantier']['noModele']);
+                }
+                $chantier->setModele($modele);
             }
 
             $errorsChantier = $validator->validate($chantier);
@@ -383,18 +427,18 @@ class DossierController extends AbstractController
             /** @var EtapeChantier $ec */
             $artisan = $ec->getArtisan();
 
-            // Récupérer la durée théorique depuis le modèle
-            $nbJours = 0;
-            if ($modele && $ec->getEtape()) {
-                $construire = $construireRepo->findOneBy([
+            // Fallback pour nbJours si non présent (pour compatibilité existant)
+            $nbJours = $ec->getNbJoursPrevu();
+            if (empty($nbJours) && $modele && $ec->getEtape()) {
+                 $construire = $construireRepo->findOneBy([
                     'noModele' => $modele,
                     'noEtape' => $ec->getEtape()
                 ]);
                 if ($construire) {
-                    $nbJours = $construire->getNbJoursRealisation() ?? 0;
+                    $nbJours = $construire->getNbJoursRealisation();
                 }
             }
-
+            
             $result[] = [
                 'noEtapeChantier' => $ec->getId(),
                 'noEtape' => $ec->getEtape()?->getId(),
@@ -409,7 +453,7 @@ class DossierController extends AbstractController
                 'noArtisan' => $artisan ? $artisan->getId() : null,
                 'reducSuppl' => $ec->getReductionSupplementaire() !== null ? (float) $ec->getReductionSupplementaire() : null,
                 'descriptionReducSuppl' => $ec->getDescriptionReductionSupplementaire(),
-                'nbJours' => $nbJours,
+                'nbJours' => $nbJours ?? 0,
             ];
         }
 

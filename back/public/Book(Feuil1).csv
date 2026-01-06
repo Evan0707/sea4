@@ -1,5 +1,5 @@
-nom;prenom;adresse;cp;ville;qualifications
-Dupont;Jean;30 rue des lilias;26000;Valence;Charpente, Sanitaire
-Martin;Claire;12 avenue des acacias;69000;Lyon;Electricité
+nom;prenom;adresse;cp;ville;qualifications;telephone;email
+Dupont;Jean;30 rue des lilias;26000;Valence;Charpente, Sanitaire;0612345678;jdupont@gmail.com
+Martin;Claire;12 avenue des acacias;69000;Lyon;Electricité;0612345678;jdupont@gmail.com
 
 

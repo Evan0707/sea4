@@ -39,6 +39,8 @@ class ChantierController extends AbstractController
                 'address' => $chantier->getAdresse(),
                 'cp' => $chantier->getCodePostal(),
                 'ville' => $chantier->getVille(),
+                'latitude' => $chantier->getLatitude(),
+                'longitude' => $chantier->getLongitude(),
                 'start' => $chantier->getDateCreation()->format('Y-m-d'),
                 'status' => $chantier->getStatut(),
                 'noClient' => $client->getId(),
@@ -978,6 +980,7 @@ class ChantierController extends AbstractController
             ]
         ], 201);
     }
+    #[Route('/api/devis/{id}/pdf', name: 'api_devis_pdf', methods: ['GET'])]
     public function generateDevisPdf(
         int $id,
         EntityManagerInterface $entityManager

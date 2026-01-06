@@ -70,7 +70,7 @@ export const chantierFormSchema = z.object({
   longitude: z.number().optional().nullable(),
   dateCreation: z.string().min(1, "La date de création est requise"),
   statutChantier: z.enum(['À compléter', 'À venir', 'En chantier', 'Terminé']),
-  noMOE: z.number().optional().refine((v) => v !== undefined && v !== null, { message: "Le maître d'œuvre est requis" }),
+  noMOE: z.string().optional().refine((v) => v !== undefined && v !== null, { message: "Le maître d'œuvre est requis" }),
   noModele: z.number().optional().refine((v) => v !== undefined && v !== null, { message: "Le modèle est requis" }),
 });
 
