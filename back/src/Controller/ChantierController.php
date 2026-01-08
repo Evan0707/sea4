@@ -12,8 +12,14 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 
+/**
+ * Contrôleur gérant les opérations liées aux chantiers.
+ */
 class ChantierController extends AbstractController
 {
+    /**
+     * Liste les chantiers avec filtres (recherche, tri).
+     */
     #[Route('/api/chantiers', name: 'api_chantiers_list', methods: ['GET'])]
     public function list(
         Request $request,
@@ -52,6 +58,9 @@ class ChantierController extends AbstractController
         return $this->json($result);
     }
 
+    /**
+     * Supprime un chantier par son ID.
+     */
     #[Route('/api/chantiers/{id}', name: 'api_chantiers_delete', methods: ['DELETE'])]
     public function delete(
         int $id,
@@ -89,6 +98,9 @@ class ChantierController extends AbstractController
         }
     }
 
+    /**
+     * Met à jour les étapes d'un chantier (planning, montants, artisans).
+     */
     #[Route('/api/chantiers/{id}/etapes', name: 'api_chantiers_update_etapes', methods: ['PUT'])]
     public function updateEtapes(
         int $id,
@@ -204,6 +216,9 @@ class ChantierController extends AbstractController
         ]);
     }
 
+    /**
+     * Liste les chantiers assignés au Maître d'Œuvre connecté.
+     */
     #[Route('/api/mes-chantiers', name: 'api_mes_chantiers', methods: ['GET'])]
     public function mesChantiers(
         Request $request,
@@ -251,6 +266,9 @@ class ChantierController extends AbstractController
         return $this->json($result);
     }
 
+    /**
+     * Exporte la liste des chantiers du Maître d'Œuvre au format CSV.
+     */
     #[Route('/api/mes-chantiers/export', name: 'api_mes_chantiers_export', methods: ['GET'])]
     public function exportChantiers(
         ChantierRepository $chantierRepository
@@ -302,6 +320,9 @@ class ChantierController extends AbstractController
         return $response;
     }
 
+    /**
+     * Récupère les statistiques détaillées des chantiers du Maître d'Œuvre.
+     */
     #[Route('/api/mes-chantiers/stats', name: 'api_mes_chantiers_stats', methods: ['GET'])]
     public function mesChantierStats(
         ChantierRepository $chantierRepository
@@ -448,6 +469,9 @@ class ChantierController extends AbstractController
         ]);
     }
 
+    /**
+     * Récupère les détails complets d'un chantier (étapes, appels, devis, factures).
+     */
     #[Route('/api/mes-chantiers/{id}', name: 'api_mes_chantiers_detail', methods: ['GET'])]
     public function mesChantierDetail(
         int $id,
@@ -588,6 +612,9 @@ class ChantierController extends AbstractController
         ]);
     }
 
+    /**
+     * Démarre un chantier (passe le statut à 'En chantier').
+     */
     #[Route('/api/mes-chantiers/{id}/demarrer', name: 'api_mes_chantiers_demarrer', methods: ['POST'])]
     public function demarrerChantier(
         int $id,
@@ -630,6 +657,9 @@ class ChantierController extends AbstractController
         return $this->json(['message' => 'Chantier démarré avec succès']);
     }
 
+    /**
+     * Termine un chantier (passe le statut à 'Terminé') et génère l'appel de solde.
+     */
     #[Route('/api/mes-chantiers/{id}/terminer', name: 'api_mes_chantiers_terminer', methods: ['POST'])]
     public function terminerChantier(
         int $id,
@@ -684,6 +714,9 @@ class ChantierController extends AbstractController
         return $this->json(['message' => 'Chantier terminé avec succès', 'solde' => round($solde, 2)]);
     }
 
+    /**
+     * Démarre une étape spécifique d'un chantier.
+     */
     #[Route('/api/mes-chantiers/{chantierId}/etapes/{etapeId}/demarrer', name: 'api_etape_demarrer', methods: ['POST'])]
     public function demarrerEtape(
         int $chantierId,
@@ -723,6 +756,9 @@ class ChantierController extends AbstractController
         return $this->json(['message' => 'Étape démarrée avec succès']);
     }
 
+    /**
+     * Termine une étape spécifique d'un chantier (et peut générer un appel de fonds).
+     */
     #[Route('/api/mes-chantiers/{chantierId}/etapes/{etapeId}/terminer', name: 'api_etape_terminer', methods: ['POST'])]
     public function terminerEtape(
         int $chantierId,
@@ -781,6 +817,9 @@ class ChantierController extends AbstractController
         return $this->json(['message' => 'Étape terminée avec succès']);
     }
 
+    /**
+     * Enregistre le règlement d'un appel de fonds.
+     */
     #[Route('/api/mes-chantiers/{id}/appels/{appelId}/regler', name: 'api_appel_regler', methods: ['POST'])]
     public function reglerAppel(
         int $id,

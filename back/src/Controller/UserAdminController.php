@@ -19,8 +19,14 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 #[Route('/api/admin')]
 #[IsGranted('ROLE_ADMIN')]
+/**
+ * Contrôleur réservé aux administrateurs pour la gestion des utilisateurs (création, stats).
+ */
 class UserAdminController extends AbstractController
 {
+    /**
+     * Crée un utilisateur (admin, commercial ou maître d'œuvre) avec son profil associé.
+     */
     #[Route('/utilisateurs', name: 'admin_users_create', methods: ['POST'])]
     public function create(
         Request $request,
@@ -92,6 +98,9 @@ class UserAdminController extends AbstractController
         ], 201);
     }
 
+    /**
+     * Liste tous les utilisateurs avec leurs profils associés.
+     */
     #[Route('/utilisateurs', name: 'admin_users_list', methods: ['GET'])]
     public function list(UtilisateurRepository $repo): JsonResponse
     {
@@ -133,6 +142,9 @@ class UserAdminController extends AbstractController
         return $this->json($data);
     }
 
+    /**
+     * Récupère les statistiques globales (utilisateurs, chantiers, graphiques).
+     */
     #[Route('/stats', name: 'admin_stats', methods: ['GET'])]
     public function getStats(EntityManagerInterface $em): JsonResponse
     {
@@ -248,6 +260,9 @@ class UserAdminController extends AbstractController
             'recentUsers' => $recent,
         ]);
     }
+    /**
+     * Affiche les détails d'un utilisateur.
+     */
     #[Route('/utilisateurs/{id}', name: 'admin_users_show', methods: ['GET'])]
     public function show(int $id, UtilisateurRepository $repo): JsonResponse
     {
@@ -279,6 +294,9 @@ class UserAdminController extends AbstractController
         ]);
     }
 
+    /**
+     * Met à jour un utilisateur et son profil associé.
+     */
     #[Route('/utilisateurs/{id}', name: 'admin_users_update', methods: ['PUT'])]
     public function update(
         int $id,

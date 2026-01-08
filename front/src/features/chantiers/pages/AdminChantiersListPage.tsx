@@ -38,6 +38,7 @@ export const AdminChantiersListPage = () => {
     return () => clearTimeout(timer);
   }, [search]);
 
+  // supprimer un chantier
   const confirmDelete = async () => {
     if (chantierToDelete) {
       await deleteChantier(chantierToDelete);
@@ -45,6 +46,7 @@ export const AdminChantiersListPage = () => {
     }
   };
 
+  // exporter les chantiers
   const handleExport = () => {
     const exportColumns: CsvColumn<Chantier>[] = [
       { key: 'nom', header: 'Nom Client' },
@@ -57,6 +59,7 @@ export const AdminChantiersListPage = () => {
     exportToCSV(chantiers as Chantier[], exportColumns, 'chantiers');
   };
 
+  // actions en-tête
   const headerActions = useMemo(() => (
     <div className='flex gap-2'>
       <Button variant="Secondary" icon={Download} onClick={handleExport}>
@@ -68,16 +71,17 @@ export const AdminChantiersListPage = () => {
     </div>
   ), [navigate]);
 
+  // en-tête de la page
   usePageHeader(
     'Tous les Chantiers',
     headerActions,
     "Vue d'ensemble et gestion des chantiers."
   );
 
+  // colonnes de la liste
   const columns: Column<Chantier>[] = [
     {
       key: 'nom',
-      // ...
       header: 'Client',
       width: 'flex-1 md:w-[200px] md:flex-none',
       render: (c) => (

@@ -23,6 +23,7 @@ import { ArtisansListPage } from '../features/users/pages/ArtisansListPage';
 import ArtisanDetailsPage from '@/features/users/pages/ArtisanDetailsPage';
 import NewUtilisateurPage from '@/features/users/pages/NewUtilisateurPage';
 import UserDetailPage from '@/features/users/pages/UserDetailPage';
+import EditUserPage from '@/features/users/pages/EditUserPage';
 import { SettingsPage } from '../features/settings/pages/SettingsPage';
 import { AuthProvider, useAuth } from '../features/auth/context/AuthContext';
 import { ToastProvider } from '../shared/context/ToastProvider';
@@ -154,7 +155,8 @@ function AppRoutes() {
           />
           <Route path="/admin/utilisateurs/new" element={<NewUtilisateurPage />} />
           <Route path="/admin/utilisateurs/:id" element={<UserDetailPage />} />
-          <Route path="/admin/utilisateurs/:id/edit" element={<div>Page d'édition à venir</div>} />
+          <Route path="/admin/utilisateurs/:id" element={<UserDetailPage />} />
+          <Route path="/admin/utilisateurs/:id/edit" element={<EditUserPage />} />
 
 
           <Route path="/admin/artisans" element={<ArtisansListPage />} />

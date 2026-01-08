@@ -8,8 +8,14 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Annotation\Route;
 
+/**
+ * Contrôleur gérant les modèles de maisons.
+ */
 class ModeleController extends AbstractController
 {
+    /**
+     * Liste tous les modèles disponibles.
+     */
     #[Route('/api/modeles', name: 'api_modeles_list', methods: ['GET'])]
     public function list(EntityManagerInterface $entityManager): JsonResponse
     {
@@ -30,6 +36,9 @@ class ModeleController extends AbstractController
         }
     }
 
+    /**
+     * Récupère les détails d'un modèle avec ses étapes associées.
+     */
     #[Route('/api/modeles/{id}', name: 'api_modeles_show', methods: ['GET'])]
     public function show(int $id, EntityManagerInterface $entityManager): JsonResponse
     {
@@ -61,6 +70,9 @@ class ModeleController extends AbstractController
         return $this->json($data);
     }
 
+    /**
+     * Crée un nouveau modèle avec ses étapes.
+     */
     #[Route('/api/modeles', name: 'api_modeles_create', methods: ['POST'])]
     public function create(\Symfony\Component\HttpFoundation\Request $request, EntityManagerInterface $entityManager): JsonResponse
     {
@@ -112,6 +124,9 @@ class ModeleController extends AbstractController
         }
     }
 
+    /**
+     * Met à jour un modèle et ses étapes associées.
+     */
     #[Route('/api/modeles/{id}', name: 'api_modeles_update', methods: ['PUT'])]
     public function update(int $id, \Symfony\Component\HttpFoundation\Request $request, EntityManagerInterface $entityManager): JsonResponse
     {
@@ -176,6 +191,9 @@ class ModeleController extends AbstractController
         }
     }
 
+    /**
+     * Supprime un modèle s'il n'est pas utilisé par des chantiers.
+     */
     #[Route('/api/modeles/{id}', name: 'api_modeles_delete', methods: ['DELETE'])]
     public function delete(int $id, EntityManagerInterface $entityManager): JsonResponse
     {
@@ -203,6 +221,9 @@ class ModeleController extends AbstractController
         }
     }
 
+    /**
+     * Récupère la liste des étapes d'un modèle.
+     */
     #[Route('/api/modeles/{id}/etapes', name: 'api_modeles_etapes', methods: ['GET'])]
     public function getEtapes(int $id, EntityManagerInterface $entityManager): JsonResponse
     {

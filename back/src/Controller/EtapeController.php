@@ -9,8 +9,14 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 
+/**
+ * Contrôleur gérant la recherche et la récupération des étapes standard.
+ */
 class EtapeController extends AbstractController
 {
+    /**
+     * Recherche les étapes par nom (autocomplétion).
+     */
     #[Route('/api/etapes', name: 'api_etapes_search', methods: ['GET'])]
     public function search(Request $request, EntityManagerInterface $entityManager): JsonResponse
     {

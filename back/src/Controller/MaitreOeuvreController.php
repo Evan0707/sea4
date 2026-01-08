@@ -8,8 +8,14 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Annotation\Route;
 
+/**
+ * Contrôleur gérant les opérations liées aux maîtres d'œuvre.
+ */
 class MaitreOeuvreController extends AbstractController
 {
+    /**
+     * Récupère la liste de tous les maîtres d'œuvre.
+     */
     #[Route('/api/maitres-oeuvre', name: 'api_maitres_oeuvre_list', methods: ['GET'])]
     public function list(EntityManagerInterface $entityManager): JsonResponse
     {

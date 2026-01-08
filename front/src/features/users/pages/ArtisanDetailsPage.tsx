@@ -21,7 +21,6 @@ import ConfirmModal from '@/shared/components/ui/ConfirmModal';
 const ArtisanDetailsPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  // const { addToast } = useToast();
   const toast = useToast();
 
   const { data: artisan, isLoading: loadingArtisan } = useArtisan(id);

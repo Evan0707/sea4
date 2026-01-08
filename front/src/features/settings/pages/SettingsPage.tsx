@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
 import { H3, H2, Text, Label } from '@/shared/components/ui/Typography';
-import { User, CogFour, Download, Check, Map } from '@mynaui/icons-react';
+import { User, CogFour, Download, Check } from '@mynaui/icons-react';
 import { useThemeContext } from '@/shared/context/ThemeProvider';
 import { useAuth } from '@/features/auth/context/AuthContext';
-import { DepartementAutocomplete } from '@/shared/components/ui/DepartementAutocomplete';
+
 import { useToast } from '@/shared/hooks/useToast';
 import Button from '@/shared/components/ui/Button';
 import Input from '@/shared/components/ui/Input';
@@ -12,7 +12,7 @@ import SYSTEM from '@/shared/assets/SYSTEM.png'
 import DARK from '@/shared/assets/DARK.png'
 import LIGHT from '@/shared/assets/LIGHT.png'
 
-type SettingSection = 'profil' | 'preferences' | 'zone' | 'export';
+type SettingSection = 'profil' | 'preferences' | 'export';
 type DateFormat = 'dd/MM/yyyy' | 'MM/dd/yyyy' | 'yyyy-MM-dd';
 
 export const SettingsPage = () => {
@@ -20,13 +20,13 @@ export const SettingsPage = () => {
   const { theme, setTheme } = useThemeContext();
   const { user } = useAuth();
   const { addToast } = useToast();
-  
+
   // Profil state
   const [nom, setNom] = useState('');
   const [prenom, setPrenom] = useState('');
   const [profilLoading, setProfilLoading] = useState(false);
   const [profilSaving, setProfilSaving] = useState(false);
-  
+
   // Export state
   const [exportLoading, setExportLoading] = useState(false);
 
@@ -36,14 +36,7 @@ export const SettingsPage = () => {
     return (saved as DateFormat) || 'dd/MM/yyyy';
   });
 
-  const [selectedDepartements, setSelectedDepartements] = useState<string[]>(() => {
-    const saved = localStorage.getItem('preferredZones');
-    return saved ? JSON.parse(saved) : [];
-  });
 
-  useEffect(() => {
-    localStorage.setItem('preferredZones', JSON.stringify(selectedDepartements));
-  }, [selectedDepartements]);
 
   useEffect(() => {
     localStorage.setItem('dateFormat', dateFormat);
@@ -118,7 +111,7 @@ export const SettingsPage = () => {
   const sections = [
     { id: 'profil' as const, label: 'Profil', icon: User },
     { id: 'preferences' as const, label: 'Préférences', icon: CogFour },
-    ...(user?.roles.includes('ROLE_COMMERCIAL') ? [{ id: 'zone' as const, label: 'Zone géographique', icon: Map }] : []),
+
     ...(user?.roles.includes('ROLE_MAITRE_OEUVRE') ? [{ id: 'export' as const, label: 'Export de données', icon: Download }] : []),
   ];
 
@@ -149,8 +142,8 @@ export const SettingsPage = () => {
                   placeholder="Votre prénom"
                 />
                 <div className="pt-4">
-                  <Button 
-                    variant="Primary" 
+                  <Button
+                    variant="Primary"
                     onClick={handleSaveProfil}
                     loading={profilSaving}
                   >
@@ -165,7 +158,7 @@ export const SettingsPage = () => {
         return (
           <div>
             <H2 className="mb-6">Préférences</H2>
-            
+
             {/* Thème système */}
             <div className="space-y-6">
               <div>
@@ -173,48 +166,45 @@ export const SettingsPage = () => {
                 <div className="grid grid-cols-3 gap-3">
                   <button
                     onClick={() => setTheme('light')}
-                    className={`flex flex-col relative items-center gap-3 rounded-lg border-2 transition-all overflow-hidden ${
-                      theme === 'light'
+                    className={`flex flex-col relative items-center gap-3 rounded-lg border-2 transition-all overflow-hidden ${theme === 'light'
                         ? 'border-primary bg-primary/5'
                         : 'border-border hover:border-primary/20'
-                    }`}
+                      }`}
                   >
-                    <img src={LIGHT} className={`box-border ${theme === 'light'&&'border-2 rounded-md border-bg-secondary'}`}/>
-                    {theme === 'light'&&
+                    <img src={LIGHT} className={`box-border ${theme === 'light' && 'border-2 rounded-md border-bg-secondary'}`} />
+                    {theme === 'light' &&
                       <div className='p-2 bg-primary rounded-[100%] absolute bottom-2 right-2'>
-                        <Check className='text-white'/>
+                        <Check className='text-white' />
                       </div>
                     }
                   </button>
 
                   <button
                     onClick={() => setTheme('dark')}
-                    className={`flex flex-col items-center gap-3 relative rounded-lg border-2 transition-all overflow-hidden ${
-                      theme === 'dark'
+                    className={`flex flex-col items-center gap-3 relative rounded-lg border-2 transition-all overflow-hidden ${theme === 'dark'
                         ? 'border-primary bg-primary/5'
                         : 'border-border hover:border-primary/20'
-                    }`}
+                      }`}
                   >
-                    <img src={DARK} className={`box-border ${theme === 'dark'&&'border-2 rounded-md border-bg-secondary'}`}/>
-                    {theme === 'dark'&&
+                    <img src={DARK} className={`box-border ${theme === 'dark' && 'border-2 rounded-md border-bg-secondary'}`} />
+                    {theme === 'dark' &&
                       <div className='p-2 bg-primary rounded-[100%] absolute bottom-2 right-2'>
-                        <Check className='text-white'/>
+                        <Check className='text-white' />
                       </div>
                     }
                   </button>
 
                   <button
                     onClick={() => setTheme('system')}
-                    className={`flex flex-col items-center gap-3 relative rounded-lg border-2 transition-all overflow-hidden ${
-                      theme === 'system'
+                    className={`flex flex-col items-center gap-3 relative rounded-lg border-2 transition-all overflow-hidden ${theme === 'system'
                         ? 'border-primary bg-primary/5'
                         : 'border-border hover:border-primary/20'
-                    }`}
+                      }`}
                   >
-                    <img src={SYSTEM} className={`box-border ${theme === 'system'&&'border-2 rounded-md border-bg-secondary'}`}/>
-                    {theme === 'system'&&
+                    <img src={SYSTEM} className={`box-border ${theme === 'system' && 'border-2 rounded-md border-bg-secondary'}`} />
+                    {theme === 'system' &&
                       <div className='p-2 bg-primary rounded-[100%] absolute bottom-2 right-2'>
-                        <Check className='text-white'/>
+                        <Check className='text-white' />
                       </div>
                     }
                   </button>
@@ -233,11 +223,10 @@ export const SettingsPage = () => {
                     <button
                       key={format}
                       onClick={() => setDateFormat(format)}
-                      className={`w-full flex items-center justify-between px-4 py-3 rounded-lg border-2 transition-all ${
-                        dateFormat === format
+                      className={`w-full flex items-center justify-between px-4 py-3 rounded-lg border-2 transition-all ${dateFormat === format
                           ? 'border-primary bg-primary/5'
                           : 'border-border hover:border-primary/20'
-                      }`}
+                        }`}
                     >
                       <div className="flex flex-col items-start">
                         <Text weight="medium">{format}</Text>
@@ -260,35 +249,7 @@ export const SettingsPage = () => {
             </div>
           </div>
         );
-      case 'zone':
-        return (
-          <div>
-            <H2 className="mb-6">Zone géographique préférée</H2>
-            <Text className="text-text-secondary mb-6">
-              Sélectionnez les départements dans lesquels vous souhaitez intervenir en priorité.
-              Ces zones seront utilisées pour le filtrage et les suggestions de dossiers.
-            </Text>
-            
-            <DepartementAutocomplete
-              label="Départements préférés"
-              selectedDepartements={selectedDepartements}
-              onChange={(codes) => {
-                setSelectedDepartements(codes);
-                localStorage.setItem('preferredZones', JSON.stringify(codes));
-              }}
-              info="Recherchez et sélectionnez les départements où vous intervenez"
-              placeholder="Rechercher un département..."
-            />
-            
-            {selectedDepartements.length === 0 && (
-              <div className="mt-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-                <Text variant="small" className="text-yellow-800">
-                  Aucune zone sélectionnée. Sélectionnez au moins un département pour optimiser votre travail.
-                </Text>
-              </div>
-            )}
-          </div>
-        );
+
       case 'export':
         return (
           <div>
@@ -296,7 +257,7 @@ export const SettingsPage = () => {
             <Text className="text-text-secondary mb-6">
               Téléchargez vos données au format CSV pour les analyser ou les archiver.
             </Text>
-            
+
             <div className="space-y-4">
               <div className="p-4 bg-bg-primary rounded-lg border border-border">
                 <div className="flex items-center justify-between">
@@ -306,8 +267,8 @@ export const SettingsPage = () => {
                       Télécharge la liste de tous vos chantiers avec leur statut et montants
                     </Text>
                   </div>
-                  <Button 
-                    variant="Secondary" 
+                  <Button
+                    variant="Secondary"
                     onClick={handleExportChantiers}
                     loading={exportLoading}
                   >
@@ -337,11 +298,10 @@ export const SettingsPage = () => {
               <button
                 key={section.id}
                 onClick={() => setActiveSection(section.id)}
-                className={`w-full flex items-center gap-3 px-4 py-2 rounded-lg transition-colors ${
-                  isActive
+                className={`w-full flex items-center gap-3 px-4 py-2 rounded-lg transition-colors ${isActive
                     ? 'bg-border/60 text-text-primary'
                     : 'hover:bg-border/35 text-text-secondary border-transparent'
-                }`}
+                  }`}
               >
                 <Icon className="w-5 h-5" />
                 <Text className={`font-medium ${isActive ? 'text-text-primary' : 'text-text-secondary'}`}>

@@ -143,3 +143,14 @@ export const createUserSchema = z.object({
 })
 
 export type CreateUserFormData = z.infer<typeof createUserSchema>
+
+// Schéma pour la modification d'un utilisateur via l'admin
+export const updateUserSchema = z.object({
+  prenom: z.string().min(1, "Le prénom est requis").max(50, "Le prénom ne peut pas dépasser 50 caractères"),
+  nom: z.string().min(1, "Le nom est requis").max(50, "Le nom ne peut pas dépasser 50 caractères"),
+  login: z.string().min(3, "Le login doit contenir au moins 3 caractères").max(50, "Le login est trop long"),
+  password: z.string().min(6, "Le mot de passe doit contenir au moins 6 caractères").optional().or(z.literal('')),
+  role: z.enum(['admin', 'commercial', 'maitre_oeuvre']),
+})
+
+export type UpdateUserFormData = z.infer<typeof updateUserSchema>

@@ -11,9 +11,15 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Doctrine\ORM\EntityManagerInterface;
 
+/**
+ * Contrôleur gérant les utilisateurs (liste, profil, suppression).
+ */
 #[Route('/api')]
 class UtilisateurController extends AbstractController
 {
+    /**
+     * Liste les utilisateurs avec filtres (recherche) et tri.
+     */
     #[Route('/utilisateurs', name: 'utilisateurs_list', methods: ['GET'])]
     public function list(UtilisateurRepository $repo, Request $request): JsonResponse
     {
@@ -76,6 +82,9 @@ class UtilisateurController extends AbstractController
         return $this->json($data);
     }
 
+    /**
+     * Récupère les informations de l'utilisateur connecté.
+     */
     #[Route('/me', name: 'utilisateurs_me', methods: ['GET'])]
     public function me(): JsonResponse
     {
@@ -107,6 +116,9 @@ class UtilisateurController extends AbstractController
         ]);
     }
 
+    /**
+     * Supprime un utilisateur s'il n'est pas lié à des chantiers importants.
+     */
     #[Route('/utilisateur/{id}/delete', name: 'utilisateur_delete', methods: ['DELETE'])]
     #[IsGranted('ROLE_ADMIN')]
     public function delete(int $id, UtilisateurRepository $repo, EntityManagerInterface $em): JsonResponse
@@ -138,6 +150,9 @@ class UtilisateurController extends AbstractController
         return $this->json(['success' => true]);
     }
 
+    /**
+     * Récupère le profil de l'utilisateur connecté.
+     */
     #[Route('/profil', name: 'profil_get', methods: ['GET'])]
     public function getProfil(): JsonResponse
     {
@@ -167,6 +182,9 @@ class UtilisateurController extends AbstractController
         ]);
     }
 
+    /**
+     * Met à jour le profil (nom, prénom) de l'utilisateur connecté.
+     */
     #[Route('/profil', name: 'profil_update', methods: ['PUT'])]
     public function updateProfil(Request $request, EntityManagerInterface $em): JsonResponse
     {

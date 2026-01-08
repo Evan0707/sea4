@@ -6,6 +6,9 @@ use Doctrine\DBAL\Connection;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Attribute\Route;
 
+/**
+ * Contrôleur gérant les opérations liées aux clients.
+ */
 class ClientController
 {
     private ?string $schema;
@@ -15,6 +18,9 @@ class ClientController
         $this->schema = $this->getSchemaFromDsn($_ENV['DATABASE_URL'] ?? $_SERVER['DATABASE_URL'] ?? '');
     }
 
+    /**
+     * Récupère la liste complète des clients triés par nom et prénom.
+     */
     #[Route('/api/clients', name: 'api_clients_list', methods: ['GET'])]
     public function list(): JsonResponse
     {
@@ -24,7 +30,10 @@ class ClientController
         return new JsonResponse($rows, 200);
     }
 
-    #[Route('/api/clients/{id<\\d+>}', name: 'api_clients_show', methods: ['GET'])]
+    /**
+     * Récupère les détails d'un client spécifique par son ID.
+     */
+    #[Route('/api/clients/{id<\d+>}', name: 'api_clients_show', methods: ['GET'])]
     public function show(int $id): JsonResponse
     {
         $schema = $this->schema ?? 'public';

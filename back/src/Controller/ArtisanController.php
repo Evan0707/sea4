@@ -11,8 +11,14 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
+/**
+ * Contrôleur gérant les opérations liées aux artisans.
+ */
 class ArtisanController extends AbstractController
 {
+    /**
+     * Liste tous les artisans avec filtres et leurs qualifications.
+     */
     #[Route('/api/artisan', name: 'api_artisan_list', methods: ['GET'])]
     public function list(
         Request $request,
@@ -79,7 +85,10 @@ class ArtisanController extends AbstractController
         return $this->list($request, $entityManager);
     }
 
-    #[Route('/api/artisan/{id}', name: 'api_artisan_show', methods: ['GET'], requirements: ['id' => '\\d+'])]
+    /**
+     * Récupère les détails d'un artisan.
+     */
+    #[Route('/api/artisan/{id}', name: 'api_artisan_show', methods: ['GET'], requirements: ['id' => '\d+'])]
     public function show(
         string $id,
         EntityManagerInterface $entityManager
@@ -112,6 +121,9 @@ class ArtisanController extends AbstractController
         ]);
     }
 
+    /**
+     * Crée un nouvel artisan avec ses qualifications.
+     */
     #[Route('/api/artisan', name: 'api_artisan_create', methods: ['POST'])]
     public function create(
         Request $request,
@@ -185,6 +197,9 @@ class ArtisanController extends AbstractController
         ], 201);
     }
 
+    /**
+     * Met à jour un artisan existant.
+     */
     #[Route('/api/artisan/{id}/edit', name: 'api_artisan_update', methods: ['PUT'])]
     public function update(
         int $id,
@@ -289,6 +304,9 @@ class ArtisanController extends AbstractController
         ]);
     }
 
+    /**
+     * Supprime un artisan s'il n'est pas lié à des chantiers ou factures.
+     */
     #[Route('/api/artisan/{id}/delete', name: 'api_artisan_delete', methods: ['DELETE'])]
     public function delete(
         int $id,
@@ -341,6 +359,9 @@ class ArtisanController extends AbstractController
         }
     }
 
+    /**
+     * Importe une liste d'artisans en masse (JSON).
+     */
     #[Route('/api/artisan/import', name: 'api_artisan_import', methods: ['POST'])]
     public function import(
         Request $request,
@@ -416,6 +437,9 @@ class ArtisanController extends AbstractController
         ], 201);
     }
 
+    /**
+     * Récupère le planning (assignments et indisponibilités) d'un artisan.
+     */
     #[Route('/api/artisan/{id}/planning', name: 'api_artisan_planning', methods: ['GET'])]
     public function planning(
         int $id,
@@ -489,6 +513,9 @@ class ArtisanController extends AbstractController
         ]);
     }
 
+    /**
+     * Ajoute une période d'indisponibilité pour un artisan.
+     */
     #[Route('/api/artisan/{id}/unavailability', name: 'api_artisan_add_unavailability', methods: ['POST'])]
     public function addUnavailability(
         int $id,
@@ -539,6 +566,9 @@ class ArtisanController extends AbstractController
         }
     }
 
+    /**
+     * Supprime une période d'indisponibilité.
+     */
     #[Route('/api/artisan/unavailability/{id}', name: 'api_artisan_delete_unavailability', methods: ['DELETE'])]
     public function deleteUnavailability(
         int $id,
@@ -562,6 +592,9 @@ class ArtisanController extends AbstractController
         }
     }
 
+    /**
+     * Trouve les artisans disponibles pour une période et une compétence données.
+     */
     #[Route('/api/artisans/available', name: 'api_artisans_available', methods: ['GET'])]
     public function available(
         Request $request,

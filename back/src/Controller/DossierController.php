@@ -14,8 +14,14 @@ use Symfony\Component\HttpFoundation\Response;
 use App\Entity\EtapeChantier;
 use App\Entity\Artisan;
 
+/**
+ * Contrôleur gérant les dossiers (création, mise à jour, listes, étapes).
+ */
 class DossierController extends AbstractController
 {
+    /**
+     * Crée un dossier complet (Client + Chantier + association MOE/Modèle).
+     */
     #[Route('/api/dossiers', name: 'api_dossiers_create', methods: ['POST'])]
     public function create(
         Request $request,
@@ -168,6 +174,9 @@ class DossierController extends AbstractController
         ], 201);
     }
 
+    /**
+     * Met à jour un dossier (Client et Chantier).
+     */
     #[Route('/api/dossiers/{id}', name: 'api_dossiers_update', methods: ['PUT'])]
     public function update(
         int $id,
@@ -252,7 +261,10 @@ class DossierController extends AbstractController
         return $this->json(['message' => 'Dossier modifié avec succès']);
     }
 
-        #[Route('/api/dossiers/{id}', name: 'api_dossiers_get', methods: ['GET'])]
+    /**
+     * Récupère les détails d'un dossier.
+     */
+    #[Route('/api/dossiers/{id}', name: 'api_dossiers_get', methods: ['GET'])]
     public function getDossier(
         int $id,
         EntityManagerInterface $entityManager
@@ -285,6 +297,9 @@ class DossierController extends AbstractController
             ]
         ]);
     }
+    /**
+     * Récupère les dossiers 'À compléter' ou 'À venir' pour les listes administratives.
+     */
     #[Route('/api/dossier', name: 'api_dossiers_list_todo', methods: ['GET'])]
     public function getDossiersToCompleteOrUpcoming(
         Request $request,
@@ -344,6 +359,9 @@ class DossierController extends AbstractController
         return $this->json($result);
     }
 
+    /**
+     * Récupère les dossiers assignés au Maître d'Œuvre connecté.
+     */
     #[Route('/api/mes-dossiers', name: 'api_mes_dossiers', methods: ['GET'])]
     public function getMesDossiers(Request $request, EntityManagerInterface $entityManager): JsonResponse
     {
@@ -410,7 +428,10 @@ class DossierController extends AbstractController
         return $this->json($result);
     }
 
-    #[Route('/api/dossiers/{id}/etapes', name: 'api_dossier_etapes', methods: ['GET'], requirements: ['id' => '\\d+'])]
+    /**
+     * Récupère les étapes d'un dossier (chantier).
+     */
+    #[Route('/api/dossiers/{id}/etapes', name: 'api_dossier_etapes', methods: ['GET'], requirements: ['id' => '\d+'])]
     public function getEtapesForDossier(int $id, EntityManagerInterface $entityManager): JsonResponse
     {
         $chantier = $entityManager->getRepository(\App\Entity\Chantier::class)->find($id);
@@ -459,7 +480,10 @@ class DossierController extends AbstractController
         return $this->json($result);
     }
 
-    #[Route('/api/dossiers/{id}/etapes', name: 'api_dossier_etapes_update', methods: ['POST'], requirements: ['id' => '\\d+'])]
+    /**
+     * Met à jour les étapes d'un dossier (montant, dates, artisan, etc.).
+     */
+    #[Route('/api/dossiers/{id}/etapes', name: 'api_dossier_etapes_update', methods: ['POST'], requirements: ['id' => '\d+'])]
     public function updateEtapesForDossier(int $id, Request $request, EntityManagerInterface $entityManager): JsonResponse
     {
         $chantier = $entityManager->getRepository(\App\Entity\Chantier::class)->find($id);
@@ -535,6 +559,9 @@ class DossierController extends AbstractController
         return $this->json(['message' => 'Étapes mises à jour']);
     }
 
+    /**
+     * Récupère les statistiques pour le dashboard commercial.
+     */
     #[Route('/api/commercial/stats', name: 'api_commercial_stats', methods: ['GET'])]
     public function getCommercialStats(EntityManagerInterface $entityManager): JsonResponse
     {

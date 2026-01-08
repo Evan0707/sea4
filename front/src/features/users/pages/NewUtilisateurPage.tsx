@@ -109,7 +109,6 @@ export default function NewUtilisateurPage() {
             register={register('password')}
             error={errors.password?.message as string | undefined}
           />
-          {/* Popover could be added here properly if needed, but removing broken test code for now */}
         </div>
 
 

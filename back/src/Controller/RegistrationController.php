@@ -10,8 +10,15 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Annotation\Route;
 
+/**
+ * Contrôleur gérant l'inscription des utilisateurs.
+ */
 class RegistrationController extends AbstractController
 {
+    /**
+     * Crée un nouvel utilisateur.
+     * Vérifie les données, hash le mot de passe et assigne un rôle valide.
+     */
     #[Route('/api/register', name: 'api_register', methods: ['POST'])]
     public function register(
         Request $request,
