@@ -128,7 +128,7 @@ export const UtilisateursListPage = () => {
   ];
 
   return (
-    <div className="p-4 md:p-8 h-full flex flex-col">
+    <div className="p-4 md:p-4 h-full flex flex-col">
       {/* PageHeader moved to Layout */}
 
       <SearchBar

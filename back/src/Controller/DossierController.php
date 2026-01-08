@@ -424,10 +424,9 @@ class DossierController extends AbstractController
 
         $result = [];
         foreach ($etapeChantiers as $ec) {
-            /** @var EtapeChantier $ec */
+    
             $artisan = $ec->getArtisan();
 
-            // Fallback pour nbJours si non présent (pour compatibilité existant)
             $nbJours = $ec->getNbJoursPrevu();
             if (empty($nbJours) && $modele && $ec->getEtape()) {
                  $construire = $construireRepo->findOneBy([
@@ -516,7 +515,6 @@ class DossierController extends AbstractController
 
             // artisan assignment: set single artisan (clear existing)
             if (array_key_exists('artisanId', $item)) {
-                // remove existing artisans
                 foreach ($ec->getArtisans() as $a) {
                     $ec->removeArtisan($a);
                 }

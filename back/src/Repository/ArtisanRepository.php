@@ -17,9 +17,6 @@ class ArtisanRepository extends ServiceEntityRepository
         parent::__construct($registry, Artisan::class);
     }
 
-    /**
-     * @return Artisan[] Returns an array of available qualified artisans
-     */
     public function findAvailableArtisans(\DateTimeInterface $start, \DateTimeInterface $end, Etape $etape): array
     {
         $qb = $this->createQueryBuilder('a');
@@ -32,29 +29,47 @@ class ArtisanRepository extends ServiceEntityRepository
             ->andWhere('ia.dateFin >= :start')
             ->getDQL();
 
-        // Sous-requête pour exclure les artisans déjà occupés sur un autre chantier
-        $busySubQuery = $this->getEntityManager()->createQueryBuilder()
-            ->select('DISTINCT ec_artisan.id') // Note: JoinTable logic is tricky in DQL sometimes, using inverse side relation
-            ->from('App\Entity\EtapeChantier', 'ec')
-            ->join('ec.artisans', 'ec_artisan')
-            ->where('ec.dateDebut <= :end')
-            ->andWhere('ec.dateFin >= :start')
-            ->getDQL();
-
         $qb->join('a.etapesQualifiees', 'eq')
             ->where('eq.id = :etapeId')
             ->andWhere('a.actif = true')
             ->andWhere($qb->expr()->notIn('a.id', $unavailableSubQuery))
-             // Si la logique 'busy' est complexe, on peut la gérer ici, mais attention à la performance.
-             // Pour l'instant, on suppose que l'indispo gère tout ou qu'on check aussi les chantiers.
-             // Ajout de la vérif chantier :
-            ->andWhere($qb->expr()->notIn('a.id', $busySubQuery))
-            
             ->setParameter('start', $start)
             ->setParameter('end', $end)
             ->setParameter('etapeId', $etape->getId())
             ->orderBy('a.nom', 'ASC');
 
-        return $qb->getQuery()->getResult();
+        $candidates = $qb->getQuery()->getResult();
+
+        $availableArtisans = [];
+        foreach ($candidates as $artisan) {
+            $isAvailable = true;
+
+            // Check EtapeChantier overlaps
+            foreach ($artisan->getEtapeChantiers() as $ec) {
+                // Determine effective start
+                $ecStart = $ec->getDateDebut() ?? $ec->getDateDebutTheorique();
+                if (!$ecStart) continue; // No date set, ignore
+
+                // Determine effective end
+                $ecEnd = $ec->getDateFin();
+                if (!$ecEnd) {
+                    $nbJours = $ec->getNbJoursPrevu() ?? 1;
+                    $ecEnd = clone $ecStart;
+                    $ecEnd->modify('+' . ($nbJours - 1) . ' days'); // inclusive end
+                }
+
+                // Check overlap: (StartA <= EndB) and (EndA >= StartB)
+                if ($start <= $ecEnd && $end >= $ecStart) {
+                    $isAvailable = false;
+                    break;
+                }
+            }
+
+            if ($isAvailable) {
+                $availableArtisans[] = $artisan;
+            }
+        }
+
+        return $availableArtisans;
     }
 }

@@ -40,9 +40,7 @@ export const ChantiersMapPage = () => {
  useEffect(() => {
   const fetchChantiers = async () => {
    try {
-    // Fetch list of dossiers (chantiers)
-    // We might need a specific endpoint or just use the list endpoint and filter client-side if needed.
-    // Assuming /api/dossier returns chantiers with lat/long as updated in controller.
+
     const response = await apiClient.get('/chantiers');
     const data = response.data;
 
@@ -64,7 +62,7 @@ export const ChantiersMapPage = () => {
       longitude: c.longitude,
       title: `${c.nom} ${c.prenom}`,
       description: `${c.address}, ${c.cp} ${c.ville} - ${c.status}`,
-      link: `/commercial/dossiers/${c.noChantier}`,
+      link: `/admin/dossiers/${c.noChantier}`,
       color: getStatusColor(c.status)
      }));
 
@@ -142,7 +140,7 @@ export const ChantiersMapPage = () => {
       <Map
        markers={markers}
        height="100%"
-       zoom={8} // Adjust zoom to fit region better
+       zoom={8}
       />
      )}
     </CardContent>

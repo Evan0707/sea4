@@ -887,6 +887,9 @@ class ChantierController extends AbstractController
         // Calculer le montant total basé sur les étapes
         $montantTotal = 0;
         foreach ($chantier->getEtapeChantiers() as $etapeChantier) {
+             if ($etapeChantier->isReservee()) {
+                 continue;
+             }
              $montantTotal += (float)$etapeChantier->getMontantTheoriqueFacture();
         }
 
@@ -1051,6 +1054,9 @@ class ChantierController extends AbstractController
                 <tbody>';
         
         foreach ($chantier->getEtapeChantiers() as $etapeChantier) {
+            if ($etapeChantier->isReservee()) {
+                continue;
+            }
             $nomEtape = $etapeChantier->getEtape() ? $etapeChantier->getEtape()->getNom() : 'Étape inconnue';
             $montant = $etapeChantier->getMontantTheoriqueFacture();
             
@@ -1100,10 +1106,121 @@ class ChantierController extends AbstractController
         );
     }
 
+    #[Route('/api/factures-artisans/{id}/pdf', name: 'api_facture_artisan_pdf', methods: ['GET'])]
+    public function generateFactureArtisanPdf(
+        int $id,
+        EntityManagerInterface $entityManager
+    ): \Symfony\Component\HttpFoundation\Response {
+        $facture = $entityManager->getRepository(\App\Entity\FactureArtisan::class)->find($id);
+
+        if (!$facture) {
+            return $this->json(['message' => 'Facture non trouvée'], 404);
+        }
+
+        $artisan = $facture->getArtisan();
+        
+        // Simple HTML template for the PDF
+        $html = '
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <style>
+                body { font-family: sans-serif; }
+                .header { text-align: center; margin-bottom: 30px; }
+                .details { margin-bottom: 20px; }
+                .client { float: left; }
+                .company { float: right; text-align: right; }
+                .clear { clear: both; }
+                table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+                th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+                th { background-color: #f2f2f2; }
+                .total { text-align: right; font-weight: bold; margin-top: 20px; }
+            </style>
+        </head>
+        <body>
+            <div class="header">
+                <h1>FACTURE #' . $facture->getId() . '</h1>
+                <p>Date: ' . $facture->getDateFacture()->format('d/m/Y') . '</p>
+            </div>
+
+            <div class="details">
+                <div class="client">
+                    <strong>Artisan:</strong><br>'
+                    . ($artisan ? $artisan->getNom() . ' ' . $artisan->getPrenom() : 'N/A') . '<br>'
+                    . ($artisan ? $artisan->getEmail() : '') . '<br>
+                    ' . ($artisan ? $artisan->getTelephone() : '') . '
+                </div>
+                <div class="company">
+                    <strong>BATIPARTI</strong><br>
+                    123 Rue de la Construction<br>
+                    75000 Paris<br>
+                    Siret: 123 456 789 00012
+                </div>
+                <div class="clear"></div>
+            </div>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Description</th>
+                        <th style="text-align: right;">Montant</th>
+                    </tr>
+                </thead>
+                <tbody>';
+        
+        foreach ($facture->getEtapeChantiers() as $etapeChantier) {
+             $nomEtape = $etapeChantier->getEtape() ? $etapeChantier->getEtape()->getNom() : 'Étape inconnue';
+             $chantierAdresse = $etapeChantier->getChantier() ? $etapeChantier->getChantier()->getAdresse() : '';
+            
+            $html .= '
+                    <tr>
+                        <td>' . $nomEtape . ' (Chantier: ' . $chantierAdresse . ')</td>
+                        <td style="text-align: right;">' . number_format((float)$facture->getMontant(), 2, ',', ' ') . ' €</td>
+                    </tr>';
+        }
+
+        $html .= '
+                </tbody>
+            </table>
+
+            <div class="total">
+                TOTAL: ' . number_format((float)$facture->getMontant(), 2, ',', ' ') . ' €
+            </div>
+
+            <div style="margin-top: 50px; font-size: 0.8em; text-align: center;">
+                Facture acquittée par virement bancaire.
+            </div>
+        </body>
+        </html>';
+
+        // Configure Dompdf
+        $options = new \Dompdf\Options();
+        $options->set('defaultFont', 'Arial');
+        $options->set('isRemoteEnabled', true);
+        
+        $dompdf = new \Dompdf\Dompdf($options);
+        $dompdf->loadHtml($html);
+        $dompdf->setPaper('A4', 'portrait');
+        $dompdf->render();
+
+        return new \Symfony\Component\HttpFoundation\Response(
+            $dompdf->output(),
+            200,
+            [
+                'Content-Type' => 'application/pdf',
+                'Content-Disposition' => 'inline; filename="facture-artisan-' . $facture->getId() . '.pdf"',
+            ]
+        );
+    }
+
     private function calculerMontantTheorique(\App\Entity\Chantier $chantier): float
     {
         $total = 0;
         foreach ($chantier->getEtapeChantiers() as $ec) {
+            if ($ec->isReservee()) {
+                continue;
+            }
             $montant = (float)($ec->getMontantTheoriqueFacture() ?? 0);
             $total += $montant;
         }

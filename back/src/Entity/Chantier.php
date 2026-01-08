@@ -97,7 +97,7 @@ class Chantier
     public function removeDevis(Devis $devis): static
     {
         if ($this->devis->removeElement($devis)) {
-            // set the owning side to null (unless already changed)
+      
             if ($devis->getChantier() === $this) {
                 $devis->setChantier(null);
             }

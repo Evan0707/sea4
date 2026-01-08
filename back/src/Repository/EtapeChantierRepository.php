@@ -13,9 +13,7 @@ class EtapeChantierRepository extends ServiceEntityRepository
         parent::__construct($registry, EtapeChantier::class);
     }
 
-    /**
-     * @return array[] Returns an array of arrays containing the delayed EtapeChantier and the delay in days
-     */
+
     public function findDelayedEtapes(): array
     {
         $qb = $this->createQueryBuilder('ec')

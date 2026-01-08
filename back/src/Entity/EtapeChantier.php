@@ -204,15 +204,12 @@ class EtapeChantier
         return $this;
     }
 
-    // Helper method for compatibility (returns the first artisan or null)
+
     public function getArtisan(): ?Artisan
     {
         return $this->artisans->first() ?: null;
     }
 
-    /**
-     * @return Collection<int, FactureArtisan>
-     */
     public function getFacturesArtisan(): Collection
     {
         return $this->facturesArtisan;

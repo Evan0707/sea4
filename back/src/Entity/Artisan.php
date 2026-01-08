@@ -64,7 +64,7 @@ class Artisan
         $this->indisponibilites = new ArrayCollection();
     }
 
-    // ... getters/setters ...
+
 
     /**
      * @return Collection<int, IndisponibiliteArtisan>

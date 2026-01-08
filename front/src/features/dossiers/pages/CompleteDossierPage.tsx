@@ -12,6 +12,8 @@ import type { Artisan } from '../../users/types';
 import apiClient from '@/shared/api/client';
 import { Card, CardHeader, CardTitle, CardContent } from '@/shared/components/ui/Card';
 import { useDossier, useDossierEtapes } from '../hooks/useDossiers';
+import { Tabs } from '@/shared/components/ui/Tabs';
+import { Calendar, User } from '@mynaui/icons-react';
 import { useArtisans } from '../../users/hooks/useArtisans';
 
 interface EtapeState extends Etape {
@@ -53,13 +55,11 @@ const CompleteDossierPage: React.FC = () => {
         : new Date();
 
       const etapesState = sortedEtapes.map((e: any) => {
-        // Force calculation to fix "all same dates" issue
-        // We assume the desired state is a perfect chain based on duration
+
         const startDate = new Date(currentDate);
 
         const duration = e.nbJours || 0;
 
-        // Prepare date for next step
         const nextDate = new Date(startDate);
         nextDate.setDate(nextDate.getDate() + duration);
         currentDate = nextDate;
@@ -81,7 +81,7 @@ const CompleteDossierPage: React.FC = () => {
       });
       setEtapes(etapesState);
     }
-  }, [etapesData, dossierData]); // Add dossierData dependency
+  }, [etapesData, dossierData]);
 
   const dossier = dossierData as DossierResponse | undefined;
   const artisans = artisansList as Array<{ noArtisan: number; nomArtisan: string; prenomArtisan?: string }>; // Cast to match local interface if needed
@@ -157,26 +157,37 @@ const CompleteDossierPage: React.FC = () => {
     });
   };
 
+  const [isSavingDraft, setIsSavingDraft] = useState(false);
+
   const handleSaveDraft = async () => {
+    setIsSavingDraft(true);
     try {
       await saveEtapes();
+
+
+      await apiClient.put(`/dossiers/${id}`, {
+        chantier: { statutChantier: 'À compléter' }
+      });
+
       addToast('Brouillon sauvegardé', 'success');
-      // On ne quitte pas la page forcément, ou on peut navigate(-1) si voulu. 
-      // Le client demande "possibilité de ne pas tout compléter", implicitement pour y revenir.
-      // On peut rester sur la page ou sortir. Restons sur la page pour l'instant ou retour?
-      // "mais ducoup passe pas à a venir" -> implicite : on garde l'état courant.
-      navigate('/commercial/dossiers');
+
+      navigate('/maitre-doeuvre/dossiers');
     } catch (error) {
       console.error('Erreur lors de la sauvegarde:', error);
       addToast('Erreur lors de la sauvegarde du brouillon', 'error');
+    } finally {
+      setIsSavingDraft(false);
     }
   }
 
+  const [isValidating, setIsValidating] = useState(false);
+
   const handleComplete = async () => {
     setErrors(new Set());
+    setIsValidating(true);
     try {
       // 1. Check for missing required fields
-      const etapesIncompletes = etapes.filter(e => !e.artisanId || !e.dateTheorique);
+      const etapesIncompletes = etapes.filter(e => (!e.reservee && !e.artisanId) || !e.dateTheorique);
       if (etapesIncompletes.length > 0) {
         addToast(`${etapesIncompletes.length} étape(s) n'ont pas d'artisan ou de date théorique`, 'error');
         const newErrors = new Set<number>();
@@ -207,19 +218,20 @@ const CompleteDossierPage: React.FC = () => {
         return;
       }
 
-      // Save steps first
+
       await saveEtapes();
 
-      // Update status to 'À venir' explicitly
       await apiClient.put(`/dossiers/${id}`, {
         chantier: { statutChantier: 'À venir' }
       });
 
       addToast('Dossier validé et passé à "À venir"', 'success');
-      navigate('/commercial/dossiers');
+      navigate('/maitre-doeuvre/dossiers');
     } catch (error) {
       console.error('Erreur lors de la validation:', error);
       addToast('Erreur lors de la validation du dossier', 'error');
+    } finally {
+      setIsValidating(false);
     }
   };
 
@@ -245,91 +257,109 @@ const CompleteDossierPage: React.FC = () => {
   const { coutTheorique, total } = computeTotals();
 
   return (
-    <div className="p-10 max-w-[1500px] mx-auto">
+    <div className="p-4 max-w-[1500px] mx-auto">
 
       <H1>Compléter le dossier</H1>
 
 
-      {/* Client info */}
-      <Card className="mb-6">
-        <CardHeader>
-          <CardTitle className="text-xl">Informations client</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-3 gap-4">
-            <div>
-              <Text className="font-medium">Nom</Text>
-              <Text>{dossier.client.nomClient}</Text>
-            </div>
-            <div>
-              <Text className="font-medium">Prénom</Text>
-              <Text>{dossier.client.prenomClient}</Text>
-            </div>
-            <div>
-              <Text className="font-medium">Adresse</Text>
-              <Text className="text-placeholder">{dossier.client.adresseClient ?? '—'}</Text>
-              <Text className="text-placeholder">{dossier.client.cpClient ?? ''} {dossier.client.villeClient ?? ''}</Text>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+      <Tabs
+        tabs={[
+          { id: 'traitement', label: 'Traitement', icon: <Calendar className="w-4 h-4" /> },
+          { id: 'infos', label: 'Informations', icon: <User className="w-4 h-4" /> }
+        ]}
+        defaultTab="traitement"
+      >
+        {(activeTab) => (
+          <>
+            {activeTab === 'traitement' && (
+              /* Étapes */
+              <Card className="mb-6 overflow-hidden" padding="none">
+                <CardHeader className="p-6 pb-4">
+                  <CardTitle className="text-xl">Étapes à compléter</CardTitle>
+                </CardHeader>
+                <CardContent className="p-0">
+                  <div className="divide-y relative divide-border bg-bg-primary overflow-y-auto max-h-[60vh]">
+                    {etapes.length === 0 && (
+                      <div className="p-6">
+                        <Text className="text-placeholder">Aucune étape trouvée pour ce dossier.</Text>
+                      </div>
+                    )}
 
-      {/* Chantier info */}
-      <Card className="mb-6">
-        <CardHeader>
-          <CardTitle className="text-xl">Informations chantier</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-3 gap-4">
-            <div>
-              <Text className="font-medium">Adresse</Text>
-              <Text>{dossier.chantier.adresseChantier ?? '—'} {dossier.chantier.cpChantier ?? ''} {dossier.chantier.villeChantier ?? ''}</Text>
-            </div>
-            <div>
-              <Text className="font-medium">Date création</Text>
-              <Text>{dossier.chantier.dateCreation}</Text>
-            </div>
-            <div>
-              <Text className="font-medium">Maître d'œuvre</Text>
-              <Text className="text-placeholder">—</Text>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Étapes */}
-      <Card className="mb-6 overflow-hidden" padding="none">
-        <CardHeader className="p-6 pb-4">
-          <CardTitle className="text-xl">Étapes à compléter</CardTitle>
-        </CardHeader>
-        <CardContent className="p-0">
-          <div className="divide-y relative divide-border bg-bg-primary overflow-y-auto max-h-[60vh]">
-            {etapes.length === 0 && (
-              <div className="p-6">
-                <Text className="text-placeholder">Aucune étape trouvée pour ce dossier.</Text>
-              </div>
+                    {etapes.map((e) => (
+                      <EtapeItem
+                        key={e.noEtape}
+                        e={e}
+                        artisans={artisans}
+                        onChange={updateEtape}
+                        onOpenAvailability={handleOpenAvailability}
+                        hasError={errors.has(e.noEtape)}
+                      />
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
             )}
 
-            {etapes.map((e) => (
-              <EtapeItem
-                key={e.noEtape}
-                e={e}
-                artisans={artisans}
-                onChange={updateEtape}
-                onOpenAvailability={handleOpenAvailability}
-                hasError={errors.has(e.noEtape)}
-              />
-            ))}
-          </div>
-        </CardContent>
-      </Card>
+            {activeTab === 'infos' && (
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {/* Client info */}
+                <Card className="mb-6 h-fit">
+                  <CardHeader>
+                    <CardTitle className="text-xl">Informations client</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid grid-cols-1 gap-4">
+                      <div>
+                        <Text className="font-medium">Nom</Text>
+                        <Text>{dossier.client.nomClient}</Text>
+                      </div>
+                      <div>
+                        <Text className="font-medium">Prénom</Text>
+                        <Text>{dossier.client.prenomClient}</Text>
+                      </div>
+                      <div>
+                        <Text className="font-medium">Adresse</Text>
+                        <Text className="text-placeholder">{dossier.client.adresseClient ?? '—'}</Text>
+                        <Text className="text-placeholder">{dossier.client.cpClient ?? ''} {dossier.client.villeClient ?? ''}</Text>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Chantier info */}
+                <Card className="mb-6 h-fit">
+                  <CardHeader>
+                    <CardTitle className="text-xl">Informations chantier</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid grid-cols-1 gap-4">
+                      <div>
+                        <Text className="font-medium">Adresse</Text>
+                        <Text>{dossier.chantier.adresseChantier ?? '—'} {dossier.chantier.cpChantier ?? ''} {dossier.chantier.villeChantier ?? ''}</Text>
+                      </div>
+                      <div>
+                        <Text className="font-medium">Date création</Text>
+                        <Text>{dossier.chantier.dateCreation}</Text>
+                      </div>
+                      <div>
+                        <Text className="font-medium">Maître d'œuvre</Text>
+                        <Text className="text-placeholder">—</Text>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            )}
+          </>
+        )}
+      </Tabs>
 
       {/* Totals */}
       <div className="mt-6 border-t border-border pt-4 flex justify-between items-center gap-8">
         <div className="flex gap-2 justify-start items-start">
           <Button variant="Secondary" onClick={() => navigate(-1)}>Annuler</Button>
-          <Button variant="Secondary" icon={Save} onClick={handleSaveDraft}>Sauvegarder (brouillon)</Button>
-          <Button variant="Primary" icon={Check} onClick={handleComplete}>Valider le dossier</Button>
+          <Button variant="Secondary" icon={Save} onClick={handleSaveDraft} loading={isSavingDraft}>Sauvegarder (brouillon)</Button>
+          <Button variant="Primary" icon={Check} onClick={handleComplete} loading={isValidating}>Valider le dossier</Button>
         </div>
         <div className='flex flex-row items-center'>
           <div className="text-right text-text-primary">

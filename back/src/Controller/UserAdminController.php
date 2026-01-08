@@ -53,7 +53,7 @@ class UserAdminController extends AbstractController
         $user->setRole($roleDb);
 
 
-        // create associated profile entity depending on role
+       
         if ($roleDb === 'admin') {
             if ($nom === '' || $prenom === '') {
                 return $this->json(['error' => 'nom and prenom are required for admin'], 400);
@@ -305,7 +305,7 @@ class UserAdminController extends AbstractController
             ], 400);
         }
 
-        // Check unique login if changed
+
         if ($login !== $user->getLogin()) {
             if ($repo->findOneBy(['login' => $login])) {
                 return $this->json(['error' => 'Ce login est déjà utilisé par un autre utilisateur.'], 409);
@@ -313,14 +313,11 @@ class UserAdminController extends AbstractController
             $user->setLogin($login);
         }
 
-        // Update password if provided
+
         if ($password !== '') {
              $user->setMotDePasse($hasher->hashPassword($user, $password));
         }
 
-        // Update profile
-        // Note: Changing role is not supported in this simple edit to avoid data loss on linked profiles.
-        // We only update the name/prenom of the CURRENT profile.
         
         $updated = false;
         if ($c = $user->getCommercial()) {

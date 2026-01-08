@@ -59,7 +59,7 @@ export const MesProjetsListPage = () => {
     {
       key: 'start',
       header: 'Date début',
-      width: 'hidden md:block w-[200px]',
+      width: 'hidden md:flex w-[200px]',
       sortable: true,
       render: (c) => (
         <Text className="text-sm font-mono tabular-nums">
@@ -95,7 +95,7 @@ export const MesProjetsListPage = () => {
   ];
 
   return (
-    <div className="p-4 md:p-8 h-full flex flex-col">
+    <div className="p-4 md:p-4 h-full flex flex-col">
       <SearchBar
         value={search}
         onChange={setSearch}

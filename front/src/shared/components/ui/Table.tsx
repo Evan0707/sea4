@@ -3,7 +3,7 @@ import type { ReactNode } from 'react';
 interface Column<T> {
  header: string;
  key?: string; // Optional if using render
- render?: (item: T) => ReactNode;
+ render?: (item: T, index: number) => ReactNode;
  align?: 'left' | 'center' | 'right';
  width?: string;
 }
@@ -42,18 +42,18 @@ export const Table = <T,>({
     </thead>
     <tbody>
      {data.length > 0 ? (
-      data.map((item) => (
+      data.map((item, rowIndex) => (
        <tr
         key={keyExtractor(item)}
         className={`border-b border-border/50 last:border-0 hover:bg-bg-primary/50 transition-colors ${onRowClick ? 'cursor-pointer' : ''}`}
         onClick={() => onRowClick && onRowClick(item)}
        >
-        {columns.map((col, index) => (
+        {columns.map((col, colIndex) => (
          <td
-          key={index}
+          key={colIndex}
           className={`py-3 px-4 text-text-primary text-${col.align || 'left'}`}
          >
-          {col.render ? col.render(item) : (item as any)[col.key as string]}
+          {col.render ? col.render(item, rowIndex) : (item as any)[col.key as string]}
          </td>
         ))}
        </tr>

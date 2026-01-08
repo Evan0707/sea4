@@ -136,7 +136,6 @@ class ArtisanController extends AbstractController
         $artisan->setEmail($data['emailArtisan'] ?? null);
         $artisan->setTelephone($data['telArtisan'] ?? null);
 
-        // Sync etapes if provided on creation
         if (isset($data['etapes']) && is_array($data['etapes'])) {
             foreach ($data['etapes'] as $item) {
                 $no = null;
@@ -236,9 +235,8 @@ class ArtisanController extends AbstractController
             ], 400);
         }
 
-        // Sync etapes if provided: accept array of ids or array of {noEtape, nomEtape}
         if (isset($data['etapes']) && is_array($data['etapes'])) {
-            // Build set of requested ids
+      
             $requested = [];
             foreach ($data['etapes'] as $item) {
                 if (is_array($item) && isset($item['noEtape'])) {
@@ -248,13 +246,12 @@ class ArtisanController extends AbstractController
                 }
             }
 
-            // Current etapes ids
+        
             $current = [];
             foreach ($artisan->getEtapesQualifiees() as $e) {
                 $current[] = $e->getId();
             }
 
-            // Remove those not requested
             foreach ($current as $curId) {
                 if (!in_array($curId, $requested, true)) {
                     $et = $entityManager->getRepository(\App\Entity\Etape::class)->find($curId);
@@ -264,7 +261,7 @@ class ArtisanController extends AbstractController
                 }
             }
 
-            // Add missing requested
+  
             foreach ($requested as $reqId) {
                 if (!in_array($reqId, $current, true)) {
                     $et = $entityManager->getRepository(\App\Entity\Etape::class)->find($reqId);
@@ -358,7 +355,7 @@ class ArtisanController extends AbstractController
         $etapeRepo = $entityManager->getRepository(\App\Entity\Etape::class);
         $allEtapes = $etapeRepo->findAll();
 
-        // Build normalized etape map for matching
+  
         $etapeMap = [];
         foreach ($allEtapes as $etape) {
             $normalized = $this->normalizeString($etape->getNom());
@@ -379,14 +376,12 @@ class ArtisanController extends AbstractController
                 $artisan->setEmail($artisanData['email'] ?? null);
                 $artisan->setTelephone($artisanData['tel'] ?? null);
 
-                // Match qualifications to etapes
                 if (!empty($artisanData['qualifications'])) {
                     $quals = array_map('trim', preg_split('/[,;]/', $artisanData['qualifications']));
                     foreach ($quals as $qual) {
                         if (empty($qual)) continue;
                         $normalizedQual = $this->normalizeString($qual);
                         
-                        // Find matching etape
                         $matchedEtape = null;
                         foreach ($etapeMap as $normalizedName => $etape) {
                             if (str_contains($normalizedName, $normalizedQual) || str_contains($normalizedQual, $normalizedName)) {
@@ -434,11 +429,6 @@ class ArtisanController extends AbstractController
         // Assignments (Chantiers)
         $assignments = [];
         foreach ($artisan->getEtapeChantiers() as $ec) {
-            // Only include if theoretical dates are set, or if actual dates are (though usually planning based on theoretical)
-            // Or maybe both? Let's use start/end from EtapeChantier if available.
-            // EtapeChantier has dateDebut and dateFin (realisation?) or usually theoretical is stored?
-            // Checking EtapeChantier entity would be good, but assuming standard fields.
-            // Based on previous code: $ec->getDateDebut() and $ec->getDateFin() seem to be the ones used for availability check.
             
             $dateStart = $ec->getDateDebut() ?? $ec->getDateDebutTheorique();
 
@@ -456,17 +446,11 @@ class ArtisanController extends AbstractController
                     
                     // Priority 2: Model duration
                     if (!$nbJours && $etape) {
-                        // We need the model duration. But we don't have easy access to Costruire here without extra query?
-                        // Actually, Etape entity might not have nbJours directly (it's on Costruire/Modele).
-                        // Let's rely on nbJoursPrevu first. 
+                     
                     }
 
                     if ($nbJours && $nbJours > 0) {
-                        // -1 because if starts Today and lasts 1 day, End is Today (inclusive)?
-                        // No, FullCalendar usually expects End to be exclusive for rendering blocks?
-                        // Or inclusive? 
-                        // If I say Start: 2023-01-01, End: 2023-01-01, it is 1 day.
-                        // If I usually add days:
+                        
                         $dateEnd->modify('+' . ($nbJours - 1) . ' days');
                     }
                 }
@@ -537,10 +521,7 @@ class ArtisanController extends AbstractController
             $indispo->setDateDebut($start);
             $indispo->setDateFin($end);
             $indispo->setMotif($motif);
-            $indispo->setArtisan($artisan); // This uses the setter on IndisponibiliteArtisan
-            // Or use the adder on Artisan if cascade persist is set, but better to set owning side.
-            // Entity logic: Artisan has OneToMany mappedBy 'artisan'. IndisponibiliteArtisan has ManyToOne inversedBy 'indisponibilites'.
-            // So we must set the artisan on the indispo.
+            $indispo->setArtisan($artisan);
             
             $entityManager->persist($indispo);
             $entityManager->flush();
@@ -606,7 +587,6 @@ class ArtisanController extends AbstractController
             return $this->json(['message' => 'Etape non trouvée'], 404);
         }
 
-        /** @var \App\Repository\ArtisanRepository $repo */
         $repo = $entityManager->getRepository(Artisan::class);
         $artisans = $repo->findAvailableArtisans($start, $end, $etape);
 

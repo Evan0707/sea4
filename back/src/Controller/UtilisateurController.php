@@ -44,7 +44,7 @@ class UtilisateurController extends AbstractController
             ->setParameter('q', "%$q%");
         }
 
-        // order by login by default (asc|desc)
+     
         $qb->orderBy('u.login', $sortOrder);
 
         $rows = $qb->getQuery()->getResult();
@@ -79,7 +79,7 @@ class UtilisateurController extends AbstractController
     #[Route('/me', name: 'utilisateurs_me', methods: ['GET'])]
     public function me(): JsonResponse
     {
-        /** @var Utilisateur|null $u */
+       
         $u = $this->getUser();
         if (!$u instanceof Utilisateur) {
             return $this->json(['error' => 'Not authenticated'], 401);
@@ -170,7 +170,7 @@ class UtilisateurController extends AbstractController
     #[Route('/profil', name: 'profil_update', methods: ['PUT'])]
     public function updateProfil(Request $request, EntityManagerInterface $em): JsonResponse
     {
-        /** @var Utilisateur|null $u */
+ 
         $u = $this->getUser();
         if (!$u instanceof Utilisateur) {
             return $this->json(['error' => 'Not authenticated'], 401);

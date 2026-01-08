@@ -132,8 +132,9 @@ export const AvailabilitySelector = ({ isOpen, onClose, onSelect, etape, current
               <Text>{error}</Text>
             </div>
           ) : artisans.length === 0 ? (
-            <div className="flex flex-col items-center justify-center h-full text-placeholder">
+            <div className="flex flex-col items-center justify-center h-full text-placeholder text-center max-w-sm mx-auto">
               <Text>Aucun artisan disponible trouvé pour cette période.</Text>
+              <Text className="text-sm mt-2">Cela signifie que tous les artisans qualifiés sont soit en congés, soit déjà affectés à d'autres chantiers qui chevauchent ces dates.</Text>
             </div>
           ) : filteredArtisans.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-full text-placeholder">

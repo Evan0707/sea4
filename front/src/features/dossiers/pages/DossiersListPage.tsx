@@ -71,7 +71,7 @@ export const DossiersListPage = () => {
     {
       key: 'nom',
       header: 'Nom Prénom',
-      // ... (rest of columns)
+
       width: 'flex-1 md:w-[200px] md:flex-none',
       render: (d) => (
         <Text className="font-semibold text-sm">
@@ -139,7 +139,6 @@ export const DossiersListPage = () => {
 
   return (
     <div className="p-4 md:p-8 h-full flex flex-col">
-      {/* PageHeader moved to Layout */}
 
       <div className="mb-5 flex items-center justify-between">
         <SearchBar
@@ -147,7 +146,7 @@ export const DossiersListPage = () => {
           onChange={setSearch}
           placeholder="Rechercher par nom, prénom ou ville..."
         />
-        {/* Can add a Create button here later */}
+
       </div>
 
       {error && (

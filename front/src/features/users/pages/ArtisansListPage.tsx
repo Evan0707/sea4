@@ -64,7 +64,7 @@ export const ArtisansListPage = () => {
       <Button variant='Secondary' onClick={handleExport} size='md' icon={Download}>
         Exporter
       </Button>
-      <Button variant='Secondary' onClick={() => { }} size='md'>
+      <Button variant='Secondary' onClick={() => fileInputRef.current?.click()} size='md'>
         Importer
       </Button>
       <Button variant='Primary' onClick={() => navigate('/admin/artisans/new')} size='md'>
@@ -85,6 +85,31 @@ export const ArtisansListPage = () => {
     }, 500);
     return () => clearTimeout(timer);
   }, [search]);
+
+  // Gestionnaires Drag & Drop
+  const processFile = useCallback((file: File) => {
+    if (!file.name.endsWith('.csv')) {
+      toast.addToast('Veuillez déposer un fichier CSV', 'error');
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      try {
+        const text = event.target?.result as string;
+        const parsed = parseCSV(text);
+        if (parsed.length === 0) {
+          toast.addToast('Aucun artisan trouvé dans le fichier', 'error');
+          return;
+        }
+        setCsvArtisans(parsed);
+        setShowCsvPopup(true);
+      } catch {
+        toast.addToast('Erreur lors de la lecture du fichier', 'error');
+      }
+    };
+    reader.readAsText(file);
+  }, [toast]);
 
   // Gestionnaires Drag & Drop
   const handleDragEnter = useCallback((e: React.DragEvent) => {
@@ -119,29 +144,18 @@ export const ArtisansListPage = () => {
     const files = e.dataTransfer.files;
     if (files.length === 0) return;
 
-    const file = files[0];
-    if (!file.name.endsWith('.csv')) {
-      toast.addToast('Veuillez déposer un fichier CSV', 'error');
-      return;
-    }
+    processFile(files[0]);
+  }, [processFile]);
 
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      try {
-        const text = event.target?.result as string;
-        const parsed = parseCSV(text);
-        if (parsed.length === 0) {
-          toast.addToast('Aucun artisan trouvé dans le fichier', 'error');
-          return;
-        }
-        setCsvArtisans(parsed);
-        setShowCsvPopup(true);
-      } catch {
-        toast.addToast('Erreur lors de la lecture du fichier', 'error');
-      }
-    };
-    reader.readAsText(file);
-  }, [toast]);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      processFile(e.target.files[0]);
+    }
+    // Reset value to allow selecting same file again
+    e.target.value = '';
+  };
 
   const columns: Column<Artisan>[] = [
     {
@@ -216,7 +230,7 @@ export const ArtisansListPage = () => {
 
   return (
     <div
-      className="p-4 md:p-8 h-full flex flex-col relative"
+      className="p-4 md:p-4 h-full flex flex-col relative"
       onDragEnter={handleDragEnter}
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
@@ -256,7 +270,14 @@ export const ArtisansListPage = () => {
           onChange={setSearch}
           placeholder="Rechercher par nom, prénom ou ville..."
         />
-        {/* Drag Drop Zone or other instructions can go here */}
+        {/* Hidden file input */}
+        <input
+          type="file"
+          ref={fileInputRef}
+          onChange={handleFileSelect}
+          accept=".csv"
+          className="hidden"
+        />
       </div>
 
       <DataList

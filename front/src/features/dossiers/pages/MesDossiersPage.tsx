@@ -82,7 +82,7 @@ export const MesDossiersPage = () => {
     {
       key: 'start',
       header: 'Date début',
-      width: 'hidden md:block w-[150px]',
+      width: 'hidden md:flex w-[150px]',
       sortable: true,
       render: (d) => (
         <Text className="text-sm font-mono tabular-nums">
@@ -125,7 +125,7 @@ export const MesDossiersPage = () => {
   ];
 
   return (
-    <div className="p-4 md:p-8 h-full flex flex-col">
+    <div className="p-4 md:p-4 h-full flex flex-col">
       <SearchBar
         value={search}
         onChange={setSearch}

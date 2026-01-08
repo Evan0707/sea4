@@ -39,7 +39,7 @@ class ModeleController extends AbstractController
             return $this->json(['message' => 'Modèle non trouvé'], 404);
         }
 
-        // Get etapes sorted by ID
+      
         $etapes = $modele->getEtapes()->toArray();
         usort($etapes, fn($a, $b) => $a->getId() <=> $b->getId());
 
@@ -82,6 +82,20 @@ class ModeleController extends AbstractController
                         $construire = new \App\Entity\Construire();
                         $construire->setNoModele($modele);
                         $construire->setNoEtape($etape);
+                        
+                        // Set additional fields if provided
+                        if (is_array($etapeData)) {
+                            if (isset($etapeData['montantFacture'])) {
+                                $construire->setMontantFacture((string)$etapeData['montantFacture']);
+                            }
+                            if (isset($etapeData['coutSousTraitant'])) {
+                                $construire->setCoutSousTraitant((string)$etapeData['coutSousTraitant']);
+                            }
+                            if (isset($etapeData['nbJoursRealisation'])) {
+                                $construire->setNbJoursRealisation((int)$etapeData['nbJoursRealisation']);
+                            }
+                        }
+                        
                         $entityManager->persist($construire);
                     }
                 }
@@ -121,17 +135,12 @@ class ModeleController extends AbstractController
                 // Get current constructions
                 $currentConstructions = $modele->getConstructions();
                 
-                // Remove all existing constructions (simplest way to ensure sync, assumming no extra data in Construire is critical or handled by UI yet)
-                // Note: If cost data existed, it would be lost. 
-                // Given the requirement "order by ID" and simple selection UI, full sync is appropriate for now.
                 foreach ($currentConstructions as $construction) {
                     $entityManager->remove($construction);
                 }
                 
-                // Flush to remove old relations before adding new ones to avoid unique constraint issues if any (though composite key handles it)
-                $entityManager->flush();
 
-                // Add new constructions
+                // Nouvelles constructions
                 foreach ($data['etapes'] as $etapeData) {
                     $etapeId = is_array($etapeData) ? $etapeData['noEtape'] : $etapeData;
                     $etape = $entityManager->getRepository(\App\Entity\Etape::class)->find($etapeId);
@@ -140,6 +149,20 @@ class ModeleController extends AbstractController
                         $construire = new \App\Entity\Construire();
                         $construire->setNoModele($modele);
                         $construire->setNoEtape($etape);
+                        
+                        // Set additional fields if provided
+                        if (is_array($etapeData)) {
+                            if (isset($etapeData['montantFacture'])) {
+                                $construire->setMontantFacture((string)$etapeData['montantFacture']);
+                            }
+                            if (isset($etapeData['coutSousTraitant'])) {
+                                $construire->setCoutSousTraitant((string)$etapeData['coutSousTraitant']);
+                            }
+                            if (isset($etapeData['nbJoursRealisation'])) {
+                                $construire->setNbJoursRealisation((int)$etapeData['nbJoursRealisation']);
+                            }
+                        }
+                        
                         $entityManager->persist($construire);
                     }
                 }
@@ -162,7 +185,6 @@ class ModeleController extends AbstractController
                 return $this->json(['message' => 'Modèle non trouvé'], 404);
             }
 
-            // Manually remove constructions first? Cascade might essentially handle it but explicit is safer for ManyToMany/JoinTable
             foreach ($modele->getConstructions() as $construction) {
                 $entityManager->remove($construction);
             }
@@ -174,7 +196,6 @@ class ModeleController extends AbstractController
         } catch (\Doctrine\DBAL\Exception\ForeignKeyConstraintViolationException $e) {
             return $this->json(['message' => 'Ce modèle est lié à des chantiers existants et ne peut pas être supprimé. Veuillez vérifier qu\'aucun chantier n\'utilise ce modèle avant de tenter de le supprimer.'], 400);
         } catch (\Exception $e) {
-             // Fallback check for string in case of other wrapper exceptions
              if (str_contains($e->getMessage(), 'Integrity constraint violation') || str_contains($e->getMessage(), 'ConstraintViolationException')) {
                  return $this->json(['message' => 'Ce modèle est lié à des chantiers existants et ne peut pas être supprimé. Veuillez vérifier qu\'aucun chantier n\'utilise ce modèle avant de tenter de le supprimer.'], 400);
              }

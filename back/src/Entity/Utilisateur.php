@@ -109,7 +109,7 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function getRoles(): array
     {
-        // Map DB role values to Symfony security roles
+        
         $map = [
             'admin' => 'ROLE_ADMIN',
             'commercial' => 'ROLE_COMMERCIAL',
@@ -119,7 +119,7 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
         if ($this->role && isset($map[$this->role])) {
             $roles[] = $map[$this->role];
         }
-        // Always include a base role
+
         $roles[] = 'ROLE_USER';
         return array_unique($roles);
     }
@@ -144,7 +144,7 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function eraseCredentials(): void
     {
-        // If you store any temporary, sensitive data on the user, clear it here
+
     }
 
     public function getUserIdentifier(): string

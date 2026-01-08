@@ -87,7 +87,7 @@ export const ProjetsListPage = () => {
   ];
 
   return (
-    <div className="p-8 h-full flex flex-col">
+    <div className="p-4 h-full flex flex-col">
       <div className="mb-6">
         <SearchBar
           value={search}

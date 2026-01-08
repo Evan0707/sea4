@@ -11,7 +11,8 @@ import Input from '@/shared/components/ui/Input';
 import Textarea from '@/shared/components/ui/Textarea';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/shared/components/ui/Card';
 import { Grid } from '@mynaui/icons-react';
-import { ArrowLeft, Save } from '@mynaui/icons-react';
+import { ArrowLeft, Save, Trash } from '@mynaui/icons-react';
+import { Table } from '@/shared/components/ui/Table';
 import Skeleton from '@/shared/components/ui/Skeleton';
 import EtapeMultiSelect from '@/shared/components/ui/EtapeMultiSelect';
 import { Text } from '@/shared/components/ui/Typography';
@@ -19,11 +20,13 @@ import { Text } from '@/shared/components/ui/Typography';
 const modeleSchema = z.object({
  nomModele: z.string().min(1, 'Le nom est requis'),
  descriptionModele: z.string().optional(),
- prixDeBase: z.number().min(0, 'Le prix doit être positif').optional(),
  etapes: z.array(z.object({
   noEtape: z.number(),
   nomEtape: z.string(),
   reservable: z.boolean().optional(),
+  montantFacture: z.number().nullable().optional(),
+  coutSousTraitant: z.number().nullable().optional(),
+  nbJoursRealisation: z.number().nullable().optional(),
  })).optional()
 });
 
@@ -44,7 +47,6 @@ export const ModeleEditPage = () => {
   defaultValues: {
    nomModele: '',
    descriptionModele: '',
-   prixDeBase: 0,
    etapes: []
   }
  });
@@ -54,7 +56,6 @@ export const ModeleEditPage = () => {
    form.reset({
     nomModele: modele.nomModele,
     descriptionModele: modele.descriptionModele || '',
-    prixDeBase: 0,
     etapes: modele.etapes || []
    });
   }
@@ -64,7 +65,14 @@ export const ModeleEditPage = () => {
   try {
    const payload = {
     ...data,
-    etapes: (data.etapes || []).map(e => ({ noEtape: e.noEtape, nomEtape: e.nomEtape }))
+    etapes: (data.etapes || []).map(e => ({
+     noEtape: e.noEtape,
+     nomEtape: e.nomEtape,
+     reservable: e.reservable,
+     montantFacture: e.montantFacture,
+     coutSousTraitant: e.coutSousTraitant,
+     nbJoursRealisation: e.nbJoursRealisation
+    }))
    };
    if (isEditMode && id) {
     await updateModele({
@@ -148,7 +156,6 @@ export const ModeleEditPage = () => {
      {/* Section: Informations générales */}
      <div className="space-y-4">
       <Text className="font-semibold text-text-primary flex items-center gap-2">
-       <span className="w-2 h-2 bg-primary rounded-full"></span>
        Informations générales
       </Text>
       <div className="pl-4 space-y-4">
@@ -174,20 +181,94 @@ export const ModeleEditPage = () => {
      {/* Section: Étapes de construction */}
      <div className="space-y-4">
       <Text className="font-semibold text-text-primary flex items-center gap-2">
-       <span className="w-2 h-2 bg-primary rounded-full"></span>
        Étapes de construction
       </Text>
       <div className="pl-4">
        <EtapeMultiSelect
         value={form.watch('etapes') || []}
-        onChange={(etapes) => {
-         const sorted = [...etapes].sort((a, b) => a.noEtape - b.noEtape);
+        onChange={(newEtapes) => {
+         // Merge new etapes with existing data to preserve filled fields
+         const currentEtapes = form.getValues('etapes') || [];
+         const mergedEtapes = newEtapes.map(newEtape => {
+          const existing = currentEtapes.find(c => c.noEtape === newEtape.noEtape);
+          return existing ? { ...newEtape, ...existing } : newEtape;
+         });
+
+         const sorted = [...mergedEtapes].sort((a, b) => a.noEtape - b.noEtape);
          form.setValue('etapes', sorted, { shouldDirty: true });
         }}
         label="Sélectionner les étapes"
         disabled={isEditMode}
         info={isEditMode ? "Les étapes ne peuvent pas être modifiées après création" : undefined}
        />
+
+       {/* Table for detailed values */}
+       {(form.watch('etapes') || []).length > 0 && (
+        <div className="mt-6">
+         <Text className="text-sm font-semibold mb-2">Détails des étapes</Text>
+         <Table
+          data={form.watch('etapes') || []}
+          keyExtractor={(item) => item.noEtape}
+          columns={[
+           { header: 'Étape', width: 'w-1/4', render: (item) => <Text className="text-sm font-medium">{item.nomEtape}</Text> },
+           {
+            header: 'Montant Facture (€)',
+            render: (item, index) => (
+             <Input
+              type="number"
+              name={`etapes.${index}.montantFacture`}
+              placeholder="0.00"
+              register={form.register(`etapes.${index}.montantFacture`, { valueAsNumber: true })}
+              className="h-8 text-sm"
+             />
+            )
+           },
+           {
+            header: 'Coût Sous-Traitant (€)',
+            render: (item, index) => (
+             <Input
+              type="number"
+              name={`etapes.${index}.coutSousTraitant`}
+              placeholder="0.00"
+              register={form.register(`etapes.${index}.coutSousTraitant`, { valueAsNumber: true })}
+              className="h-8 text-sm"
+             />
+            )
+           },
+           {
+            header: 'Nb Jours',
+            width: 'w-24',
+            render: (item, index) => (
+             <Input
+              type="number"
+              name={`etapes.${index}.nbJoursRealisation`}
+              placeholder="0"
+              register={form.register(`etapes.${index}.nbJoursRealisation`, { valueAsNumber: true })}
+              className="h-8 text-sm"
+             />
+            )
+           },
+           {
+            header: '',
+            width: 'w-10',
+            render: (item) => !isEditMode ? (
+             <Button
+              variant="Destructive"
+              size="sm"
+              onClick={() => {
+               const current = form.getValues('etapes');
+               form.setValue('etapes', current?.filter(e => e.noEtape !== item.noEtape) || [], { shouldDirty: true });
+              }}
+             >
+              <Trash className="w-4 h-4" />
+             </Button>
+            ) : null
+           }
+          ]}
+         />
+        </div>
+       )}
+
        {!isEditMode && (
         <Text className="text-sm text-placeholder mt-2">
          Les étapes seront associées dans l'ordre de leur numéro.

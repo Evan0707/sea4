@@ -72,9 +72,7 @@ class MaitreOeuvre
         return $this;
     }
 
-    /**
-     * @return Collection<int, Chantier>
-     */
+  
     public function getChantiers(): Collection
     {
         return $this->chantiers;
