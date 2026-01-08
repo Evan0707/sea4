@@ -35,7 +35,7 @@ export const MesDossiersPage = () => {
     return () => clearTimeout(timer);
   }, [search]);
 
-  // Use useChantiers hook with endpoint /mes-dossiers
+  // Utilisation du hook useChantiers avec endpoint /mes-dossiers
   const { chantiers: dossiers, loading, refetch: refetch } = useChantiers({
     endpoint: '/mes-dossiers',
     filters: {
@@ -44,6 +44,7 @@ export const MesDossiersPage = () => {
     }
   });
 
+  // Gestion de la suppression
   const confirmDelete = async () => {
     if (!dossierToDelete) return;
 
@@ -58,6 +59,7 @@ export const MesDossiersPage = () => {
     setDossierToDelete(null);
   };
 
+  // Configuration des colonnes
   const columns: Column<Chantier>[] = [
     {
       key: 'nom',

@@ -56,6 +56,7 @@ interface MoeStats {
  }[];
 }
 
+// Fonction pour recuperer les stats de l'admin
 export const useAdminStats = () => {
  return useQuery({
   queryKey: ['admin-stats'],
@@ -66,6 +67,7 @@ export const useAdminStats = () => {
  });
 };
 
+// Fonction pour recuperer les stats du commercial
 export const useCommercialStats = () => {
  return useQuery({
   queryKey: ['commercial-stats'],
@@ -76,6 +78,7 @@ export const useCommercialStats = () => {
  });
 };
 
+// Fonction pour recuperer les stats du MOE
 export const useMoeStats = () => {
  return useQuery({
   queryKey: ['moe-stats'],

@@ -34,6 +34,7 @@ const ArtisanItem = ({
   const popoverRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
 
+  // Gestion du popover
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (popoverRef.current && !popoverRef.current.contains(event.target as Node)) {

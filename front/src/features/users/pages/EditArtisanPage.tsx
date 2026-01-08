@@ -37,6 +37,7 @@ const EditArtisanPage = () => {
     `Édition des informations de ${artisan.prenomArtisan || '...'} ${artisan.nomArtisan || '...'}`
   );
 
+  // Gestion de la récupération des informations de l'artisan
   useEffect(() => {
     const fetch = async () => {
       if (!id || isNaN(Number(id))) {
@@ -74,6 +75,7 @@ const EditArtisanPage = () => {
     setArtisan(prev => ({ ...prev, [field]: value }));
   };
 
+  // Gestion de la soumission du formulaire
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);

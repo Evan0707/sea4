@@ -15,11 +15,13 @@ interface ChantierStepProps {
 }
 
 export const ChantierStep = ({ form }: ChantierStepProps) => {
+  // Destructuration des props
   const { register, formState: { errors }, setValue, watch } = form;
 
   const { data: maitresOeuvre = [] } = useMaitresOeuvre();
   const { data: modeles = [] } = useModeles();
 
+  // Recuperation de l'id du modele selectionne
   const selectedModeleId = watch('noModele');
   const { data: etapesModele = [], isLoading: loadingEtapes } = useEtapes(selectedModeleId ?? null);
 

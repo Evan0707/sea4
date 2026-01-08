@@ -40,6 +40,7 @@ export const useChantiers = ({ endpoint = '/chantiers', filters = {} }: UseChant
   },
  });
 
+ // Mutation pour supprimer un chantier
  const deleteMutation = useMutation({
   mutationFn: async (id: number) => {
    await apiClient.delete(`/chantiers/${id}`);
@@ -54,6 +55,7 @@ export const useChantiers = ({ endpoint = '/chantiers', filters = {} }: UseChant
   },
  });
 
+ // Fonction pour supprimer un chantier
  const deleteChantier = async (id: number) => {
   await deleteMutation.mutateAsync(id);
  };
@@ -61,13 +63,13 @@ export const useChantiers = ({ endpoint = '/chantiers', filters = {} }: UseChant
  return { chantiers, loading, error, refetch, deleteChantier };
 };
 
+// Fonction pour recuperer un chantier
 export const useChantier = (id: string | undefined, options: { endpoint?: string } = {}) => {
  return useQuery({
   queryKey: ['chantier', id, options.endpoint],
   queryFn: async () => {
    if (!id) return null;
    const url = options.endpoint ? `${options.endpoint}/${id}` : `/chantiers/${id}`;
-   // Cast to any to handle different detail types (Chantier vs ChantierDetail)
    const response = await apiClient.get<any>(url);
    return response.data;
   },

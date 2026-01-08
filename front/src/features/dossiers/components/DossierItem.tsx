@@ -38,6 +38,7 @@ const DossierItem = ({
   const popoverRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
 
+  // Gestion du popover
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (popoverRef.current && !popoverRef.current.contains(event.target as Node)) {
@@ -79,9 +80,9 @@ const DossierItem = ({
             <Text className="truncate w-[100px] font-medium font-mono tabular-nums">{formatDate(start)}</Text>
             <div className="w-[120px] flex justify-end items-center gap-2">
               {
-                status=='À venir'?
+                status == 'À venir' ?
                   <Status label='À compléter' />
-                :
+                  :
                   <Status label={status} />
               }
             </div>

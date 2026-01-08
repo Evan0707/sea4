@@ -15,6 +15,7 @@ import { useDossier, useDossierEtapes } from '../hooks/useDossiers';
 import { Tabs } from '@/shared/components/ui/Tabs';
 import { Calendar, User } from '@mynaui/icons-react';
 import { useArtisans } from '../../users/hooks/useArtisans';
+import { useAuth } from '@/features/auth/context/AuthContext';
 
 interface EtapeState extends Etape {
   // valeurs d'édition locales
@@ -33,6 +34,10 @@ const CompleteDossierPage: React.FC = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { addToast } = useToast();
+  const { user } = useAuth();
+
+  const isAdmin = user?.roles.includes('ROLE_ADMIN');
+  const basePath = isAdmin ? '/admin' : '/maitre-doeuvre';
 
   const { data: dossierData, isLoading: loadingDossier } = useDossier(id);
   const { data: etapesData = [], isLoading: loadingEtapes } = useDossierEtapes(id);
@@ -40,10 +45,10 @@ const CompleteDossierPage: React.FC = () => {
 
   const [etapes, setEtapes] = useState<EtapeState[]>([]);
 
-  // Effect to sync etapes state when data loads
+  // sync etapes state quand data loads
   useEffect(() => {
     if (etapesData.length > 0) {
-      // Sort etapes by noEtape just in case
+      // Sort etapes par noEtape 
       const sortedEtapes = [...etapesData].sort((a: any, b: any) => {
         const idA = a.noEtape || a.noEtapeChantier || a.id;
         const idB = b.noEtape || b.noEtapeChantier || b.id;
@@ -122,7 +127,7 @@ const CompleteDossierPage: React.FC = () => {
       setSelectedEtapeForAssignment(null);
     }
   };
-
+  // Calculer les totaux
   const computeTotals = () => {
     let coutTheorique = 0;
     let total = 0;
@@ -138,6 +143,7 @@ const CompleteDossierPage: React.FC = () => {
 
   const [errors, setErrors] = useState<Set<number>>(new Set());
 
+  // Enregistrer les étapes
   const saveEtapes = async () => {
     // Préparer les données pour l'API
     const etapesPayload = etapes.map((e) => ({
@@ -159,6 +165,7 @@ const CompleteDossierPage: React.FC = () => {
 
   const [isSavingDraft, setIsSavingDraft] = useState(false);
 
+  // Enregistrer le brouillon
   const handleSaveDraft = async () => {
     setIsSavingDraft(true);
     try {
@@ -171,7 +178,7 @@ const CompleteDossierPage: React.FC = () => {
 
       addToast('Brouillon sauvegardé', 'success');
 
-      navigate('/maitre-doeuvre/dossiers');
+      navigate(`${basePath}/dossiers`);
     } catch (error) {
       console.error('Erreur lors de la sauvegarde:', error);
       addToast('Erreur lors de la sauvegarde du brouillon', 'error');
@@ -182,11 +189,12 @@ const CompleteDossierPage: React.FC = () => {
 
   const [isValidating, setIsValidating] = useState(false);
 
+  // Compléter le dossier
   const handleComplete = async () => {
     setErrors(new Set());
     setIsValidating(true);
     try {
-      // 1. Check for missing required fields
+      // 1. Vérifier les champs obligatoires
       const etapesIncompletes = etapes.filter(e => (!e.reservee && !e.artisanId) || !e.dateTheorique);
       if (etapesIncompletes.length > 0) {
         addToast(`${etapesIncompletes.length} étape(s) n'ont pas d'artisan ou de date théorique`, 'error');
@@ -196,7 +204,7 @@ const CompleteDossierPage: React.FC = () => {
         return;
       }
 
-      // 2. Validate Chronological Order
+      // 2. Vérifier l'ordre chronologique
       const sequenceErrors = new Set<number>();
       for (let i = 1; i < etapes.length; i++) {
         const current = etapes[i];
@@ -226,7 +234,7 @@ const CompleteDossierPage: React.FC = () => {
       });
 
       addToast('Dossier validé et passé à "À venir"', 'success');
-      navigate('/maitre-doeuvre/dossiers');
+      navigate(`${basePath}/dossiers`);
     } catch (error) {
       console.error('Erreur lors de la validation:', error);
       addToast('Erreur lors de la validation du dossier', 'error');

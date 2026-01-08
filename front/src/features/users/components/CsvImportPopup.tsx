@@ -37,6 +37,7 @@ const EtapeSelector: React.FC<EtapeSelectorProps> = ({ etapes, onSelect, onClose
   const [search, setSearch] = useState('');
   const ref = useRef<HTMLDivElement>(null);
 
+  // Gestion de la fermeture du sélecteur
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       if (ref.current && !ref.current.contains(e.target as Node)) {
@@ -47,6 +48,7 @@ const EtapeSelector: React.FC<EtapeSelectorProps> = ({ etapes, onSelect, onClose
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [onClose]);
 
+  // Filtrage des étapes
   const filtered = etapes.filter(e =>
     e.nomEtape.toLowerCase().includes(search.toLowerCase())
   );

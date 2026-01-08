@@ -11,13 +11,14 @@ interface DevisCreationModalProps {
  loading?: boolean;
 }
 
+// Composant pour creer un devis
 export const DevisCreationModal = ({ isOpen, onClose, onSubmit, loading = false }: DevisCreationModalProps) => {
  const [remarques, setRemarques] = useState('');
 
  const handleSubmit = async (e: React.FormEvent) => {
   e.preventDefault();
   await onSubmit({ remarques });
-  // Reset form on success
+  // Reset le formulaire
   setRemarques('');
  };
 

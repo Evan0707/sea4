@@ -19,6 +19,7 @@ export const UtilisateursListPage = () => {
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
   const [userToDelete, setUserToDelete] = useState<number | null>(null);
 
+  // Utilisation du hook personnalisé pour récupérer les utilisateurs
   const { utilisateurs, loading, deleteUtilisateur } = useUtilisateurs({
     search: debouncedSearch,
     sortOrder,
@@ -33,6 +34,7 @@ export const UtilisateursListPage = () => {
   }, [search]);
 
 
+  // Fonction de confirmation de suppression
   const confirmDelete = async () => {
     if (userToDelete) {
       await deleteUtilisateur(userToDelete);
@@ -40,6 +42,7 @@ export const UtilisateursListPage = () => {
     }
   };
 
+  // Fonction de gestion de l'export CSV
   const handleExport = () => {
     const exportColumns: CsvColumn<Utilisateur>[] = [
       { key: 'login', header: 'Login' },
@@ -50,6 +53,7 @@ export const UtilisateursListPage = () => {
     exportToCSV(utilisateurs, exportColumns, 'utilisateurs');
   };
 
+  // Configuration des actions dans le header
   const headerActions = useMemo(() => (
     <div className="flex items-center gap-2">
       <Button variant="Secondary" icon={Download} onClick={handleExport}>
@@ -61,12 +65,14 @@ export const UtilisateursListPage = () => {
     </div>
   ), []);
 
+  // Configuration de l'en-tête
   usePageHeader(
     'Utilisateurs',
     headerActions,
     "Gérez les comptes utilisateurs de l'application."
   );
 
+  // Configuration des colonnes
   const columns: Column<Utilisateur>[] = [
     {
       key: 'login',

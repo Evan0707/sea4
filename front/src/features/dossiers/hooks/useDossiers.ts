@@ -4,10 +4,12 @@ import type { Dossier, DossierFilters } from '../types';
 import type { DossierResponse } from '@/shared/types/dossier';
 import { useToast } from '@/shared/hooks/useToast';
 
+// Fonction pour recuperer les dossiers
 export const useDossiers = (filters: DossierFilters = {}) => {
  const queryClient = useQueryClient();
  const { addToast } = useToast();
 
+ // Fonction pour recuperer les dossiers
  const { data: dossiers = [], isLoading: loading, error } = useQuery({
   queryKey: ['dossiers', filters],
   queryFn: async () => {
@@ -21,6 +23,7 @@ export const useDossiers = (filters: DossierFilters = {}) => {
   },
  });
 
+ // Fonction pour supprimer un dossier
  const deleteMutation = useMutation({
   mutationFn: async (id: number) => {
    await apiClient.delete(`/chantiers/${id}`);
@@ -47,6 +50,7 @@ export const useDossiers = (filters: DossierFilters = {}) => {
  };
 };
 
+// Fonction pour recuperer un dossier
 export const useDossier = (id: string | undefined) => {
  return useQuery({
   queryKey: ['dossier', id],
@@ -59,6 +63,7 @@ export const useDossier = (id: string | undefined) => {
  });
 };
 
+// Fonction pour recuperer les etapes d'un dossier
 export const useDossierEtapes = (id: string | undefined) => {
  return useQuery({
   queryKey: ['dossier-etapes', id],

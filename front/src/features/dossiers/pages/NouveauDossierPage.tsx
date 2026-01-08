@@ -109,10 +109,12 @@ export const NouveauDossierPage = () => {
     }
   };
 
+  // Gestion du retour
   const handlePrevious = () => {
     setCurrentStep((prev: number) => Math.max(prev - 1, 1));
   };
 
+  // Gestion de la soumission
   const handleSubmit = async () => {
     const clientData = clientForm.getValues();
     const chantierData = chantierForm.getValues();

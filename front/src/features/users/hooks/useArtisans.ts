@@ -5,6 +5,7 @@ import { useToast } from '@/shared/hooks/useToast';
 
 export const useArtisans = (filters: UserFilters) => {
  const toast = useToast();
+ // appels requetes
  const queryClient = useQueryClient();
  const queryKey = ['artisans', filters];
 
@@ -18,10 +19,10 @@ export const useArtisans = (filters: UserFilters) => {
     },
    });
 
-   // Cleaning logic from original file
+   // nettoyage des données
    const cleanArtisans = response.data.map((a: any) => ({
     noArtisan: a.noArtisan,
-    // Handle potentially double-quoted keys if backend returns them
+    // nettoyage des clés
     nomArtisan: a['"nomArtisan"'] ?? a.nomArtisan,
     prenomArtisan: a['"prenomArtisan"'] ?? a.prenomArtisan,
     adresseArtisan: a['"adresseArtisan"'] ?? a.adresseArtisan,
@@ -33,6 +34,7 @@ export const useArtisans = (filters: UserFilters) => {
   },
  });
 
+ // supprimer un artisan
  const deleteMutation = useMutation({
   mutationFn: async (noArtisan: number) => {
    await apiClient.delete(`/artisan/${noArtisan}/delete`);
@@ -56,6 +58,7 @@ export const useArtisans = (filters: UserFilters) => {
   },
  });
 
+ // supprimer un artisan
  const deleteArtisan = async (noArtisan: number) => {
   await deleteMutation.mutateAsync(noArtisan);
  };

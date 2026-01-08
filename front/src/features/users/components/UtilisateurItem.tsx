@@ -27,6 +27,7 @@ const UtilisateurItem = ({
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const popoverRef = useRef<HTMLDivElement>(null);
 
+  // Gestion du popover
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (popoverRef.current && !popoverRef.current.contains(event.target as Node)) {
@@ -50,6 +51,7 @@ const UtilisateurItem = ({
     }
   }, [isHovered, isPopoverOpen]);
 
+  // Récupération du label du rôle
   const getRoleLabel = (role: string) => {
     switch (role) {
       case 'admin':

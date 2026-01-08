@@ -25,6 +25,7 @@ export const ProjetsListPage = () => {
     }
   });
 
+  // Gestion du debouncing de la recherche
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedSearch(search);
@@ -32,6 +33,7 @@ export const ProjetsListPage = () => {
     return () => clearTimeout(timer);
   }, [search]);
 
+  // Configuration des colonnes
   const columns: Column<Projet>[] = [
     {
       key: 'noChantier',

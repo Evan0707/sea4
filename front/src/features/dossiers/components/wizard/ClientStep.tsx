@@ -9,6 +9,7 @@ interface ClientStepProps {
 }
 
 export const ClientStep = ({ form }: ClientStepProps) => {
+ // Destructuration des props
  const { register, formState: { errors }, setValue, watch } = form;
 
  return (

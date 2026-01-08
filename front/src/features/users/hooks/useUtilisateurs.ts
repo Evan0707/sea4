@@ -21,6 +21,7 @@ export const useUtilisateurs = (filters: UserFilters) => {
   },
  });
 
+ // supprimer un utilisateur
  const deleteMutation = useMutation({
   mutationFn: async (noUtilisateur: number) => {
    await apiClient.delete(`/utilisateur/${noUtilisateur}/delete`);
@@ -36,6 +37,7 @@ export const useUtilisateurs = (filters: UserFilters) => {
   },
  });
 
+ // supprimer un utilisateur
  const deleteUtilisateur = async (noUtilisateur: number) => {
   await deleteMutation.mutateAsync(noUtilisateur);
  };

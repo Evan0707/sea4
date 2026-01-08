@@ -35,11 +35,12 @@ export const FactureArtisanCreationModal = ({
  const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
  const [selectedEtapeId, setSelectedEtapeId] = useState<string>('');
 
- // Filter etapes that have an artisan assigned
+ // Filtrer les etapes qui ont un artisan assigne
  const availableEtapes = useMemo(() => {
   return etapes.filter(e => e.artisan !== null);
  }, [etapes]);
 
+ // Fonction pour soumettre le formulaire
  const handleSubmit = async (e: React.FormEvent) => {
   e.preventDefault();
   if (!selectedEtapeId || !montant) return;
@@ -54,7 +55,7 @@ export const FactureArtisanCreationModal = ({
    etapeId: etape.noEtapeChantier
   });
 
-  // Reset
+  // Reset le formulaire
   setMontant('');
   setSelectedEtapeId('');
  };

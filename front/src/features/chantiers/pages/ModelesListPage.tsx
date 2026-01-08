@@ -19,10 +19,12 @@ export const ModelesListPage = () => {
  const { data: modeles = [], isLoading } = useModeles();
  const deleteMutation = useDeleteModele();
 
+ // Gestion de l'edition
  const handleEdit = (id: number) => {
   navigate(`/admin/modeles/${id}/edit`);
  };
 
+ // Gestion de la suppression
  const handleDelete = async () => {
   if (modelToDelete) {
    try {
@@ -35,6 +37,7 @@ export const ModelesListPage = () => {
   }
  };
 
+ // Mettre en place les actions du header
  const headerActions = useMemo(() => (
   <Button
    variant="Primary"

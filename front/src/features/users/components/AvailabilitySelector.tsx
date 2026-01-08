@@ -30,6 +30,7 @@ export const AvailabilitySelector = ({ isOpen, onClose, onSelect, etape, current
 
   const { dateDebutTheorique, nbJours = 0 } = etape;
 
+  // Gestion des dates
   useEffect(() => {
     if (isOpen && dateDebutTheorique) {
       setStartDate(dateDebutTheorique);
@@ -43,6 +44,7 @@ export const AvailabilitySelector = ({ isOpen, onClose, onSelect, etape, current
     }
   }, [isOpen, dateDebutTheorique, nbJours]);
 
+  // Recherche des artisans disponibles
   const searchAvailableArtisans = async () => {
     if (!startDate || !endDate) return;
 
@@ -65,6 +67,7 @@ export const AvailabilitySelector = ({ isOpen, onClose, onSelect, etape, current
     }
   };
 
+  // Gestion de la recherche des artisans disponibles
   useEffect(() => {
     if (isOpen && startDate && endDate) {
       searchAvailableArtisans();

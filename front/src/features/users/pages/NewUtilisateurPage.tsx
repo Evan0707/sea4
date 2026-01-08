@@ -21,12 +21,14 @@ export default function NewUtilisateurPage() {
   const navigate = useNavigate()
   const { addToast } = useToast()
 
+  // Configuration du formulaire
   const { register, handleSubmit, setValue, watch, formState: { errors, isSubmitting } } = useForm<CreateUserFormData>({
     resolver: zodResolver(createUserSchema),
     defaultValues: { prenom: '', nom: '', login: '', password: '', role: 'admin' }
   })
   const [isLoginEdited, setIsLoginEdited] = useState(false)
 
+  // Fonction de transformation des caractères spéciaux
   const slugify = (s: string) => {
     return s
       .normalize('NFD')
@@ -39,6 +41,7 @@ export default function NewUtilisateurPage() {
   const prenom = watch('prenom')
   const nom = watch('nom')
 
+  // Gestion de la modification du login
   useEffect(() => {
     if (isLoginEdited) return
     const p = (prenom ?? '').trim()
@@ -48,6 +51,7 @@ export default function NewUtilisateurPage() {
     setValue('login', candidate)
   }, [prenom, nom, isLoginEdited, setValue])
 
+  // Gestion de la soumission du formulaire
   const onSubmit = async (data: CreateUserFormData) => {
     try {
       await apiClient.post('/admin/utilisateurs', data)

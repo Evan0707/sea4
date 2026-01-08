@@ -27,9 +27,11 @@ type Props = {
   hasError?: boolean
 }
 
+// Fonction pour afficher un item d'etape
 const EtapeItem: React.FC<Props> = ({ e, artisans, onChange, onOpenAvailability, hasError }) => {
   const update = (patch: Partial<EtapeState>) => onChange(e.noEtape, patch)
 
+  // Recuperation de l'artisan selectionne
   const selectedArtisan = artisans.find(art => art.noArtisan === e.artisanId)
   const artisanLabel = selectedArtisan
     ? `${selectedArtisan.prenomArtisan ?? ''} ${selectedArtisan.nomArtisan}`.trim()

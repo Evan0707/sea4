@@ -236,8 +236,7 @@ export const CommercialDashboardPage = () => {
               {stats.recentDossiers.map((d) => (
                 <div
                   key={d.noChantier}
-                  onClick={() => navigate(`/commercial/dossiers/${d.noChantier}`)}
-                  className="p-4 bg-bg-primary rounded-lg border border-border hover:border-primary/50 transition-colors cursor-pointer"
+                  className="p-4 bg-bg-primary rounded-lg border border-border transition-colors"
                 >
                   <div className="flex items-center justify-between mb-2">
                     <Text className="font-medium">{d.client}</Text>

@@ -100,6 +100,7 @@ export const ModeleEditPage = () => {
 
  const { isDirty } = form.formState;
 
+ // Mettre en place les actions du header
  const headerActions = useMemo(() => (
   <div className="flex gap-2">
    <Button variant="Secondary" onClick={() => navigate('/admin/modeles')} icon={ArrowLeft}>

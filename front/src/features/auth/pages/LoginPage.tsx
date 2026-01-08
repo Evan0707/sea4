@@ -16,6 +16,8 @@ export const Login = () => {
   const navigate = useNavigate();
   const { login } = useAuth();
   const { addToast } = useToast();
+
+  // Configuration du formulaire
   const {
     register,
     handleSubmit,
@@ -24,6 +26,7 @@ export const Login = () => {
     resolver: zodResolver(loginSchema),
   });
 
+  // Fonction de soumission du formulaire
   const onSubmit = async (data: LoginFormData) => {
     try {
       const response = await fetch('http://localhost:8000/api/login_check', {

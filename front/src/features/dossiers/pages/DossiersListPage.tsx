@@ -13,6 +13,7 @@ import { exportToCSV, type CsvColumn } from '@/shared/utils/csvExporter';
 import { formatDate } from '@/shared/utils/dateFormatter';
 import { usePageHeader } from '@/shared/context/LayoutContext';
 import ConfirmModal from '@/shared/components/ui/ConfirmModal';
+import { useAuth } from '@/features/auth/context/AuthContext';
 
 export const DossiersListPage = () => {
   const [search, setSearch] = useState('');
@@ -32,7 +33,7 @@ export const DossiersListPage = () => {
     }
   };
 
-  // Debounce search
+  // Gestion du debouncing de la recherche
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedSearch(search);
@@ -40,6 +41,7 @@ export const DossiersListPage = () => {
     return () => clearTimeout(timer);
   }, [search]);
 
+  // Gestion de l'export
   const handleExport = () => {
     const exportColumns: CsvColumn<Dossier>[] = [
       { key: 'nom', header: 'Nom' },
@@ -55,6 +57,7 @@ export const DossiersListPage = () => {
 
   const navigate = useNavigate();
 
+  // Configuration des actions du header
   const headerActions = useMemo(() => (
     <Button variant="Secondary" icon={Download} onClick={handleExport}>
       Exporter CSV
@@ -67,6 +70,15 @@ export const DossiersListPage = () => {
     'Gérez les dossiers clients et suivez leur avancement.'
   );
 
+  const { user } = useAuth();
+  const isAdmin = user?.roles.includes('ROLE_ADMIN');
+  const isCommercial = user?.roles.includes('ROLE_COMMERCIAL');
+
+  let basePath = '/maitre-doeuvre';
+  if (isAdmin) basePath = '/admin';
+  if (isCommercial) basePath = '/commercial';
+
+  // Configuration des colonnes
   const columns: Column<Dossier>[] = [
     {
       key: 'nom',
@@ -119,11 +131,25 @@ export const DossiersListPage = () => {
         <div onClick={(e) => e.stopPropagation()}>
           <Popover>
             <Popover.Item
-              onClick={() => navigate(`/maitre-doeuvre/chantiers/${d.noChantier}`)}
+              onClick={() => {
+                if (isCommercial) {
+                  navigate(`/commercial/dossiers/${d.noChantier}/edit`);
+                } else {
+                  navigate(`${basePath}/chantiers/${d.noChantier}`);
+                }
+              }}
               icon={Eye}
             >
               Voir détails
             </Popover.Item>
+            {(d.status === 'À compléter' || d.status === 'À venir') && !isCommercial && (
+              <Popover.Item
+                onClick={() => navigate(`${basePath}/dossiers/${d.noChantier}/completer`)}
+                icon={Eye}
+              >
+                Compléter
+              </Popover.Item>
+            )}
             <Popover.Item
               variant="destructive"
               onClick={() => setDossierToDelete(d.noChantier)}
@@ -163,7 +189,13 @@ export const DossiersListPage = () => {
         sortDirection={sortOrder}
         onSort={() => setSortOrder(prev => prev === 'asc' ? 'desc' : 'asc')}
         keyExtractor={(item) => item.noChantier}
-        onRowClick={(item) => navigate(`/maitre-doeuvre/chantiers/${item.noChantier}`)}
+        onRowClick={(item) => {
+          if (isCommercial) {
+            navigate(`/commercial/dossiers/${item.noChantier}/edit`);
+          } else {
+            navigate(`${basePath}/chantiers/${item.noChantier}`);
+          }
+        }}
         emptyMessage="Aucun dossier trouvé"
       />
 

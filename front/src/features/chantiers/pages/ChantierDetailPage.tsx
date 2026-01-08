@@ -54,7 +54,7 @@ export const ChantierDetailPage = () => {
   // Devis Modal State
   const [devisModalOpen, setDevisModalOpen] = useState(false);
 
-  // Set header with back button
+  // Mettre en place le header
   const headerActions = useMemo(() => (
     <div className="flex items-center gap-2">
       <Button variant="Secondary" onClick={() => navigate(-1)}>
@@ -68,6 +68,7 @@ export const ChantierDetailPage = () => {
     headerActions
   );
 
+  // Toggle etape etendue
   const toggleEtapeExpanded = (etapeId: number) => {
     setExpandedEtapes(prev => {
       const newSet = new Set(prev);
@@ -163,6 +164,7 @@ export const ChantierDetailPage = () => {
     setSelectionModalOpen(true);
   };
 
+  // Assigner un artisan
   const handleAssignArtisan = async (artisan: Artisan) => {
     if (!selectedEtapeForAssignment || !chantier) return;
 
@@ -266,7 +268,7 @@ export const ChantierDetailPage = () => {
     return (order[a.statut] ?? 1) - (order[b.statut] ?? 1);
   });
 
-  // Check if any step is currently in progress
+  // Vérifier si une étape est en cours
   const isAnyEtapeInProgress = chantier.etapes.some(e => e.statut === 'En cours');
 
   return (

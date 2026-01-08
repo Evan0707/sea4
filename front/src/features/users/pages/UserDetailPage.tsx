@@ -20,6 +20,7 @@ interface UserDetail {
   role: string;
 }
 
+// Fonction de récupération du style du badge en fonction du rôle
 const getRoleBadgeStyle = (role: string) => {
   switch (role?.toLowerCase()) {
     case 'admin':
@@ -33,6 +34,7 @@ const getRoleBadgeStyle = (role: string) => {
   }
 };
 
+// Fonction de récupération des initiales
 const getInitials = (prenom: string | null | undefined, nom: string | null | undefined) => {
   const first = prenom?.charAt(0)?.toUpperCase() || '';
   const last = nom?.charAt(0)?.toUpperCase() || '';
@@ -46,6 +48,7 @@ const UserDetailPage = () => {
   const { data: userData, isLoading: loading } = useUtilisateur(id);
   const user = (Array.isArray(userData) ? userData.find((u: any) => u.noUtilisateur === Number(id)) : userData) as UserDetail | undefined | null;
 
+  // Gestion de la suppression de l'utilisateur
   const handleDelete = useCallback(async () => {
     try {
       await apiClient.delete(`/admin/utilisateurs/${id}`);
@@ -58,6 +61,7 @@ const UserDetailPage = () => {
     }
   }, [id, navigate, addToast]);
 
+  // Gestion des actions dans le header
   const headerActions = useMemo(() => (
     <div className="flex gap-2">
       <ConfirmPopover
@@ -76,6 +80,7 @@ const UserDetailPage = () => {
     </div>
   ), [id, navigate, handleDelete]);
 
+  // Gestion de l'en-tête
   usePageHeader(
     user ? `${user.prenom || ''} ${user.nom || ''}`.trim() || user.login : 'Chargement...',
     headerActions,

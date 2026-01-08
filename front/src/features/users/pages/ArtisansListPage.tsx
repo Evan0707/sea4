@@ -42,7 +42,7 @@ export const ArtisansListPage = () => {
       try {
         await deleteArtisan(artisanToDelete);
       } catch (e) {
-        // Error already handled in hook (toast)
+        toast.addToast('Erreur lors de la suppression', 'error');
       }
       setArtisanToDelete(null);
     }
@@ -121,6 +121,7 @@ export const ArtisansListPage = () => {
     }
   }, []);
 
+  // Gestionnaires Drag & Drop
   const handleDragOver = useCallback((e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
@@ -157,6 +158,7 @@ export const ArtisansListPage = () => {
     e.target.value = '';
   };
 
+  // Configuration des colonnes
   const columns: Column<Artisan>[] = [
     {
       key: 'nomArtisan',

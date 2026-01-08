@@ -13,6 +13,7 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | null>(null);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
+  // Gestion de l'état de l'utilisateur
   const [user, setUser] = useState<UserProfile | null>(() => {
     const savedToken = localStorage.getItem('token');
     if (savedToken) {
@@ -33,7 +34,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     return null;
   });
 
-  // When a token is present, try to fetch the user profile (/api/me)
+  // QUand un token est present, on tente de recuperer le profile de l'utilisateur
   useEffect(() => {
     let mounted = true
     const fetchProfile = async () => {
@@ -42,7 +43,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         if (!mounted) return
         setUser(prev => prev ? ({ ...prev, nom: res.data.nom ?? null, prenom: res.data.prenom ?? null }) : null)
       } catch (e) {
-        // ignore failure (token may be invalid/expired)
+        // Ignorer l'erreur (le token peut être invalide/expiration)
       }
     }
 
@@ -66,7 +67,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setUser(userData);
       localStorage.setItem('token', token);
 
-      // fetch profile immediately
+      // Recuperer le profile de l'utilisateur
       (async () => {
         try {
           const res = await apiClient.get('/me')

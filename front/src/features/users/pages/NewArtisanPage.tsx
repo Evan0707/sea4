@@ -25,6 +25,7 @@ const NewArtisanPage = () => {
   const [etapes, setEtapes] = useState<Etape[]>([]);
   const [saving, setSaving] = useState(false);
 
+  // Gestion de la soumission du formulaire
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);

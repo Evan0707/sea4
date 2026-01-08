@@ -38,7 +38,7 @@ const ArtisanDetailsPage = () => {
   const [motif, setMotif] = useState('');
   const [eventToDelete, setEventToDelete] = useState<CalendarEvent | null>(null);
 
-  // Set header
+  // Configuration des actions du header
   const headerActions = useMemo(() => (
     <div className="flex items-center gap-2">
       <Button variant="Secondary" onClick={() => navigate('/admin/artisans')}>
@@ -52,6 +52,7 @@ const ArtisanDetailsPage = () => {
     headerActions
   );
 
+  // Gestion de la selection d'une date
   const handleDateClick = (date: Date) => {
     if (date.getDay() === 0) {
       toast.addToast("Impossible d'ajouter un événement le dimanche", "error");
@@ -77,6 +78,7 @@ const ArtisanDetailsPage = () => {
     setModalOpen(true);
   };
 
+  // Gestion de la sauvegarde d'une contrainte
   const handleSaveConstraint = async () => {
     if (!selectedStartDate || !selectedEndDate) return;
 
@@ -86,7 +88,7 @@ const ArtisanDetailsPage = () => {
       return;
     }
 
-    // Check for overlap strictly
+    // Vérification de chevauchement
     const newStart = parseISO(selectedStartDate);
     const newEnd = parseISO(selectedEndDate);
 
@@ -94,7 +96,7 @@ const ArtisanDetailsPage = () => {
       const evStart = parseISO(event.start);
       const evEnd = parseISO(event.end);
 
-      // Check if ranges overlap
+      // Vérification de chevauchement
       return (newStart <= evEnd && newEnd >= evStart);
     });
 
@@ -121,6 +123,7 @@ const ArtisanDetailsPage = () => {
     }
   };
 
+  // Gestion de la suppression d'une contrainte
   const confirmDeleteEvent = async () => {
     if (!eventToDelete) return;
     const e = eventToDelete;
