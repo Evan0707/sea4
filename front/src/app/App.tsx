@@ -144,6 +144,7 @@ function AppRoutes() {
         <Route element={<DashboardLayout />}>
           <Route path="/admin" element={<AdminDashboardPage />} />
           <Route path="/admin/dossiers" element={<DossiersListPage />} />
+          <Route path="/admin/dossiers/:id/completer" element={<CompleteDossierPage />} />
           <Route path="/admin/chantiers" element={<AdminChantiersListPage />} />
           <Route path="/admin/chantiers/map" element={<ChantiersMapPage />} />
           <Route path="/admin/chantiers/:id" element={<AdminChantierDetailPage />} />

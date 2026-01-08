@@ -8,6 +8,7 @@ import Input from '@/shared/components/ui/Input';
 interface Etape {
  noEtapeChantier: number;
  nomEtape: string;
+ coutSousTraitant?: string;
  artisan: {
   noArtisan: number;
   nom: string;
@@ -79,7 +80,17 @@ export const FactureArtisanCreationModal = ({
        <select
         className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-primary focus:outline-none"
         value={selectedEtapeId}
-        onChange={(e) => setSelectedEtapeId(e.target.value)}
+        onChange={(e) => {
+         const newId = e.target.value;
+         setSelectedEtapeId(newId);
+         // Prefill montant from coutSousTraitant
+         if (newId) {
+          const etape = availableEtapes.find(et => et.noEtapeChantier === parseInt(newId));
+          if (etape?.coutSousTraitant) {
+           setMontant(etape.coutSousTraitant);
+          }
+         }
+        }}
         required
        >
         <option value="">Sélectionner une étape</option>

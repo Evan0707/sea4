@@ -35,6 +35,7 @@ export interface Etape {
  reservee: boolean;
  reductionSupplementaire: string;
  nbJours?: number;
+ coutSousTraitant?: string;
  artisan: {
   noArtisan: number;
   nom: string;

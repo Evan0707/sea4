@@ -486,19 +486,21 @@ class ChantierController extends AbstractController
             
             // Récupérer la durée théorique: soit le prévisionnel custom, soit depuis le modèle
             $nbJours = $ec->getNbJoursPrevu();
-            if ($nbJours === null) {
-                // Fallback to model
-                if ($modele && $ec->getEtape()) {
-                    $construire = $construireRepo->findOneBy([
-                        'noModele' => $modele,
-                        'noEtape' => $ec->getEtape()
-                    ]);
-                    if ($construire) {
+            $coutSousTraitant = null;
+            
+            if ($modele && $ec->getEtape()) {
+                $construire = $construireRepo->findOneBy([
+                    'noModele' => $modele,
+                    'noEtape' => $ec->getEtape()
+                ]);
+                if ($construire) {
+                    if ($nbJours === null) {
                         $nbJours = $construire->getNbJoursRealisation() ?? 0;
                     }
+                    $coutSousTraitant = $construire->getCoutSousTraitant();
                 }
             }
-             $nbJours = $nbJours ?? 0;
+            $nbJours = $nbJours ?? 0;
 
             $etapes[] = [
                 'noEtapeChantier' => $ec->getId(),
@@ -512,6 +514,7 @@ class ChantierController extends AbstractController
                 'reservee' => $ec->isReservee(),
                 'reductionSupplementaire' => $ec->getReductionSupplementaire(),
                 'nbJours' => $nbJours,
+                'coutSousTraitant' => $coutSousTraitant,
                 'artisan' => $artisan ? [
                     'noArtisan' => $artisan->getId(),
                     'nom' => $artisan->getNom(),
