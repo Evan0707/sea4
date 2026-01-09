@@ -29,9 +29,9 @@ Ce guide détaille toutes les fonctionnalités disponibles pour chaque type d'ut
 L'application est accessible via votre navigateur web. Pour y accéder, vous devez vous authentifier.
 
 **Comptes de démonstration :**
-- **Administrateur** : `admin@example.com` / `admin123`
-- **Commercial** : `commercial@example.com` / `commercial123`
-- **Maître d'Œuvre** : `maitre_oeuvre@example.com` / `maitre123`
+- **Administrateur** : `pierre.leblanc` / `admin123`
+- **Commercial** : `tristan.gervier` / `commercial123`
+- **Maître d'Œuvre** : `laurent.franchet` / `maitre123`
 
 > 🔒 **Note** : En cas d'oubli de mot de passe, veuillez contacter un administrateur.
 

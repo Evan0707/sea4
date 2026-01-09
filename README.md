@@ -85,15 +85,18 @@ npm run dev
 - Autocomplétion d'adresses pour une saisie rapide et sans erreur
 - Messages d'erreur contextuels et explicites
 
-## Comptes par défaut
+## Comptes présent dans l'application :
 
-Les fixtures créent automatiquement trois utilisateurs de test :
+Nous avons six utilisateurs différents dans notre application :
 
 | Email | Mot de passe | Rôle |
 |-------|-------------|------|
-| admin@example.com | admin123 | Administrateur |
-| commercial@example.com | commercial123 | Commercial |
-| maitre_oeuvre@example.com | maitre123 | Maître d'œuvre |
+| pierre.leblanc | admin123 | Administrateur |
+| muarc.tulis | admin456 | Administrateur |
+| tristan.gervier | commercial123 | Commercial |
+| valerie.legrand | commercial456 | Commercial |
+| laurent.franchet | moe123 | Maître d'œuvre |
+| sylvain.blancheau | moe123 | Maître d'œuvre |
 
 ## Structure du projet
 
@@ -207,9 +210,11 @@ nelmio_cors:
 ### Lancer le backend
 ```bash
 cd back
-symfony serve
+symfony server:start
 ```
 Le serveur démarre sur `http://localhost:8000`
+
+> 🔒 **Note** : Utiliser bien la commande `symfony server:stop` quand vous arrêtez l'application.
 
 ### Lancer le frontend
 ```bash
