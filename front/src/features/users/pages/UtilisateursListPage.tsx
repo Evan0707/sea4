@@ -53,6 +53,10 @@ export const UtilisateursListPage = () => {
     exportToCSV(utilisateurs, exportColumns, 'utilisateurs');
   }, [utilisateurs]) ;
 
+  const test = () =>{
+    console.log("click")
+  }
+
   // Configuration des actions dans le header
   const headerActions = useMemo(() => (
     <div className="flex items-center gap-2">
@@ -63,7 +67,7 @@ export const UtilisateursListPage = () => {
         Nouveau
       </Button>
     </div>
-  ), []);
+  ), [handleExport, navigate]);
 
   // Configuration de l'en-tête
   usePageHeader(

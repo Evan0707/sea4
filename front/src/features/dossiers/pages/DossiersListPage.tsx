@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { DataList, type Column } from '@/shared/components/ui/DataList';
 import { StatusBadge } from '@/shared/components/ui/StatusBadge';
@@ -42,7 +42,7 @@ export const DossiersListPage = () => {
   }, [search]);
 
   // Gestion de l'export
-  const handleExport = () => {
+  const handleExport = useCallback(() => {
     const exportColumns: CsvColumn<Dossier>[] = [
       { key: 'nom', header: 'Nom' },
       { key: 'prenom', header: 'Prénom' },
@@ -53,7 +53,7 @@ export const DossiersListPage = () => {
       { key: 'status', header: 'Statut' },
     ];
     exportToCSV(dossiers, exportColumns, 'dossiers');
-  };
+  }, [dossiers]);
 
   const navigate = useNavigate();
 
@@ -62,7 +62,7 @@ export const DossiersListPage = () => {
     <Button variant="Secondary" icon={Download} onClick={handleExport}>
       Exporter CSV
     </Button>
-  ), []);
+  ), [handleExport, navigate]);
 
   usePageHeader(
     'Dossiers',

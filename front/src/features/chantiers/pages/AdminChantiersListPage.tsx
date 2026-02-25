@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { DataList, type Column } from '@/shared/components/ui/DataList';
 import SearchBar from '@/shared/components/ui/SearchBar';
@@ -47,7 +47,7 @@ export const AdminChantiersListPage = () => {
   };
 
   // exporter les chantiers
-  const handleExport = () => {
+  const handleExport = useCallback(() => {
     const exportColumns: CsvColumn<Chantier>[] = [
       { key: 'nom', header: 'Nom Client' },
       { key: 'prenom', header: 'Prénom Client' },
@@ -57,7 +57,7 @@ export const AdminChantiersListPage = () => {
       { key: 'status', header: 'Statut' },
     ];
     exportToCSV(chantiers as Chantier[], exportColumns, 'chantiers');
-  };
+  }, [chantiers] );
 
   // actions en-tête
   const headerActions = useMemo(() => (
@@ -69,7 +69,7 @@ export const AdminChantiersListPage = () => {
         Voir la carte
       </Button>
     </div>
-  ), [navigate]);
+  ), [handleExport, navigate]);
 
   // en-tête de la page
   usePageHeader(
