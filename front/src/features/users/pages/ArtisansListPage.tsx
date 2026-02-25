@@ -62,10 +62,10 @@ export const ArtisansListPage = () => {
   const headerActions = useMemo(() => (
     <div className='flex flex-row items-center gap-2'>
       <Button variant='Secondary' onClick={handleExport} size='md' icon={Download}>
-        Exporter
+        Exporter CSV
       </Button>
       <Button variant='Secondary' onClick={() => fileInputRef.current?.click()} size='md'>
-        Importer
+        Importer CSV
       </Button>
       <Button variant='Primary' onClick={() => navigate('/admin/artisans/new')} size='md'>
         Nouveau
