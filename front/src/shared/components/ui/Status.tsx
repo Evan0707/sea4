@@ -6,11 +6,11 @@ interface statusProps {
 
 const Status = ({ label }: statusProps) => {
 
-  const variant = label === 'Complété' && 'bg-green-50 text-green-700 border-green-200'
-    || label === 'Terminé' && 'bg-green-50 text-green-700 border-green-200'
-    || label === 'En chantier' && 'bg-orange-50 text-orange-700 border-orange-200'
-    || label === 'À venir' && 'bg-blue-50 text-blue-700 border-blue-200'
-    || label === 'À compléter' && 'bg-red-50 text-red-700 border-red-200'
+  const variant = label === 'Complété' && 'bg-bg-secondary text-green-700 border-green-200'
+    || label === 'Terminé' && 'bg-gray-secondary text-green-700 border'
+    || label === 'En chantier' && 'bg-bg-secondary text-orange-700 border'
+    || label === 'À venir' && 'bg-bg-secondary text-blue-700 border'
+    || label === 'À compléter' && 'bg-bg-secondary text-red-700 border'
 
   return (
     <div className='flex items-center'>

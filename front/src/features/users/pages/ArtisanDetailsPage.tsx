@@ -168,9 +168,9 @@ const ArtisanDetailsPage = () => {
               </button>
             </div>
 
-            <div className="space-y-6">
+            <div className=" space-y-6">
               <div className="flex bg-bg-secondary/50 p-1 rounded-lg border border-border">
-                <label className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-md cursor-pointer transition-all text-sm font-medium ${constraintType === 'indisponibilite' ? 'bg-white text-primary shadow-sm ring-1 ring-border/5' : 'text-text-secondary hover:text-text-primary'}`}>
+                <label className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-md cursor-pointer transition-all text-sm font-medium ${constraintType === 'indisponibilite' ? 'bg-bg-tertiary text-primary shadow-sm ring-1 ring-border/5' : 'text-text-secondary hover:text-text-primary'}`}>
                   <input
                     type="radio"
                     name="type"
@@ -180,7 +180,7 @@ const ArtisanDetailsPage = () => {
                   />
                   <span>Indisponibilité</span>
                 </label>
-                <label className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-md cursor-pointer transition-all text-sm font-medium ${constraintType === 'chantier_externe' ? 'bg-white text-primary shadow-sm ring-1 ring-border/5' : 'text-text-secondary hover:text-text-primary'}`}>
+                <label className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-md cursor-pointer transition-all text-sm font-medium ${constraintType === 'chantier_externe' ? 'bg-bg-tertiary text-primary shadow-sm ring-1 ring-border/5' : 'text-text-secondary hover:text-text-primary'}`}>
                   <input
                     type="radio"
                     name="type"

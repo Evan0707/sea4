@@ -278,7 +278,7 @@ export const AdminDashboardPage = () => {
                 {stats.recentUsers.map((u) => (
                   <div
                     key={u.id}
-                    className="flex items-center justify-between p-3 bg-bg-primary rounded-lg border border-border"
+                    className="flex items-center justify-between p-3 bg-bg-primary rounded-lg border border-border transition-colors"
                   >
                     <div className="flex items-center gap-3">
                       <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">

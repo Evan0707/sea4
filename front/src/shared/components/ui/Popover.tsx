@@ -79,11 +79,11 @@ const Popover = ({ children, icon: Icon = DotsVerticalSolid, iconSize = 28 }: Po
       <button
         ref={triggerRef}
         onClick={() => setIsOpen(!isOpen)}
-        className="p-1 hover:bg-gray-100 rounded-md transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-border/60"
+        className="p-1 hover:bg-bg-tertiary rounded-md transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-border/60"
         aria-label="Ouvrir le menu"
         aria-expanded={isOpen}
       >
-        <Icon size={iconSize} className="text-gray-700" />
+        <Icon size={iconSize} className="text-text-primary" />
       </button>
 
       <AnimatePresence>
@@ -94,7 +94,7 @@ const Popover = ({ children, icon: Icon = DotsVerticalSolid, iconSize = 28 }: Po
             animate="show"
             exit="exit"
             ref={contentRef}
-            className={`absolute right-2 w-48 bg-white/70 backdrop-blur-sm rounded-[var(--radius)] shadow-lg border-[1.5px] border-border/40 z-50 py-1 px-1 ${position === 'top' ? 'bottom-full mb-2' : 'top-full mt-2'
+            className={`absolute right-2 w-48 bg-bg-tertiary/70 backdrop-blur-sm rounded-[var(--radius)] shadow-lg border-[1.5px] border-border/40 z-50 py-1 px-1 ${position === 'top' ? 'bottom-full mb-2' : 'top-full mt-2'
               }`}
           >
             {children}
@@ -107,8 +107,8 @@ const Popover = ({ children, icon: Icon = DotsVerticalSolid, iconSize = 28 }: Po
 
 const PopoverItem = ({ variant = 'default', children, icon: Icon, onClick }: PopoverItemProps) => {
   const variants = {
-    default: 'hover:bg-gray-100 text-gray-900',
-    destructive: 'hover:bg-red-50 text-red',
+    default: 'hover:bg-bg-secondary text-text-primary',
+    destructive: 'hover:bg-bg-secondary text-red',
   }
 
   return (
