@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { DataList, type Column } from '@/shared/components/ui/DataList';
 import Button from '@/shared/components/ui/Button';
@@ -43,7 +43,7 @@ export const UtilisateursListPage = () => {
   };
 
   // Fonction de gestion de l'export CSV
-  const handleExport = () => {
+  const handleExport = useCallback(() => {
     const exportColumns: CsvColumn<Utilisateur>[] = [
       { key: 'login', header: 'Login' },
       { key: 'nom', header: 'Nom' },
@@ -51,12 +51,12 @@ export const UtilisateursListPage = () => {
       { key: 'role', header: 'Rôle' },
     ];
     exportToCSV(utilisateurs, exportColumns, 'utilisateurs');
-  };
+  }, [utilisateurs]) ;
 
   // Configuration des actions dans le header
   const headerActions = useMemo(() => (
     <div className="flex items-center gap-2">
-      <Button variant="Secondary" icon={Download} onClick={handleExport}>
+      <Button variant="Secondary" onClick={handleExport} icon={Download}>
         Exporter CSV
       </Button>
       <Button variant='Primary' onClick={() => navigate('/admin/utilisateurs/new')}>
