@@ -11,7 +11,6 @@ import {
  addMonths,
  subMonths,
  parseISO,
- isWithinInterval,
  differenceInDays,
  addDays,
  startOfDay,
@@ -132,13 +131,13 @@ const Calendar: React.FC<CalendarProps> = ({ events, onEventClick, onDateClick, 
      {format(currentDate, 'MMMM yyyy', { locale: fr })}
     </H3>
     <div className="flex gap-2">
-     <button onClick={prevMonth} className="p-2 hover:bg-bg-secondary rounded-full transition-colors text-text-secondary hover:text-text-primary">
+     <button onClick={prevMonth} className="p-2 hover:bg-bg-secondary rounded-full transition-colors text-text-primary hover:text-text-primary">
       <ChevronLeft className="w-5 h-5" />
      </button>
-     <button onClick={resetToday} className="px-3 py-1 text-sm border border-border rounded-md bg-bg-primary text-text-secondary hover:text-text-primary transition-colors">
+     <button onClick={resetToday} className="px-3 py-1 text-sm border border-border rounded-md bg-bg-primary text-text-primary hover:text-text-primary transition-colors">
       Aujourd'hui
      </button>
-     <button onClick={nextMonth} className="p-2 hover:bg-bg-secondary rounded-full transition-colors text-text-secondary hover:text-text-primary">
+     <button onClick={nextMonth} className="p-2 hover:bg-bg-secondary rounded-full transition-colors text-text-primary hover:text-text-primary">
       <ChevronRight className="w-5 h-5" />
      </button>
     </div>
@@ -154,7 +153,7 @@ const Calendar: React.FC<CalendarProps> = ({ events, onEventClick, onDateClick, 
    </div>
 
    {/* Weeks Grid */}
-   <div className="flex flex-col bg-bg-primary">
+   <div className="flex flex-col">
     {weeks.map((week, weekIndex) => {
      const { events: weekEvents, totalRows } = getWeekEvents(week.start, week.end);
      // Hauteur min pour une semaine : Header jour + espace événements
@@ -167,7 +166,8 @@ const Calendar: React.FC<CalendarProps> = ({ events, onEventClick, onDateClick, 
        style={{ minHeight: `${minHeight}px` }}
       >
        {/* Fond de grille (Jours) */}
-       <div className="absolute inset-0 grid grid-cols-7 w-full h-full">
+       <div className="absolute inset-0 grid grid-cols-7 w-full h-full bg-bg-primary hover:bg-bg-secondary
+        text-text-primary">
         {week.days.map((day, dayIndex) => {
          const isCurrentMonth = isSameMonth(day, monthStart);
          const isToday = isSameDay(day, new Date());
@@ -204,8 +204,8 @@ const Calendar: React.FC<CalendarProps> = ({ events, onEventClick, onDateClick, 
            className={`
                           absolute h-6 text-xs px-2 rounded flex items-center cursor-pointer pointer-events-auto transition-all hover:brightness-95 border
                           ${evt.original.type === 'chantier'
-             ? 'bg-blue-100/90 text-blue-700 border-blue-200 hover:z-10'
-             : 'bg-red-100/90 text-red-700 border-red-200 hover:z-10'}
+             ? 'bg-bg-tertiary text-blue-500 border-blue-500 hover:text-blue-400 hover:border-blue-400'
+             : 'bg-red-100/90 text-red-500 border-red-500 hover:text-red-400 hover:border-red-400'}
                         `}
            style={{
             left: `${(evt.colStart / 7) * 100}%`,

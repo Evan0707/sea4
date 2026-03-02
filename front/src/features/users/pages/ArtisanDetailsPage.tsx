@@ -323,11 +323,11 @@ const ArtisanDetailsPage = () => {
           <div className="flex gap-4 text-sm">
             <div className="flex items-center gap-2">
               <div className="w-3 h-3 bg-blue-100 border border-blue-500 rounded-sm"></div>
-              <span>Chantiers</span>
+              <span className="text-text-primary">Chantiers</span>
             </div>
             <div className="flex items-center gap-2">
               <div className="w-3 h-3 bg-red-100 border border-red-500 rounded-sm"></div>
-              <span>Indisponibilités</span>
+              <span className="text-text-primary">Indisponibilités</span>
             </div>
           </div>
         </div>
