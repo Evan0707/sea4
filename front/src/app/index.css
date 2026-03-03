@@ -16,7 +16,6 @@
   --color-bg-primary: #ffffff;
   --color-bg-secondary: #F9FAFB;
   --color-bg-tertiary: #F3F4F6;
-  --color-bg-calendar: #505050; /*(A finir)*/
   /* Added for input backgrounds etc */
   --color-text-primary: #111827;
   /* Slightly softer black for text */
@@ -43,7 +42,6 @@
   /* Deep dark but not pure black */
   --color-bg-secondary: #1A1A1D;
   --color-bg-tertiary: #252529;
-  --color-bg-calendar: #505050;
   --color-text-primary: #F9FAFB;
   --color-text-secondary: #9CA3AF;
   --color-border: #2E2E32;

@@ -397,12 +397,12 @@ export const ChantierDetailPage = () => {
                                       {etape.nomEtape}
                                     </Text>
                                     {etape.reservee && (
-                                      <span className="px-2 py-0.5 text-xs rounded bg-bg-secondary text-yellow-700 border border-yellow-200">
+                                      <span className="px-2 py-0.5 text-xs rounded bg-bg-primary text-yellow-500 border border-yellow-500">
                                         Réservée
                                       </span>
                                     )}
                                     {hasReducSuppl && (
-                                      <span className={`px-2 py-0.5 text-xs rounded border ${reducSuppl > 0 ? 'bg-bg-secondary text-green-700 border-green-500' : 'bg-red-50 text-red-700 border-red-200'}`}>
+                                      <span className={`px-2 py-0.5 text-xs rounded border ${reducSuppl > 0 ? 'bg-bg-primary text-green-500 border-green-500' : 'bg-red-50 text-red-700 border-red-200'}`}>
                                         {reducSuppl > 0 ? '+' : ''}{reducSuppl.toLocaleString('fr-FR')} €
                                       </span>
                                     )}

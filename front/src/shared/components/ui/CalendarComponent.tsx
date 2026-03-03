@@ -204,8 +204,8 @@ const Calendar: React.FC<CalendarProps> = ({ events, onEventClick, onDateClick, 
            className={`
                           absolute h-6 text-xs px-2 rounded flex items-center cursor-pointer pointer-events-auto transition-all hover:brightness-95 border
                           ${evt.original.type === 'chantier'
-             ? 'bg-bg-tertiary text-blue-500 border-blue-500 hover:text-blue-400 hover:border-blue-400'
-             : 'bg-red-100/90 text-red-500 border-red-500 hover:text-red-400 hover:border-red-400'}
+             ? 'bg-blue-700 text-white border-blue-700 hover:border-blue-500 hover:bg-blue-500'
+             : 'bg-red-700 text-white border-red-700 hover:border-red-500 hover:border-red-500'}
                         `}
            style={{
             left: `${(evt.colStart / 7) * 100}%`,
