@@ -43,8 +43,8 @@ const Textarea: React.FC<TextareaProps> = ({
 
   return (
     <div className={`${className ?? ''}`}>
-      <label className='m-1 font-bold text-[14px]' htmlFor={inputId}>{label}</label>
-      <div className={`border-[1.5px] ${hasError ? 'border-red' : 'border-border'} flex items-center rounded-md focus-within:border-primary focus-within:outline-[1px] outline-border justify-between mt-1 mb-0`}>
+      <label className='m-1 text-text-primary font-bold text-[14px]' htmlFor={inputId}>{label}</label>
+      <div className={`border-[1.5px] ${hasError ? 'border-red' : 'border-border'} flex items-center text-text-primary rounded-md focus-within:border-primary focus-within:outline-[1px] outline-border justify-between mt-1 mb-0`}>
           <textarea
             id={inputId}
             placeholder={placeholder}

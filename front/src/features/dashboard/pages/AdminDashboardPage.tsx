@@ -154,9 +154,9 @@ export const AdminDashboardPage = () => {
 
   const getRoleBadge = (role: string) => {
     const colors: Record<string, string> = {
-      admin: 'bg-red-50 text-red-700 border-red-200',
-      commercial: 'bg-orange-50 text-orange-700 border-orange-200',
-      maitre_oeuvre: 'bg-indigo-50 text-indigo-700 border-indigo-200',
+      admin: 'bg-bg-primary text-red-500 border-red-500',
+      commercial: 'bg-bg-primary text-orange-500 border-orange-500',
+      maitre_oeuvre: 'bg-bg-primary text-indigo-500 border-indigo-500',
     };
     const labels: Record<string, string> = {
       admin: 'Admin',
@@ -278,7 +278,7 @@ export const AdminDashboardPage = () => {
                 {stats.recentUsers.map((u) => (
                   <div
                     key={u.id}
-                    className="flex items-center justify-between p-3 bg-bg-primary rounded-lg border border-border"
+                    className="flex items-center justify-between p-3 bg-bg-primary rounded-lg border border-border transition-colors"
                   >
                     <div className="flex items-center gap-3">
                       <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
