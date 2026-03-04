@@ -27,6 +27,15 @@ interface StatusBadgeProps extends VariantProps<typeof badgeVariants> {
  className?: string;
 }
 
+const variantStyles: Record<StatusVariant, string> = {
+ default: 'bg-bg-primary text-text-primary border-gray-500',
+ success: 'bg-bg-primary text-green-500 border-green-500',
+ warning: 'bg-bg-primary text-blue-500 border-blue-500',
+ danger: 'bg-bg-primary text-red-600 border-red-500',
+ info: 'bg-bg-primary text-blue-500 border-blue-500',
+};
+
+// Helper function to guess variant from status text if not provided
 const getVariantFromStatus = (status: string): StatusVariant => {
  const s = status.toLowerCase();
  if (s.includes('terminé') || s.includes('validé') || s.includes('complété')) return 'success';

@@ -168,9 +168,9 @@ const ArtisanDetailsPage = () => {
               </button>
             </div>
 
-            <div className="space-y-6">
+            <div className=" space-y-6">
               <div className="flex bg-bg-secondary/50 p-1 rounded-lg border border-border">
-                <label className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-md cursor-pointer transition-all text-sm font-medium ${constraintType === 'indisponibilite' ? 'bg-white text-primary shadow-sm ring-1 ring-border/5' : 'text-text-secondary hover:text-text-primary'}`}>
+                <label className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-md cursor-pointer transition-all text-sm font-medium ${constraintType === 'indisponibilite' ? 'bg-bg-tertiary text-primary shadow-sm ring-1 ring-border/5' : 'text-text-secondary hover:text-text-primary'}`}>
                   <input
                     type="radio"
                     name="type"
@@ -180,7 +180,7 @@ const ArtisanDetailsPage = () => {
                   />
                   <span>Indisponibilité</span>
                 </label>
-                <label className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-md cursor-pointer transition-all text-sm font-medium ${constraintType === 'chantier_externe' ? 'bg-white text-primary shadow-sm ring-1 ring-border/5' : 'text-text-secondary hover:text-text-primary'}`}>
+                <label className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-md cursor-pointer transition-all text-sm font-medium ${constraintType === 'chantier_externe' ? 'bg-bg-tertiary text-primary shadow-sm ring-1 ring-border/5' : 'text-text-secondary hover:text-text-primary'}`}>
                   <input
                     type="radio"
                     name="type"
@@ -323,11 +323,11 @@ const ArtisanDetailsPage = () => {
           <div className="flex gap-4 text-sm">
             <div className="flex items-center gap-2">
               <div className="w-3 h-3 bg-blue-100 border border-blue-500 rounded-sm"></div>
-              <span>Chantiers</span>
+              <span className="text-text-primary">Chantiers</span>
             </div>
             <div className="flex items-center gap-2">
               <div className="w-3 h-3 bg-red-100 border border-red-500 rounded-sm"></div>
-              <span>Indisponibilités</span>
+              <span className="text-text-primary">Indisponibilités</span>
             </div>
           </div>
         </div>

@@ -38,24 +38,25 @@ export const RecapStep = ({ clientData, chantierData, onEditStep }: RecapStepPro
           <H3 className="mb-3" color="#3B82F6">
             Informations client
           </H3>
-          <div className="bg-gray-50 p-4 rounded-lg space-y-2">
+          <div className="bg-bg-primary p-4 rounded-lg space-y-2">
             <p>
-              <span className="font-medium">Nom:</span> {clientData.nomClient}
+              <span className="font-bold text-text-primary">Nom:</span>
+                <span className=" text-text-primary"> {clientData.nomClient}</span>
             </p>
             <p>
-              <span className="font-medium">Prénom:</span>{' '}
-              {clientData.prenomClient}
+              <span className="font-bold text-text-primary">Prénom:</span>{' '}
+                <span className=" text-text-primary"> {clientData.prenomClient}</span>
             </p>
             {clientData.adresseClient && (
               <p>
-                <span className="font-medium">Adresse:</span>{' '}
-                {clientData.adresseClient}
+                <span className="font-bold text-text-primary">Adresse:</span>{' '}
+                  <span className=" text-text-primary"> {clientData.adresseClient}</span>
               </p>
             )}
             {clientData.cpClient && clientData.villeClient && (
               <p>
-                <span className="font-medium">Ville:</span>{' '}
-                {clientData.cpClient} {clientData.villeClient}
+                <span className="font-bold text-text-primary">Ville:</span>{' '}
+                  <span className=" text-text-primary"> {clientData.cpClient} {clientData.villeClient}</span>
               </p>
             )}
           </div>
@@ -71,30 +72,31 @@ export const RecapStep = ({ clientData, chantierData, onEditStep }: RecapStepPro
           <H3 className="mb-3" color="#3B82F6">
             Informations chantier
           </H3>
-          <div className="bg-gray-50 p-4 rounded-lg space-y-2">
+          <div className="bg-bg-primary p-4 rounded-lg space-y-2">
             {chantierData.adresseChantier && (
-              <p>
-                <span className="font-medium">Adresse:</span>{' '}
-                {chantierData.adresseChantier}
-              </p>
+                <p>
+                    <span className="font-bold text-text-primary">Adresse:</span>{' '}
+                    <span className=" text-text-primary"> {clientData.adresseClient}</span>
+                </p>
             )}
             {chantierData.cpChantier && chantierData.villeChantier && (
-              <p>
-                <span className="font-medium">Ville:</span>{' '}
-                {chantierData.cpChantier} {chantierData.villeChantier}
-              </p>
+                <p>
+                    <span className="font-bold text-text-primary">Ville:</span>{' '}
+                    <span className=" text-text-primary"> {clientData.cpClient} {clientData.villeClient}</span>
+                </p>
             )}
             <p>
-              <span className="font-medium">Date de création:</span>{' '}
-              {new Date(chantierData.dateCreation).toLocaleDateString('fr-FR')}
+              <span className="font-bold text-text-primary">Date de création:</span>{' '}
+                <span className=" text-text-primary"> {new Date(chantierData.dateCreation).toLocaleDateString('fr-FR')}</span>
             </p>
             <p>
-              <span className="font-medium">Statut:</span>{' '}
-              {chantierData.statutChantier}
+              <span className="font-bold text-text-primary">Statut:</span>{' '}
+                <span className=" text-text-primary">{chantierData.statutChantier}</span>
             </p>
             {chantierData.noMOE && (
               <p>
-                <span className="font-medium">Maître d'œuvre:</span>{' '}
+                <span className="font-bold text-text-primary">Maître d'œuvre:</span>{' '}
+                  <span className=" text-text-primary">
                 {
                   maitresOeuvre.find((moe) => String(moe.noMOE) == String(chantierData.noMOE))
                     ?.prenomMOE
@@ -103,15 +105,18 @@ export const RecapStep = ({ clientData, chantierData, onEditStep }: RecapStepPro
                   maitresOeuvre.find((moe) => String(moe.noMOE) == String(chantierData.noMOE))
                     ?.nomMOE
                 }
+                </span>
               </p>
             )}
             {chantierData.noModele && (
               <p>
-                <span className="font-medium">Modèle:</span>{' '}
+                <span className="font-bold text-text-primary">Modèle:</span>{' '}
+                  <span className="text-text-primary">
                 {
                   modeles.find((m) => m.noModele === chantierData.noModele)
                     ?.nomModele
                 }
+                </span>
               </p>
             )}
           </div>

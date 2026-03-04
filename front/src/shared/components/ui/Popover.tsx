@@ -63,7 +63,7 @@ const Popover = ({ children, icon: Icon = DotsVerticalSolid, iconSize = 20 }: Po
         aria-label="Ouvrir le menu"
         aria-expanded={isOpen}
       >
-        <Icon size={iconSize} />
+        <Icon size={iconSize} className="text-text-primary" />
       </button>
 
       <AnimatePresence>
@@ -88,6 +88,11 @@ const Popover = ({ children, icon: Icon = DotsVerticalSolid, iconSize = 20 }: Po
 }
 
 const PopoverItem = ({ variant = 'default', children, icon: Icon, onClick }: PopoverItemProps) => {
+  const variants = {
+    default: 'hover:bg-bg-secondary text-text-primary',
+    destructive: 'hover:bg-bg-secondary text-red',
+  }
+
   return (
     <button
       onClick={onClick}

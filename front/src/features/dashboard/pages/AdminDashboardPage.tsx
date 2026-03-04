@@ -157,9 +157,9 @@ export const AdminDashboardPage = () => {
 
   const getRoleBadge = (role: string) => {
     const colors: Record<string, string> = {
-      admin: 'bg-red-50 text-red-700 border-red-200',
-      commercial: 'bg-orange-50 text-orange-700 border-orange-200',
-      maitre_oeuvre: 'bg-indigo-50 text-indigo-700 border-indigo-200',
+      admin: 'bg-bg-primary text-red-500 border-red-500',
+      commercial: 'bg-bg-primary text-orange-500 border-orange-500',
+      maitre_oeuvre: 'bg-bg-primary text-indigo-500 border-indigo-500',
     };
     const labels: Record<string, string> = {
       admin: 'Admin',

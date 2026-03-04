@@ -38,19 +38,19 @@ const ToastItem = ({ toast, index, onRemove }: { toast: ToastProps, index: numbe
   const variantStyles = {
     success: {
       icon: <CheckCircleSolid className="w-5 h-5 text-emerald-500" />,
-      bgIcon: 'bg-emerald-50',
+      bgIcon: 'bg-bg-primary',
     },
     error: {
       icon: <DangerCircleSolid className="w-5 h-5 text-red-500" />,
-      bgIcon: 'bg-red-50',
+      bgIcon: 'bg-bg-primary',
     },
     info: {
       icon: <InfoCircleSolid className="w-5 h-5 text-blue-500" />,
-      bgIcon: 'bg-blue-50',
+      bgIcon: 'bg-bg-primary',
     },
     warning: {
       icon: <InfoCircleSolid className="w-5 h-5 text-amber-500" />,
-      bgIcon: 'bg-amber-50',
+      bgIcon: 'bg-bg-primary',
     }
   }
 
@@ -72,8 +72,7 @@ const ToastItem = ({ toast, index, onRemove }: { toast: ToastProps, index: numbe
         absolute bottom-0 right-0
         w-full p-4
         rounded-xl
-        bg-white
-        border border-gray-100
+        bg-bg-primary text-text-primary
         shadow-[0_8px_30px_rgb(0,0,0,0.12)]
         flex items-start gap-3
         pointer-events-auto
@@ -90,10 +89,10 @@ const ToastItem = ({ toast, index, onRemove }: { toast: ToastProps, index: numbe
 
       {/* Content */}
       <div className="flex-1 min-w-0 pt-1.5">
-        <p className="text-sm font-medium text-gray-900 leading-none">
+        <p className="text-sm font-medium text-text-primary leading-none">
           {toast.variant === 'error' ? 'Erreur' : toast.variant === 'success' ? 'Succès' : toast.variant === 'warning' ? 'Attention' : 'Information'}
         </p>
-        <p className="mt-1 text-sm text-gray-500 leading-relaxed">
+        <p className="mt-1 text-sm text-text-secondary leading-relaxed">
           {toast.message}
         </p>
       </div>
