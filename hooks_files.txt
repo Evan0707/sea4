@@ -1,7 +1,0 @@
-C:\Users\evang\OneDrive\Bureau\UGA\sae-4-01-gery-redon-vescovi\front\src\features\chantiers\hooks\useChantiers.ts
-C:\Users\evang\OneDrive\Bureau\UGA\sae-4-01-gery-redon-vescovi\front\src\features\dashboard\hooks\useDashboardStats.ts
-C:\Users\evang\OneDrive\Bureau\UGA\sae-4-01-gery-redon-vescovi\front\src\features\dossiers\hooks\useDossierData.ts
-C:\Users\evang\OneDrive\Bureau\UGA\sae-4-01-gery-redon-vescovi\front\src\features\dossiers\hooks\useDossiers.ts
-C:\Users\evang\OneDrive\Bureau\UGA\sae-4-01-gery-redon-vescovi\front\src\features\users\hooks\useArtisans.ts
-C:\Users\evang\OneDrive\Bureau\UGA\sae-4-01-gery-redon-vescovi\front\src\features\users\hooks\useUsers.ts
-C:\Users\evang\OneDrive\Bureau\UGA\sae-4-01-gery-redon-vescovi\front\src\features\users\hooks\useUtilisateurs.ts
