@@ -425,7 +425,7 @@ export const ChantierDetailPage = () => {
                                     )}
                                     {/* Gestion de l'affichage de l'artisan + bouton Assigner */}
                                     <div className="flex items-center gap-2">
-                                      <Text className="text-xs text-placeholder">
+                                      <Text className="text-xs text-placeholder" onClick={() => { navigate(`/artisans/${etape?.artisan?.noArtisan}`, { replace: true }) }}>
                                         Artisan: {etape.artisan ? `${etape.artisan.nom} ${etape.artisan.prenom}` : 'Non assigné'}
                                       </Text>
                                       {chantier.statut !== 'Terminé' && !isCompleted && (

@@ -109,7 +109,7 @@ export function Sidebar({ user, items, onLogout, mobileOpen = false, onClose }: 
               cancelText="Annuler"
             >
               <button
-                className="w-full flex items-center justify-center py-2 rounded-lg text-red-600 hover:bg-red-50"
+                className="w-full flex items-center justify-center py-2 rounded-[var(--radius)] text-red hover:bg-red/8 transition-colors"
                 aria-label="Déconnexion"
                 title="Déconnexion"
               >
@@ -184,14 +184,14 @@ export function Sidebar({ user, items, onLogout, mobileOpen = false, onClose }: 
                 confirmText="Se déconnecter"
                 cancelText="Annuler"
               >
-                <button className="w-full flex items-center justify-center py-2 rounded-lg text-red-600 hover:bg-red-50">
-                  <Logout size={24} />
-                </button>
+                <Button variant="Destructive" icon={Logout} >
+                  Déconnexion
+                </Button>
               </ConfirmPopover>
             </div>
           </div>
-        </aside>
-      </div>
+        </aside >
+      </div >
     </>
   )
 }

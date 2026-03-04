@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import { cn } from '@/shared/lib/utils';
 
 // ============================================
 // Main Card Component
@@ -18,9 +19,9 @@ export const Card = ({
  padding = 'md',
 }: CardProps) => {
  const variants = {
-  default: 'bg-bg-secondary border border-border',
-  highlight: 'bg-gradient-to-br from-bg-primary to-bg-secondary/30 border border-border',
-  ghost: 'bg-transparent border-none',
+  default: 'bg-bg-primary border border-border shadow-sm',
+  highlight: 'bg-gradient-to-br from-bg-primary to-bg-secondary/60 border border-border shadow-sm',
+  ghost: 'bg-transparent border-none shadow-none',
  };
 
  const paddings = {
@@ -30,9 +31,11 @@ export const Card = ({
   lg: 'p-8',
  };
 
- const styles = `rounded-[var(--radius-lg)] shadow-sm ${variants[variant]} ${paddings[padding]} ${className}`;
-
- return <div className={styles}>{children}</div>;
+ return (
+  <div className={cn('rounded-[var(--radius-lg)]', variants[variant], paddings[padding], className)}>
+   {children}
+  </div>
+ );
 };
 
 // ============================================
@@ -45,7 +48,11 @@ export const CardHeader = ({
 }: {
  children: ReactNode;
  className?: string;
-}) => <div className={`flex flex-col space-y-1.5 mb-6 ${className}`}>{children}</div>;
+}) => (
+ <div className={cn('flex flex-col gap-1.5 mb-6', className)}>
+  {children}
+ </div>
+);
 
 export const CardTitle = ({
  children,
@@ -56,7 +63,7 @@ export const CardTitle = ({
  className?: string;
  as?: 'h1' | 'h2' | 'h3' | 'h4';
 }) => (
- <Component className={`text-2xl font-semibold leading-none tracking-tight text-text-primary ${className}`}>
+ <Component className={cn('text-lg font-semibold leading-none tracking-tight text-text-primary', className)}>
   {children}
  </Component>
 );
@@ -67,7 +74,9 @@ export const CardDescription = ({
 }: {
  children: ReactNode;
  className?: string;
-}) => <p className={`text-sm text-text-secondary ${className}`}>{children}</p>;
+}) => (
+ <p className={cn('text-sm text-text-secondary', className)}>{children}</p>
+);
 
 export const CardContent = ({
  children,
@@ -75,7 +84,7 @@ export const CardContent = ({
 }: {
  children: ReactNode;
  className?: string;
-}) => <div className={className}>{children}</div>;
+}) => <div className={cn(className)}>{children}</div>;
 
 export const CardFooter = ({
  children,
@@ -83,4 +92,8 @@ export const CardFooter = ({
 }: {
  children: ReactNode;
  className?: string;
-}) => <div className={`flex items-center p-6 pt-0 ${className}`}>{children}</div>;
+}) => (
+ <div className={cn('flex items-center pt-4 mt-4 border-t border-border/60', className)}>
+  {children}
+ </div>
+);

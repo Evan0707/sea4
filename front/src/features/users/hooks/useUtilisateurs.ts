@@ -8,7 +8,7 @@ export const useUtilisateurs = (filters: UserFilters) => {
  const queryClient = useQueryClient();
  const queryKey = ['utilisateurs', filters];
 
- const { data: utilisateurs = [], isLoading: loading, refetch: fetchUtilisateurs } = useQuery({
+ const { data: utilisateurs = [], isLoading: loading, refetch: fetchUtilisateurs, error } = useQuery({
   queryKey,
   queryFn: async () => {
    const response = await apiClient.get<Utilisateur[]>('/utilisateurs', {
@@ -42,7 +42,7 @@ export const useUtilisateurs = (filters: UserFilters) => {
   await deleteMutation.mutateAsync(noUtilisateur);
  };
 
- return { utilisateurs, loading, fetchUtilisateurs, deleteUtilisateur };
+ return { utilisateurs, loading, fetchUtilisateurs, deleteUtilisateur, error };
 };
 
 export const useUtilisateur = (id: string | undefined) => {

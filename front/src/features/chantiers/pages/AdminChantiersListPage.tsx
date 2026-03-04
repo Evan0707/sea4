@@ -22,7 +22,7 @@ export const AdminChantiersListPage = () => {
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
   const [chantierToDelete, setChantierToDelete] = useState<number | null>(null);
 
-  const { chantiers, loading, deleteChantier } = useChantiers({
+  const { chantiers, loading, deleteChantier, error } = useChantiers({
     endpoint: '/admin/chantiers',
     filters: {
       search: debouncedSearch,
@@ -157,17 +157,24 @@ export const AdminChantiersListPage = () => {
         className="mb-5"
       />
 
-      <DataList
-        data={chantiers as Chantier[]}
-        columns={columns}
-        loading={loading}
-        sortColumn="start"
-        sortDirection={sortOrder}
-        onSort={() => setSortOrder(prev => prev === 'asc' ? 'desc' : 'asc')}
-        keyExtractor={(item) => item.noChantier}
-        onRowClick={(item) => navigate(`/admin/chantiers/${item.noChantier}`)}
-        emptyMessage="Aucun chantier trouvé"
-      />
+      {error ? (
+        <div className="flex-1 flex flex-col items-center justify-center p-8 bg-red-50 border border-red-200 rounded-lg text-red-600">
+          <Text className="font-semibold mb-2">Erreur de chargement</Text>
+          <Text className="text-sm">Impossible de récupérer la liste des chantiers.</Text>
+        </div>
+      ) : (
+        <DataList
+          data={chantiers as Chantier[]}
+          columns={columns}
+          loading={loading}
+          sortColumn="start"
+          sortDirection={sortOrder}
+          onSort={() => setSortOrder(prev => prev === 'asc' ? 'desc' : 'asc')}
+          keyExtractor={(item) => item.noChantier}
+          onRowClick={(item) => navigate(`/admin/chantiers/${item.noChantier}`)}
+          emptyMessage="Aucun chantier trouvé"
+        />
+      )}
 
       <ConfirmModal
         isOpen={!!chantierToDelete}

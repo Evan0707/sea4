@@ -112,7 +112,7 @@ const SimplePieChart = ({ data }: { data: { label: string; value: number; color:
 
 export const AdminDashboardPage = () => {
   const navigate = useNavigate();
-  const { data: stats, isLoading: loading } = useAdminStats();
+  const { data: stats, isLoading: loading, isError } = useAdminStats();
 
   usePageHeader('Tableau de bord', undefined, 'Vue d\'ensemble de l\'activité.');
 
@@ -131,10 +131,13 @@ export const AdminDashboardPage = () => {
     );
   }
 
-  if (!stats) {
+  if (isError || !stats) {
     return (
-      <div className="p-8">
-        <Text>Erreur lors du chargement du tableau de bord</Text>
+      <div className="p-8 h-full flex flex-col items-center justify-center">
+        <div className="bg-red-50 text-red-600 p-6 rounded-lg text-center border border-red-200">
+          <Text className="text-lg font-bold mb-2">Impossible de charger le tableau de bord</Text>
+          <Text className="text-sm">Une erreur est survenue lors de la récupération de vos statistiques.</Text>
+        </div>
       </div>
     );
   }
@@ -236,7 +239,6 @@ export const AdminDashboardPage = () => {
         </Card>
 
         {/* Chantiers par statut - Span 1 */}
-        {/* Chantiers par statut - Span 1 */}
         <Card>
           <CardHeader>
             <CardTitle className="text-lg">Chantiers par statut</CardTitle>
@@ -279,6 +281,7 @@ export const AdminDashboardPage = () => {
                   <div
                     key={u.id}
                     className="flex items-center justify-between p-3 bg-bg-primary rounded-lg border border-border"
+                    onClick={() => navigate(`/admin/utilisateurs/${u.id}`)}
                   >
                     <div className="flex items-center gap-3">
                       <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">

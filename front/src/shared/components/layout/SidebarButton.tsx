@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import React from 'react';
+import { cn } from '@/shared/lib/utils';
 
 interface SidebarButtonProps {
   to: string;
@@ -23,15 +24,22 @@ export const SidebarButton: React.FC<SidebarButtonProps> = ({
   return (
     <Link
       to={to}
-      className={`px-3 flex overflow-hidden justify-start items-center py-2 rounded-md transition-colors ${
-        active
-          ? 'bg-border/45 text-text-primary text-[14px] font-medium'
-          : 'text-text-secondary font-medium text-[14px] hover:bg-border/30 border-transparent'
-      } ${className}`}
       onClick={onClick}
+      title={collapsed ? label : undefined}
+      aria-current={active ? 'page' : undefined}
+      className={cn(
+        'flex items-center overflow-hidden rounded-[var(--radius)] px-2.5 py-2 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30',
+        collapsed ? 'justify-center' : 'justify-start gap-3',
+        active
+          ? 'bg-primary/10 text-primary'
+          : 'text-text-secondary hover:bg-border/30 hover:text-text-primary',
+        className
+      )}
     >
-      <span className={collapsed ? 'mx-auto' : 'mr-3'}>{icon}</span>
-      {!collapsed && <span className={`whitespace-nowrap ${active && 'font-bold'}`}>{label}</span>}
+      <span className="w-5 h-5 shrink-0 flex items-center justify-center">{icon}</span>
+      {!collapsed && (
+        <span className={cn('whitespace-nowrap', active && 'font-semibold')}>{label}</span>
+      )}
     </Link>
   );
 };

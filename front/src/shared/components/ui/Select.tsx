@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react'
-import { DangerCircle, ChevronDown } from '@mynaui/icons-react'
+import { DangerCircle, ChevronDown, Check } from '@mynaui/icons-react'
 import type { UseFormRegisterReturn } from 'react-hook-form'
+import { cn } from '@/shared/lib/utils'
 import { Label } from './Typography'
 
 export type Option = {
@@ -10,7 +11,7 @@ export type Option = {
 
 export type SelectProps = {
   name: string
-  label: string
+  label?: string
   options: Option[]
   placeholder?: string
   className?: string
@@ -18,8 +19,9 @@ export type SelectProps = {
   register?: UseFormRegisterReturn
   onChange?: (value: string) => void
   value?: string
-  defaultValue?: string,
+  defaultValue?: string
   size?: 'small' | 'default'
+  disabled?: boolean
 }
 
 const Select: React.FC<SelectProps> = ({
@@ -33,19 +35,19 @@ const Select: React.FC<SelectProps> = ({
   onChange,
   value,
   defaultValue,
-  size = 'default'
+  size = 'default',
+  disabled = false,
 }) => {
   const [isOpen, setIsOpen] = useState(false)
   const [selectedOption, setSelectedOption] = useState<Option | null>(() => {
     const initialValue = value ?? defaultValue
-    return initialValue ? options.find(opt => opt.value === initialValue) ?? null : null
+    return initialValue ? options.find((opt) => opt.value === initialValue) ?? null : null
   })
   const dropdownRef = useRef<HTMLDivElement>(null)
 
   const hasError = Boolean(error)
   const inputId = name || label
   const describedBy = hasError ? `${inputId}-error` : undefined
-
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -57,79 +59,128 @@ const Select: React.FC<SelectProps> = ({
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [])
 
+  // Sync controlled value
+  useEffect(() => {
+    if (value !== undefined) {
+      setSelectedOption(options.find((opt) => opt.value === value) ?? null)
+    }
+  }, [value, options])
 
   const reg = register ?? ({} as UseFormRegisterReturn)
-  
+
   const handleSelect = (option: Option) => {
     setSelectedOption(option)
     setIsOpen(false)
-    
 
     const syntheticEvent = {
-      target: {
-        name: reg.name ?? name,
-        value: option.value
-      }
+      target: { name: reg.name ?? name, value: option.value },
     } as unknown as React.ChangeEvent<HTMLSelectElement>
-    
+
     reg.onChange?.(syntheticEvent)
     onChange?.(option.value)
   }
 
   return (
-    <div className={`${className ?? ''} relative ${size === 'small' ? 'flex items-center' : ''}`} ref={dropdownRef}>
-      <Label className='m-1 font-bold text-text-primary' weight="bold" htmlFor={inputId}>{label}</Label>
-      <div 
-        onClick={() => setIsOpen(!isOpen)}
-        className={`border-[1.5px] h-10 cursor-pointer ${hasError ? 'border-red' : 'border-border'} px-3 flex items-center rounded-md hover:border-primary focus-within:border-primary focus-within:outline-[1px] outline-border justify-between mt-1 mb-0 min-h-[38px]`}
-      >
-        <div className='flex flex-row items-center w-full flex-1 py-1'>
-          <span className={`flex-1 overflow-hidden w-full whitespace-nowrap ${!selectedOption ? 'text-placeholder' : 'text-text-primary'}`}>
-            {selectedOption ? selectedOption.label : placeholder}
-          </span>
-        </div>
-        <ChevronDown className={`transition-transform text-text-primary ${isOpen ? 'rotate-180' : ''}`} />
-        {hasError && <DangerCircle aria-hidden className='text-red ml-2' />}
-      </div>
-      
-      {/* Hidden native select for form handling */}
-      <select
+    <div
+      className={cn('relative', size === 'small' && 'flex items-center gap-2', className)}
+      ref={dropdownRef}
+    >
+      {label && (
+        <Label className="mb-1.5 block text-text-primary" weight="medium" htmlFor={inputId}>
+          {label}
+        </Label>
+      )}
+
+      {/* Trigger */}
+      <button
+        type="button"
         id={inputId}
+        disabled={disabled}
+        aria-haspopup="listbox"
+        aria-expanded={isOpen}
+        aria-describedby={describedBy}
+        onClick={() => !disabled && setIsOpen((v) => !v)}
+        className={cn(
+          'flex h-9 w-full items-center justify-between gap-2 rounded-[var(--radius)] border bg-bg-primary px-3 text-sm transition-[border-color,box-shadow] cursor-pointer',
+          'focus:outline-none focus:ring-2 focus:ring-primary/25 focus:border-primary',
+          hasError
+            ? 'border-red focus:ring-red/25'
+            : isOpen
+              ? 'border-primary ring-2 ring-primary/25'
+              : 'border-border hover:border-primary/50',
+          disabled && 'opacity-60 cursor-not-allowed bg-bg-secondary'
+        )}
+      >
+        <span className={cn('flex-1 truncate text-left', !selectedOption && 'text-placeholder')}>
+          {selectedOption ? selectedOption.label : placeholder}
+        </span>
+        <div className="flex items-center gap-1 shrink-0">
+          {hasError && <DangerCircle aria-hidden size={15} className="text-red" />}
+          <ChevronDown
+            className={cn(
+              'w-4 h-4 text-text-secondary transition-transform duration-200',
+              isOpen && 'rotate-180'
+            )}
+          />
+        </div>
+      </button>
+
+      {/* Hidden native select for form compatibility */}
+      <select
         name={reg.name ?? name}
         ref={reg.ref}
         onChange={reg.onChange}
         onBlur={reg.onBlur}
         value={selectedOption?.value ?? ''}
-        className="hidden"
+        className="sr-only"
         aria-hidden="true"
+        tabIndex={-1}
       >
         <option value="">{placeholder}</option>
-        {options.map(option => (
+        {options.map((option) => (
           <option key={option.value} value={option.value}>
             {option.label}
           </option>
         ))}
       </select>
 
-      {/* Custom dropdown */}
+      {/* Dropdown */}
       {isOpen && (
-        <div className="absolute z-50 w-full mt-1 bg-bg-primary border border-border rounded-md shadow-lg max-h-60 overflow-auto">
-          {options.map((option) => (
-            <div
-              key={option.value}
-              onClick={() => handleSelect(option)}
-              className={`px-3 py-2 cursor-pointer hover:bg-bg-secondary/50 text-text-primary ${
-                selectedOption?.value === option.value ? 'bg-bg-secondary font-semibold' : ''
-              }`}
-            >
-              {option.label}
-            </div>
-          ))}
+        <div
+          role="listbox"
+          className="absolute z-50 mt-1 w-full overflow-hidden rounded-[var(--radius)] border border-border bg-bg-primary shadow-md animate-in fade-in-0 zoom-in-95"
+        >
+          <div className="max-h-60 overflow-y-auto p-1">
+            {options.map((option) => {
+              const isSelected = selectedOption?.value === option.value
+              return (
+                <div
+                  key={option.value}
+                  role="option"
+                  aria-selected={isSelected}
+                  onClick={() => handleSelect(option)}
+                  className={cn(
+                    'flex cursor-pointer items-center gap-2 rounded-[calc(var(--radius)-2px)] px-2 py-1.5 text-sm text-text-primary select-none transition-colors',
+                    isSelected
+                      ? 'bg-primary/8 text-primary font-medium'
+                      : 'hover:bg-bg-secondary'
+                  )}
+                >
+                  <Check
+                    className={cn('w-4 h-4 shrink-0', isSelected ? 'opacity-100' : 'opacity-0')}
+                  />
+                  {option.label}
+                </div>
+              )
+            })}
+          </div>
         </div>
       )}
-      
+
       {hasError && (
-        <p id={describedBy} className='text-red text-[13px] font-semibold ml-1 mt-1 absolute'>{error}</p>
+        <p id={describedBy} className="mt-1.5 text-xs font-medium text-red">
+          {error}
+        </p>
       )}
     </div>
   )

@@ -110,7 +110,7 @@ const SimplePieChart = ({ data }: { data: { label: string; value: number; color:
 
 export const MoeDashboardPage = () => {
   const navigate = useNavigate();
-  const { data: stats, isLoading: loading } = useMoeStats();
+  const { data: stats, isLoading: loading, isError } = useMoeStats();
 
   if (loading) {
     return (
@@ -127,10 +127,13 @@ export const MoeDashboardPage = () => {
     );
   }
 
-  if (!stats) {
+  if (isError || !stats) {
     return (
-      <div className="p-8">
-        <Text>Erreur lors du chargement du tableau de bord</Text>
+      <div className="p-8 h-full flex flex-col items-center justify-center">
+        <div className="bg-red-50 text-red-600 p-6 rounded-lg text-center border border-red-200">
+          <Text className="text-lg font-bold mb-2">Impossible de charger le tableau de bord</Text>
+          <Text className="text-sm">Une erreur est survenue lors de la récupération de vos statistiques.</Text>
+        </div>
       </div>
     );
   }

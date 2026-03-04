@@ -28,18 +28,10 @@ const ConfirmModal = ({
 
  useEffect(() => {
   const handleEscKey = (event: KeyboardEvent) => {
-   if (event.key === 'Escape') {
-    onClose()
-   }
+   if (event.key === 'Escape') onClose()
   }
-
-  if (isOpen) {
-   document.addEventListener('keydown', handleEscKey)
-  }
-
-  return () => {
-   document.removeEventListener('keydown', handleEscKey)
-  }
+  if (isOpen) document.addEventListener('keydown', handleEscKey)
+  return () => document.removeEventListener('keydown', handleEscKey)
  }, [isOpen, onClose])
 
  return createPortal(
@@ -64,13 +56,13 @@ const ConfirmModal = ({
        className="bg-bg-primary rounded-[var(--radius-lg)] shadow-xl border border-border p-6 min-w-[320px] max-w-[400px] pointer-events-auto"
        onClick={(e) => e.stopPropagation()}
       >
-       <H3 className="font-bold text-[18px] text-text-primary mb-3">{title}</H3>
-       <p className="text-[14px] text-placeholder mb-6">{message}</p>
+       <H3 className="font-semibold text-text-primary mb-2">{title}</H3>
+       <p className="text-sm text-text-secondary mb-6 leading-relaxed">{message}</p>
        <div className="flex gap-3 justify-end">
-        <Button variant="Secondary" onClick={onClose} classname="px-6 py-2">
+        <Button variant="Secondary" size="sm" onClick={onClose}>
          {cancelText}
         </Button>
-        <Button variant="Destructive" onClick={() => { onConfirm(); onClose(); }} classname="px-6 py-2">
+        <Button variant="Destructive" size="sm" onClick={() => { onConfirm(); onClose(); }}>
          {confirmText}
         </Button>
        </div>

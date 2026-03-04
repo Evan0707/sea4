@@ -24,6 +24,7 @@ export const ArtisansListPage = () => {
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
   const [artisanToDelete, setArtisanToDelete] = useState<number | null>(null);
+  const [keysToDelete, setKeysToDelete] = useState<number[]>([]);
 
   // Custom hook usage
   const { artisans, loading, deleteArtisan, fetchArtisans } = useArtisans({
@@ -37,14 +38,39 @@ export const ArtisansListPage = () => {
   const [showCsvPopup, setShowCsvPopup] = useState(false);
   const dragCounter = useRef(0);
 
+  const handleDeleteSelected = (keys: (string | number)[]) => {
+    setKeysToDelete(keys.map(Number));
+  };
+
   const confirmDelete = async () => {
+    // Suppression unitaire (via Popover)
     if (artisanToDelete) {
       try {
         await deleteArtisan(artisanToDelete);
-      } catch (e) {
+        toast.addToast('Artisan supprimé', 'success');
+      } catch {
         toast.addToast('Erreur lors de la suppression', 'error');
       }
       setArtisanToDelete(null);
+    }
+    // Suppression multiple (via sélection)
+    if (keysToDelete.length > 0) {
+      try {
+        const results = await Promise.allSettled(keysToDelete.map((id) => deleteArtisan(id)));
+        const fulfilledCount = results.filter(r => r.status === 'fulfilled').length;
+        const rejectedCount = results.filter(r => r.status === 'rejected').length;
+
+        if (rejectedCount === 0) {
+          toast.addToast(`${fulfilledCount} artisan${fulfilledCount > 1 ? 's supprimés' : ' supprimé'}`, 'success');
+        } else if (fulfilledCount === 0) {
+          toast.addToast('Erreur lors de la suppression', 'error');
+        } else {
+          toast.addToast(`${fulfilledCount} supprimé${fulfilledCount > 1 ? 's' : ''}, ${rejectedCount} erreur${rejectedCount > 1 ? 's' : ''}`, 'error');
+        }
+      } catch {
+        toast.addToast('Erreur inattendue lors de la suppression', 'error');
+      }
+      setKeysToDelete([]);
     }
   };
 
@@ -238,6 +264,7 @@ export const ArtisansListPage = () => {
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
     >
+
       {isDragging && (
         <div
           className="absolute inset-0 bg-primary/10 border-2 border-dashed border-primary rounded-lg z-50 flex items-center justify-center"
@@ -292,14 +319,20 @@ export const ArtisansListPage = () => {
         keyExtractor={(item) => item.noArtisan}
         onRowClick={(item) => navigate(`/admin/artisans/${item.noArtisan}`)}
         emptyMessage="Aucun artisan trouvé"
+        selectable
+        onDeleteSelected={handleDeleteSelected}
+        deleteLabel="Supprimer la sélection"
       />
 
       <ConfirmModal
-        isOpen={!!artisanToDelete}
-        onClose={() => setArtisanToDelete(null)}
+        isOpen={!!artisanToDelete || keysToDelete.length > 0}
+        onClose={() => { setArtisanToDelete(null); setKeysToDelete([]); }}
         onConfirm={confirmDelete}
-        title="Supprimer l'artisan"
-        message="Êtes-vous sûr de vouloir supprimer cet artisan ? Cette action est irréversible."
+        title={keysToDelete.length > 1 ? `Supprimer ${keysToDelete.length} artisans` : "Supprimer l'artisan"}
+        message={keysToDelete.length > 1
+          ? `Êtes-vous sûr de vouloir supprimer ces ${keysToDelete.length} artisans ? Cette action est irréversible.`
+          : "Êtes-vous sûr de vouloir supprimer cet artisan ? Cette action est irréversible."
+        }
         confirmText="Supprimer"
       />
     </div>

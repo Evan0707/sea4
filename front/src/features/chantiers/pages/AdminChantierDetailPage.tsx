@@ -29,7 +29,7 @@ export const AdminChantierDetailPage = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   // Cast to ChantierDetail to ensure types, using admin endpoint
-  const { data: chantierData, isLoading: loading } = useChantier(id, { endpoint: '/admin/chantiers' });
+  const { data: chantierData, isLoading: loading, isError } = useChantier(id, { endpoint: '/admin/chantiers' });
   const chantier = chantierData as ChantierDetail | undefined | null;
 
   const [expandedEtapes, setExpandedEtapes] = useState<Set<number>>(new Set());
@@ -52,6 +52,15 @@ export const AdminChantierDetailPage = () => {
         <Skeleton className="w-48 h-8 mb-6" />
         <Skeleton className="w-full h-40 mb-6" />
         <Skeleton className="w-full h-60" />
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div className="p-8">
+        <Text className="text-red-500 font-medium mb-4">Erreur : Impossible de charger les détails du chantier.</Text>
+        <Button variant="Secondary" onClick={() => navigate(-1)}>Retour</Button>
       </div>
     );
   }
@@ -197,7 +206,7 @@ export const AdminChantierDetailPage = () => {
                               </Text>
                             )}
                             {etape.artisan && (
-                              <Text className="text-xs text-placeholder">
+                              <Text className="text-xs text-placeholder" onClick={() => { navigate(`/admin/artisans/${etape?.artisan?.noArtisan}`), { replace: true } }}>
                                 Artisan: {etape.artisan.nom} {etape.artisan.prenom}
                               </Text>
                             )}

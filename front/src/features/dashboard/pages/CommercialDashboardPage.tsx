@@ -108,7 +108,7 @@ const SimplePieChart = ({ data }: { data: { label: string; value: number; color:
 
 export const CommercialDashboardPage = () => {
   const navigate = useNavigate();
-  const { data: stats, isLoading: loading } = useCommercialStats();
+  const { data: stats, isLoading: loading, isError } = useCommercialStats();
 
   if (loading) {
     return (
@@ -125,10 +125,13 @@ export const CommercialDashboardPage = () => {
     );
   }
 
-  if (!stats) {
+  if (isError || !stats) {
     return (
-      <div className="p-8">
-        <Text>Erreur lors du chargement du tableau de bord</Text>
+      <div className="p-8 h-full flex flex-col items-center justify-center">
+        <div className="bg-red-50 text-red-600 p-6 rounded-lg text-center border border-red-200">
+          <Text className="text-lg font-bold mb-2">Impossible de charger le tableau de bord</Text>
+          <Text className="text-sm">Une erreur est survenue lors de la récupération de vos statistiques.</Text>
+        </div>
       </div>
     );
   }
@@ -237,6 +240,7 @@ export const CommercialDashboardPage = () => {
                 <div
                   key={d.noChantier}
                   className="p-4 bg-bg-primary rounded-lg border border-border transition-colors"
+                  onClick={() => navigate(`/commercial/dossiers/${d.noChantier}/edit`)}
                 >
                   <div className="flex items-center justify-between mb-2">
                     <Text className="font-medium">{d.client}</Text>

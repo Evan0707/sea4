@@ -1,9 +1,11 @@
 import React from 'react'
 import type { UseFormRegisterReturn } from 'react-hook-form'
+import { cn } from '@/shared/lib/utils'
+import { Label } from './Typography'
 
 export type TextareaProps = {
   name: string
-  label: string
+  label?: string
   placeholder?: string
   className?: string
   error?: string
@@ -11,7 +13,8 @@ export type TextareaProps = {
   onChange?: (e: React.ChangeEvent<HTMLTextAreaElement>) => void
   value?: string
   defaultValue?: string
-  type?: string
+  rows?: number
+  disabled?: boolean
 }
 
 const Textarea: React.FC<TextareaProps> = ({
@@ -24,11 +27,12 @@ const Textarea: React.FC<TextareaProps> = ({
   onChange,
   value,
   defaultValue,
+  rows = 4,
+  disabled,
 }) => {
   const hasError = Boolean(error)
   const inputId = name || label
   const describedBy = hasError ? `${inputId}-error` : undefined
-
 
   const reg = register ?? ({} as UseFormRegisterReturn)
   const mergedOnChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -42,24 +46,39 @@ const Textarea: React.FC<TextareaProps> = ({
   }
 
   return (
-    <div className={`${className ?? ''}`}>
-      <label className='m-1 font-bold text-[14px]' htmlFor={inputId}>{label}</label>
-      <div className={`border-[1.5px] ${hasError ? 'border-red' : 'border-border'} flex items-center rounded-md focus-within:border-primary focus-within:outline-[1px] outline-border justify-between mt-1 mb-0`}>
-          <textarea
-            id={inputId}
-            placeholder={placeholder}
-            aria-invalid={hasError}
-            aria-describedby={describedBy}
-            className={`focus:outline-none relative min-h-[90px] p-2 flex-1`}
-            onChange={mergedOnChange}
-            {...controlProps}
-            name={reg.name ?? name}
-            onBlur={reg.onBlur}
-            ref={reg.ref}
-          />
-      </div>
+    <div className={cn('w-full', className)}>
+      {label && (
+        <Label className="mb-1.5 block text-text-primary" weight="medium" htmlFor={inputId}>
+          {label}
+        </Label>
+      )}
+
+      <textarea
+        id={inputId}
+        placeholder={placeholder}
+        aria-invalid={hasError}
+        aria-describedby={describedBy}
+        rows={rows}
+        disabled={disabled}
+        className={cn(
+          'w-full resize-y rounded-[var(--radius)] border bg-bg-primary px-3 py-2 text-sm text-text-primary placeholder:text-placeholder transition-[border-color,box-shadow]',
+          'focus:outline-none focus:ring-2 focus:ring-primary/25 focus:border-primary',
+          hasError
+            ? 'border-red focus:ring-red/25 focus:border-red'
+            : 'border-border',
+          disabled && 'cursor-not-allowed opacity-60 bg-bg-secondary'
+        )}
+        onChange={mergedOnChange}
+        {...controlProps}
+        name={reg.name ?? name}
+        onBlur={reg.onBlur}
+        ref={reg.ref}
+      />
+
       {hasError && (
-        <p id={describedBy} className='text-red text-[13px] font-semibold ml-1 mt-1 absolute b-0'>{error}</p>
+        <p id={describedBy} className="mt-1.5 text-xs font-medium text-red">
+          {error}
+        </p>
       )}
     </div>
   )

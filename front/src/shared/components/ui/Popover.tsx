@@ -3,6 +3,7 @@ import { ANIMATIONS } from '../../constants/animations'
 import { DotsVerticalSolid } from '@mynaui/icons-react'
 import { useState, useRef, useEffect } from 'react'
 import type { ReactNode, ComponentType } from 'react'
+import { cn } from '@/shared/lib/utils'
 
 interface PopoverProps {
   children: ReactNode
@@ -17,57 +18,36 @@ interface PopoverItemProps {
   onClick?: () => void
 }
 
-const Popover = ({ children, icon: Icon = DotsVerticalSolid, iconSize = 28 }: PopoverProps) => {
+const Popover = ({ children, icon: Icon = DotsVerticalSolid, iconSize = 20 }: PopoverProps) => {
   const [isOpen, setIsOpen] = useState(false)
   const [position, setPosition] = useState<'top' | 'bottom'>('bottom')
   const popoverRef = useRef<HTMLDivElement>(null)
   const triggerRef = useRef<HTMLButtonElement>(null)
   const contentRef = useRef<HTMLDivElement>(null)
 
-  // Fermer au clic extérieur
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (popoverRef.current && !popoverRef.current.contains(event.target as Node)) {
         setIsOpen(false)
       }
     }
-
-    if (isOpen) {
-      document.addEventListener('mousedown', handleClickOutside)
-    }
-
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside)
-    }
+    if (isOpen) document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [isOpen])
 
-  // Calculer la meilleure position
   useEffect(() => {
     if (!isOpen || !triggerRef.current || !contentRef.current) return
-
     const calculatePosition = () => {
       const triggerRect = triggerRef.current!.getBoundingClientRect()
       const contentRect = contentRef.current!.getBoundingClientRect()
-
       const spaceBelow = window.innerHeight - triggerRect.bottom
       const spaceAbove = triggerRect.top
-      const popoverHeight = contentRect.height || 200 // Fallback si pas encore rendu
-
-      // Si pas assez d'espace en bas et plus d'espace en haut
-      if (spaceBelow < popoverHeight && spaceAbove > spaceBelow) {
-        setPosition('top')
-      } else {
-        setPosition('bottom')
-      }
+      const popoverHeight = contentRect.height || 200
+      setPosition(spaceBelow < popoverHeight && spaceAbove > spaceBelow ? 'top' : 'bottom')
     }
-
-    // Calculer immédiatement
     calculatePosition()
-
-    // Recalculer au scroll et resize
     window.addEventListener('scroll', calculatePosition, true)
     window.addEventListener('resize', calculatePosition)
-
     return () => {
       window.removeEventListener('scroll', calculatePosition, true)
       window.removeEventListener('resize', calculatePosition)
@@ -79,11 +59,11 @@ const Popover = ({ children, icon: Icon = DotsVerticalSolid, iconSize = 28 }: Po
       <button
         ref={triggerRef}
         onClick={() => setIsOpen(!isOpen)}
-        className="p-1 hover:bg-gray-100 rounded-md transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-border/60"
+        className="p-1.5 rounded-[var(--radius)] text-text-secondary hover:bg-bg-secondary hover:text-text-primary transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30"
         aria-label="Ouvrir le menu"
         aria-expanded={isOpen}
       >
-        <Icon size={iconSize} className="text-gray-700" />
+        <Icon size={iconSize} />
       </button>
 
       <AnimatePresence>
@@ -94,8 +74,10 @@ const Popover = ({ children, icon: Icon = DotsVerticalSolid, iconSize = 28 }: Po
             animate="show"
             exit="exit"
             ref={contentRef}
-            className={`absolute right-2 w-48 bg-white/70 backdrop-blur-sm rounded-[var(--radius)] shadow-lg border-[1.5px] border-border/40 z-50 py-1 px-1 ${position === 'top' ? 'bottom-full mb-2' : 'top-full mt-2'
-              }`}
+            className={cn(
+              'absolute right-0 w-48 bg-bg-primary rounded-[var(--radius)] shadow-md border border-border z-50 p-1',
+              position === 'top' ? 'bottom-full mb-2' : 'top-full mt-2'
+            )}
           >
             {children}
           </motion.div>
@@ -106,17 +88,17 @@ const Popover = ({ children, icon: Icon = DotsVerticalSolid, iconSize = 28 }: Po
 }
 
 const PopoverItem = ({ variant = 'default', children, icon: Icon, onClick }: PopoverItemProps) => {
-  const variants = {
-    default: 'hover:bg-gray-100 text-gray-900',
-    destructive: 'hover:bg-red-50 text-red',
-  }
-
   return (
     <button
       onClick={onClick}
-      className={`w-full px-4 py-2 rounded text-left text-sm flex items-center gap-2 transition-colors ${variants[variant]}`}
+      className={cn(
+        'w-full px-3 py-1.5 rounded-[calc(var(--radius)-2px)] text-left text-sm flex items-center gap-2 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30',
+        variant === 'destructive'
+          ? 'text-red hover:bg-red/8'
+          : 'text-text-primary hover:bg-bg-secondary'
+      )}
     >
-      {Icon && <Icon size={16} className="shrink-0" />}
+      {Icon && <Icon size={15} className="shrink-0" />}
       <span className="flex-1">{children}</span>
     </button>
   )

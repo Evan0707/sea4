@@ -13,6 +13,8 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | null>(null);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
+  const [isInitializing, setIsInitializing] = useState(true);
+
   // Gestion de l'état de l'utilisateur
   const [user, setUser] = useState<UserProfile | null>(() => {
     const savedToken = localStorage.getItem('token');
@@ -43,16 +45,21 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         if (!mounted) return
         setUser(prev => prev ? ({ ...prev, nom: res.data.nom ?? null, prenom: res.data.prenom ?? null }) : null)
       } catch (e) {
-        // Ignorer l'erreur (le token peut être invalide/expiration)
+        // En cas d'erreur 401 sur /me, on déconnecte l'utilisateur
+        logout();
+      } finally {
+        if (mounted) setIsInitializing(false);
       }
     }
 
     if (user?.token) {
       fetchProfile()
+    } else {
+      setIsInitializing(false);
     }
 
     return () => { mounted = false }
-  }, [user?.token])
+  }, []) // Removed dependency on user?.token to only initialize once
 
   const login = (token: string) => {
     try {
@@ -89,7 +96,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   return (
     <AuthContext.Provider value={{ user, login, logout }}>
-      {children}
+      {isInitializing ? (
+        <div className="min-h-screen w-full flex items-center justify-center bg-bg-primary">
+          <div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+        </div>
+      ) : children}
     </AuthContext.Provider>
   );
 };

@@ -1,22 +1,32 @@
 import React from 'react';
+import { cn } from '@/shared/lib/utils';
+import { cva, type VariantProps } from 'class-variance-authority';
+
+const badgeVariants = cva(
+ 'inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium border',
+ {
+  variants: {
+   variant: {
+    default: 'bg-bg-secondary text-text-secondary border-border',
+    success: 'bg-green-50 text-green-700 border-green-200 dark:bg-green-950/40 dark:text-green-400 dark:border-green-800/50',
+    warning: 'bg-orange-50 text-orange-700 border-orange-200 dark:bg-orange-950/40 dark:text-orange-400 dark:border-orange-800/50',
+    danger: 'bg-red/8 text-red border-red/20',
+    info: 'bg-primary/8 text-primary border-primary/20',
+   },
+  },
+  defaultVariants: {
+   variant: 'default',
+  },
+ }
+);
 
 type StatusVariant = 'default' | 'success' | 'warning' | 'danger' | 'info';
 
-interface StatusBadgeProps {
+interface StatusBadgeProps extends VariantProps<typeof badgeVariants> {
  status: string;
- variant?: StatusVariant;
  className?: string;
 }
 
-const variantStyles: Record<StatusVariant, string> = {
- default: 'bg-gray-50 text-gray-700 border-gray-200',
- success: 'bg-green-50 text-green-700 border-green-200',
- warning: 'bg-orange-50 text-orange-700 border-orange-200',
- danger: 'bg-red-50 text-red-700 border-red-200',
- info: 'bg-blue-50 text-blue-700 border-blue-200',
-};
-
-// Helper function to guess variant from status text if not provided
 const getVariantFromStatus = (status: string): StatusVariant => {
  const s = status.toLowerCase();
  if (s.includes('terminé') || s.includes('validé') || s.includes('complété')) return 'success';
@@ -29,12 +39,12 @@ const getVariantFromStatus = (status: string): StatusVariant => {
 export const StatusBadge: React.FC<StatusBadgeProps> = ({
  status,
  variant,
- className = ''
+ className = '',
 }) => {
  const finalVariant = variant || getVariantFromStatus(status);
 
  return (
-  <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium border ${variantStyles[finalVariant]} ${className}`}>
+  <span className={cn(badgeVariants({ variant: finalVariant }), className)}>
    {status}
   </span>
  );

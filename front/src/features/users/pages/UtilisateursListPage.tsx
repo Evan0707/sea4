@@ -20,7 +20,7 @@ export const UtilisateursListPage = () => {
   const [userToDelete, setUserToDelete] = useState<number | null>(null);
 
   // Utilisation du hook personnalisé pour récupérer les utilisateurs
-  const { utilisateurs, loading, deleteUtilisateur } = useUtilisateurs({
+  const { utilisateurs, loading, deleteUtilisateur, error } = useUtilisateurs({
     search: debouncedSearch,
     sortOrder,
   });
@@ -56,8 +56,8 @@ export const UtilisateursListPage = () => {
   // Configuration des actions dans le header
   const headerActions = useMemo(() => (
     <div className="flex items-center gap-2">
-      <Button variant="Secondary" icon={Download} onClick={handleExport}>
-        Exporter CSV
+      <Button variant='Secondary' onClick={handleExport} size='md' icon={Download}>
+        Exporter
       </Button>
       <Button variant='Primary' onClick={() => navigate('/admin/utilisateurs/new')}>
         Nouveau
@@ -136,7 +136,6 @@ export const UtilisateursListPage = () => {
   return (
     <div className="p-4 md:p-4 h-full flex flex-col">
       {/* PageHeader moved to Layout */}
-
       <SearchBar
         value={search}
         onChange={setSearch}
@@ -144,17 +143,24 @@ export const UtilisateursListPage = () => {
         className="mb-5"
       />
 
-      <DataList
-        data={utilisateurs}
-        columns={columns}
-        loading={loading}
-        sortColumn="login"
-        sortDirection={sortOrder}
-        onSort={() => setSortOrder(prev => prev === 'asc' ? 'desc' : 'asc')}
-        keyExtractor={(item) => item.noUtilisateur}
-        onRowClick={(item) => navigate(`/admin/utilisateurs/${item.noUtilisateur}`)}
-        emptyMessage="Aucun utilisateur trouvé"
-      />
+      {error ? (
+        <div className="flex-1 flex flex-col items-center justify-center p-8 bg-red-50 border border-red-200 rounded-lg text-red-600">
+          <Text className="font-semibold mb-2">Erreur de chargement</Text>
+          <Text className="text-sm">Impossible de récupérer la liste des utilisateurs.</Text>
+        </div>
+      ) : (
+        <DataList
+          data={utilisateurs}
+          columns={columns}
+          loading={loading}
+          sortColumn="login"
+          sortDirection={sortOrder}
+          onSort={() => setSortOrder(prev => prev === 'asc' ? 'desc' : 'asc')}
+          keyExtractor={(item) => item.noUtilisateur}
+          onRowClick={(item) => navigate(`/admin/utilisateurs/${item.noUtilisateur}`)}
+          emptyMessage="Aucun utilisateur trouvé"
+        />
+      )}
 
       <ConfirmModal
         isOpen={!!userToDelete}

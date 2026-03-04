@@ -18,7 +18,7 @@ export function HeaderBar({ user, onMenu }: HeaderBarProps) {
   const { addToast } = useToast();
 
   return (
-    <header className="sticky top-0 z-20 flex items-center justify-between w-full bg-bg-primary/95 backdrop-blur-md px-8 py-4 border-b border-border/50 transition-all duration-300">
+    <header className="sticky top-0 z-20 flex items-center justify-between w-full bg-bg-primary/95 backdrop-blur-md px-8 py-2 border-b border-border/50 transition-all duration-300">
       <div className="flex items-center gap-4">
         <button
           onClick={() => onMenu?.()}

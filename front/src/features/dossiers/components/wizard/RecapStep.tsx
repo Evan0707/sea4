@@ -10,8 +10,25 @@ interface RecapStepProps {
 
 export const RecapStep = ({ clientData, chantierData, onEditStep }: RecapStepProps) => {
   // utilisation des hooks pour recuperer les maitres d'oeuvre et les modeles
-  const { data: maitresOeuvre = [] } = useMaitresOeuvre();
-  const { data: modeles = [] } = useModeles();
+  const { data: maitresOeuvre = [], isLoading: loadingMoe, isError: errorMoe } = useMaitresOeuvre();
+  const { data: modeles = [], isLoading: loadingModeles, isError: errorModeles } = useModeles();
+
+  if (loadingMoe || loadingModeles) {
+    return (
+      <div className="p-4 md:p-8 rounded-lg border border-border bg-bg-secondary animate-pulse h-64 flex flex-col justify-center items-center">
+        <div className="text-placeholder">Chargement du récapitulatif...</div>
+      </div>
+    );
+  }
+
+  if (errorMoe || errorModeles) {
+    return (
+      <div className="p-4 md:p-8 rounded-lg border border-red-200 bg-red-50 text-red-600">
+        <H2 className="mb-2 text-red-600">Erreur</H2>
+        <p>Impossible de charger les données nécessaires au récapitulatif. Veuillez réessayer.</p>
+      </div>
+    );
+  }
 
   return (
     <div className="p-4 md:p-8 rounded-lg border border-border bg-bg-secondary">
