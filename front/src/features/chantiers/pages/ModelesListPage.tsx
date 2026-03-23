@@ -44,8 +44,6 @@ export const ModelesListPage = () => {
         { key: 'noModele', header: 'Numero Modele'},
         { key: 'nomModele', header: 'Nom Modele'},
         { key: 'descriptionModele', header: 'Description Modele'},
-        // enregistrer les étapes, les concatene et apres les mettre dans le bibul
-        //{ key: 'etapes.nomEtapes', header: 'Etapes Modele'},
     ];
     exportToCSV(modeles as Modele[], exportColumns, 'modeles')
  }, [modeles])
