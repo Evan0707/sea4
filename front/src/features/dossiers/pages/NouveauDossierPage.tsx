@@ -6,6 +6,7 @@ import { useToast } from '@/shared/hooks/useToast';
 import { useAuth } from '@/features/auth/context/AuthContext';
 import Button from '@/shared/components/ui/Button';
 import { H1, Text } from '@/shared/components/ui/Typography';
+import { cn } from '@/shared/lib/utils';
 import ConfirmPopover from '@/shared/components/ui/ConfirmPopover';
 import { clientFormSchema, chantierFormSchema, type ClientFormData, type ChantierFormData } from '@/shared/utils/validators';
 import apiClient from '@/shared/api/client';
@@ -13,6 +14,8 @@ import apiClient from '@/shared/api/client';
 import { ClientStep } from '../components/wizard/ClientStep';
 import { ChantierStep } from '../components/wizard/ChantierStep';
 import { RecapStep } from '../components/wizard/RecapStep';
+import { AnimatePresence, motion } from 'framer-motion';
+import { ChevronRight, ChevronLeft, CheckCircle } from '@mynaui/icons-react';
 
 const STORAGE_KEY = 'nouveau-dossier-draft';
 
@@ -158,76 +161,138 @@ export const NouveauDossierPage = () => {
     navigate('/commercial/dossiers');
   };
 
-  return (
-    <div className="p-4 md:p-10 pt-5 max-w-[1500px] w-full mx-auto">
-      <H1 className="mb-8">Créer un nouveau dossier</H1>
+  const steps = [
+    { id: 1, label: 'Client' },
+    { id: 2, label: 'Projet' },
+    { id: 3, label: 'Récapitulatif' },
+  ];
 
-      {/* Indicateur de progression */}
-      <div className="mb-8">
-        <div className="flex items-center justify-between mb-2">
-          {[1, 2, 3].map((step) => (
+  return (
+    <div className="p-6 pt-8 max-w-4xl w-full mx-auto">
+      <div className="mb-6">
+        <H1 className="mb-2">Nouveau dossier</H1>
+        <Text className="text-placeholder">Complétez les informations pour créer un nouveau dossier.</Text>
+      </div>
+
+      {/* Segmented Stepper */}
+      <div className="mb-8 max-w-2xl mx-auto">
+        <div className="flex justify-between mb-3 px-1">
+          {steps.map((step) => (
             <div
-              key={step}
-              className="flex-1 h-1 rounded-full mx-1 bg-primary/20 overflow-hidden"
+              key={step.id}
+              className={cn(
+                "text-[13px] font-bold transition-all duration-300",
+                currentStep === step.id ? "text-primary tracking-wide" : "text-placeholder/60"
+              )}
             >
-              <div
-                className={`h-full bg-primary transition-all duration-500 ease-out ${step < currentStep
-                  ? 'w-full'
-                  : step === currentStep
-                    ? 'w-full animate-in slide-in-from-left'
-                    : 'w-0'
-                  }`}
+              <span className="mr-1.5 opacity-50 tabular-nums">{step.id}.</span>
+              {step.label}
+            </div>
+          ))}
+        </div>
+        <div className="flex gap-2 h-1.5 px-0.5">
+          {steps.map((step) => (
+            <div
+              key={step.id}
+              className="flex-1 relative rounded-full overflow-hidden bg-bg-secondary"
+            >
+              <motion.div
+                initial={false}
+                animate={{
+                  width: currentStep >= step.id ? "100%" : "0%",
+                  opacity: currentStep === step.id ? 1 : currentStep > step.id ? 0.7 : 0
+                }}
+                className={cn(
+                  "h-full transition-all duration-500",
+                  currentStep === step.id ? "bg-primary shadow-[0_0_12px_rgba(var(--primary-rgb),0.3)]" : "bg-primary/60"
+                )}
               />
             </div>
           ))}
         </div>
-        <Text variant="small" align="center" className="text-placeholder">
-          Étape {currentStep}/3
-        </Text>
       </div>
 
-      {/* Étapes */}
-      {currentStep === 1 && <ClientStep form={clientForm} />}
-      {currentStep === 2 && <ChantierStep form={chantierForm} />}
-      {currentStep === 3 && (
-        <RecapStep
-          clientData={clientForm.watch()}
-          chantierData={chantierForm.watch()}
-          onEditStep={setCurrentStep}
-        />
-      )}
+      {/* Étapes avec Animation */}
+      <div className="relative min-h-[400px]">
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={currentStep}
+            initial={{ opacity: 0, x: 15 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -15 }}
+            transition={{ duration: 0.25, ease: "easeOut" }}
+          >
+            {currentStep === 1 && <ClientStep form={clientForm} />}
+            {currentStep === 2 && <ChantierStep form={chantierForm} />}
+            {currentStep === 3 && (
+              <RecapStep
+                clientData={clientForm.watch()}
+                chantierData={chantierForm.watch()}
+                onEditStep={setCurrentStep}
+              />
+            )}
+          </motion.div>
+        </AnimatePresence>
+      </div>
 
       {/* Boutons de navigation */}
-      <div className="flex justify-between mt-8">
+      <div className="flex justify-between items-center mt-12 pt-6 border-t border-border/60">
         <div>
-          {currentStep > 1 && (
-            <Button variant="Secondary" onClick={handlePrevious} classname="px-8">
+          {currentStep > 1 ? (
+            <Button
+              variant="Secondary"
+              onClick={handlePrevious}
+              size='md'
+              icon={ChevronLeft}
+            >
               Précédent
             </Button>
+          ) : (
+            <ConfirmPopover
+              onConfirm={handleCancelConfirm}
+              title="Annuler ?"
+              message="Vos données seront perdues."
+              confirmText="Oui, annuler"
+              cancelText="Non"
+            >
+              <Button variant="Secondary" size='md'>
+                Annuler
+              </Button>
+            </ConfirmPopover>
           )}
         </div>
+
         <div className="flex gap-4">
-          <ConfirmPopover
-            onConfirm={handleCancelConfirm}
-            title="Annuler la création du dossier ?"
-            message="Les données saisies seront perdues. Cette action est irréversible."
-            confirmText="Oui, annuler"
-            cancelText="Non, continuer"
-          >
-            <Button variant="Secondary" classname="px-8">
-              Annuler
-            </Button>
-          </ConfirmPopover>
+          {currentStep === 3 && (
+            <ConfirmPopover
+              onConfirm={handleCancelConfirm}
+              title="Annuler ?"
+              message="Vos données seront perdues."
+              confirmText="Oui, annuler"
+              cancelText="Non"
+            >
+              <Button variant="Secondary" size='md' className="md:hidden">
+                Annuler
+              </Button>
+            </ConfirmPopover>
+          )}
+
           {currentStep < 3 ? (
-            <Button variant="Primary" onClick={handleNext} classname="px-8">
-              Suivant
+            <Button
+              variant="Primary"
+              onClick={handleNext}
+              size='md'
+              iconRight={ChevronRight}
+            >
+              Continuer
             </Button>
           ) : (
             <Button
               variant="Primary"
               onClick={handleSubmit}
               loading={isSubmitting}
-              classname="px-8"
+              size='md'
+              iconRight={CheckCircle}
             >
               Créer le dossier
             </Button>

@@ -72,7 +72,8 @@ const ToastItem = ({ toast, index, onRemove }: { toast: ToastProps, index: numbe
         absolute bottom-0 right-0
         w-full p-4
         rounded-xl
-        bg-bg-primary text-text-primary
+        backdrop-blur-xl bg-bg-primary/85 text-text-primary
+        border border-border/50
         shadow-[0_8px_30px_rgb(0,0,0,0.12)]
         flex items-start gap-3
         pointer-events-auto

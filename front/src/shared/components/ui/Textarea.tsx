@@ -1,7 +1,9 @@
-import React from 'react'
+import { DangerCircle, InfoCircleSolid } from '@mynaui/icons-react'
 import type { UseFormRegisterReturn } from 'react-hook-form'
 import { cn } from '@/shared/lib/utils'
+import Tooltip from './Tooltip'
 import { Label } from './Typography'
+import { motion, AnimatePresence } from 'framer-motion'
 
 export type TextareaProps = {
   name: string
@@ -15,6 +17,10 @@ export type TextareaProps = {
   defaultValue?: string
   rows?: number
   disabled?: boolean
+  width?: string
+  required?: boolean
+  info?: boolean
+  message?: string
 }
 
 const Textarea: React.FC<TextareaProps> = ({
@@ -29,6 +35,10 @@ const Textarea: React.FC<TextareaProps> = ({
   defaultValue,
   rows = 4,
   disabled,
+  width = 'w-full',
+  required = false,
+  info = false,
+  message = '',
 }) => {
   const hasError = Boolean(error)
   const inputId = name || label
@@ -46,11 +56,21 @@ const Textarea: React.FC<TextareaProps> = ({
   }
 
   return (
-    <div className={cn('w-full', className)}>
-      {label && (
-        <Label className="mb-1.5 block text-text-primary" weight="medium" htmlFor={inputId}>
-          {label}
-        </Label>
+    <div className={cn(width, className)}>
+      {(label || info) && (
+        <div className="flex items-center mb-1.5">
+          {label && (
+            <Label className="block text-text-primary" weight="medium" htmlFor={inputId}>
+              {label}
+              {required && <span className="text-red ml-1">*</span>}
+            </Label>
+          )}
+          {info && (
+            <Tooltip content={message}>
+              <InfoCircleSolid size={14} className="text-text-secondary ml-1.5 cursor-help" />
+            </Tooltip>
+          )}
+        </div>
       )}
 
       <textarea
@@ -75,11 +95,20 @@ const Textarea: React.FC<TextareaProps> = ({
         ref={reg.ref}
       />
 
-      {hasError && (
-        <p id={describedBy} className="mt-1.5 text-xs font-medium text-red">
-          {error}
-        </p>
-      )}
+      <AnimatePresence>
+        {hasError && (
+          <motion.p
+            id={describedBy}
+            initial={{ opacity: 0, height: 0, x: 0 }}
+            animate={{ opacity: 1, height: 'auto', x: [0, -5, 5, -3, 3, 0] }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.3 }}
+            className="mt-1.5 text-xs font-medium text-red overflow-hidden origin-left"
+          >
+            {error}
+          </motion.p>
+        )}
+      </AnimatePresence>
     </div>
   )
 }

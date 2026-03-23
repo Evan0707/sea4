@@ -28,7 +28,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           nom: null,
           prenom: null
         };
-      } catch (e) {
+      } catch {
         localStorage.removeItem('token');
         return null;
       }
@@ -36,7 +36,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     return null;
   });
 
-  // QUand un token est present, on tente de recuperer le profile de l'utilisateur
+  // Écouter l'événement de déconnexion forcée (ex: 401 depuis l'intercepteur API)
+  useEffect(() => {
+    const handleForceLogout = () => logout();
+    window.addEventListener('auth:logout', handleForceLogout);
+    return () => window.removeEventListener('auth:logout', handleForceLogout);
+  }, []);
+
+  // Quand un token est present, on tente de recuperer le profile de l'utilisateur
   useEffect(() => {
     let mounted = true
     const fetchProfile = async () => {
@@ -44,22 +51,23 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         const res = await apiClient.get('/me')
         if (!mounted) return
         setUser(prev => prev ? ({ ...prev, nom: res.data.nom ?? null, prenom: res.data.prenom ?? null }) : null)
-      } catch (e) {
+      } catch {
         // En cas d'erreur 401 sur /me, on déconnecte l'utilisateur
         logout();
-      } finally {
-        if (mounted) setIsInitializing(false);
       }
     }
 
     if (user?.token) {
       fetchProfile()
-    } else {
-      setIsInitializing(false);
     }
 
+    // On n'attend plus la réponse de /me pour afficher l'application.
+    // Le token décodé depuis localStorage gère déjà les rôles. 
+    // Ça évite le double chargement: Spinner (Auth) -> Skeleton (Dashboard)
+    setIsInitializing(false);
+
     return () => { mounted = false }
-  }, []) // Removed dependency on user?.token to only initialize once
+  }, [user?.token])
 
   const login = (token: string) => {
     try {
@@ -79,7 +87,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         try {
           const res = await apiClient.get('/me')
           setUser(prev => prev ? ({ ...prev, nom: res.data.nom ?? null, prenom: res.data.prenom ?? null }) : prev)
-        } catch (e) {
+        } catch {
           // ignore
         }
       })();

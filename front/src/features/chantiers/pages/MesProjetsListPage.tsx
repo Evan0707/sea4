@@ -104,24 +104,20 @@ export const MesProjetsListPage = () => {
         className="mb-5"
       />
 
-      {error ? (
-        <div className="flex-1 flex flex-col items-center justify-center p-8 bg-red-50 border border-red-200 rounded-lg text-red-600">
-          <Text className="font-semibold mb-2">Erreur de chargement</Text>
-          <Text className="text-sm">Impossible de récupérer la liste des chantiers.</Text>
-        </div>
-      ) : (
-        <DataList
-          data={chantiers}
-          columns={columns}
-          loading={loading}
-          sortColumn="start"
-          sortDirection={sortOrder}
-          onSort={() => setSortOrder(prev => prev === 'asc' ? 'desc' : 'asc')}
-          keyExtractor={(item) => item.noChantier}
-          onRowClick={(item) => navigate(`/maitre-doeuvre/chantiers/${item.noChantier}`)}
-          emptyMessage="Aucun chantier trouvé"
-        />
-      )}
+      <DataList
+        data={chantiers}
+        columns={columns}
+        loading={loading}
+        isError={!!error}
+        errorTitle="Erreur de chargement"
+        errorDescription="Impossible de récupérer la liste des chantiers."
+        sortColumn="start"
+        sortDirection={sortOrder}
+        onSort={() => setSortOrder(prev => prev === 'asc' ? 'desc' : 'asc')}
+        keyExtractor={(item) => item.noChantier}
+        onRowClick={(item) => navigate(`/maitre-doeuvre/chantiers/${item.noChantier}`)}
+        emptyMessage="Aucun chantier trouvé"
+      />
     </div>
   );
 };

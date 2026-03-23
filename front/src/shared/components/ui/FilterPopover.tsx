@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom'
 import { cn } from '@/shared/lib/utils'
 import Button from './Button'
 import { H3, Label, Text } from './Typography'
+import { motion, AnimatePresence } from 'framer-motion'
 
 interface FilterPopoverProps {
   trigger: ReactNode
@@ -60,19 +61,32 @@ const FilterPopover = ({
     <>
       <div ref={buttonRef} onClick={handleToggle}>{trigger}</div>
 
-      {isOpen && createPortal(
-        <div
-          ref={popoverRef}
-          style={{ position: 'absolute', top: `${position.top}px`, left: `${position.left}px` }}
-          className="z-[99999] bg-bg-primary rounded-[var(--radius-lg)] shadow-md border border-border p-4 min-w-[300px] animate-in fade-in-0 zoom-in-95 duration-150"
-        >
-          <H3 className="mb-4">Filtres</H3>
-          <div className="space-y-4">{children}</div>
-          <div className="border-t border-border mt-4 pt-4 flex gap-3 justify-end">
-            <Button variant="Secondary" size="sm" onClick={onReset}>{resetText}</Button>
-            <Button variant="Primary" size="sm" onClick={() => { onApply?.(); setIsOpen(false) }}>{applyText}</Button>
-          </div>
-        </div>,
+      {createPortal(
+        <AnimatePresence>
+          {isOpen && (
+            <motion.div
+              ref={popoverRef}
+              style={{ 
+                position: 'absolute', 
+                top: `${position.top}px`, 
+                left: `${position.left}px`,
+                transformOrigin: 'top left'
+              }}
+              initial={{ opacity: 0, scale: 0.8, y: -10 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: -5 }}
+              transition={{ type: 'spring', stiffness: 400, damping: 25 }}
+              className="z-[99999] bg-bg-secondary/60 backdrop-blur-xl rounded-[var(--radius-lg)] shadow-2xl border border-border/50 p-4 min-w-[300px]"
+            >
+              <H3 className="mb-4">Filtres</H3>
+              <div className="space-y-4">{children}</div>
+              <div className="border-t border-border mt-4 pt-4 flex gap-3 justify-end">
+                <Button variant="Secondary" size="sm" onClick={onReset}>{resetText}</Button>
+                <Button variant="Primary" size="sm" onClick={() => { onApply?.(); setIsOpen(false) }}>{applyText}</Button>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>,
         document.body
       )}
     </>

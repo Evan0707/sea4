@@ -14,9 +14,11 @@ interface Props {
   value: Etape[];
   onChange: (items: Etape[]) => void;
   placeholder?: string;
-  info?: string;
+  info?: boolean;
+  message?: string;
   minChars?: number;
   disabled?: boolean;
+  required?: boolean;
 }
 
 const EtapeMultiSelect: React.FC<Props> = ({
@@ -24,9 +26,11 @@ const EtapeMultiSelect: React.FC<Props> = ({
   value,
   onChange,
   placeholder = 'Rechercher une étape...',
-  info,
+  info = false,
+  message = '',
   minChars = 2,
   disabled = false,
+  required = false,
 }) => {
   const [query, setQuery] = useState('');
   const [suggestions, setSuggestions] = useState<Etape[]>([]);
@@ -98,10 +102,13 @@ const EtapeMultiSelect: React.FC<Props> = ({
   return (
     <div className="flex flex-col gap-1 relative" ref={wrapperRef}>
       <div className="flex items-center gap-2">
-        <Label className="text-sm font-bold text-text-primary m-1">{label}</Label>
+        <Label className="text-sm font-bold text-text-primary m-1">
+          {label}
+          {required && <span className="text-red ml-1">*</span>}
+        </Label>
         {info && (
-          <Tooltip content={info}>
-            <InfoCircleSolid size={14} className="text-text-secondary" />
+          <Tooltip content={message}>
+            <InfoCircleSolid size={14} className="text-text-secondary cursor-help" />
           </Tooltip>
         )}
       </div>
@@ -123,13 +130,13 @@ const EtapeMultiSelect: React.FC<Props> = ({
         )}
 
         {isOpen && suggestions.length > 0 && (
-          <div className="absolute z-50 w-full mt-1 bg-bg-secondary border border-border rounded-md shadow-lg max-h-60 overflow-y-auto">
+          <div className="absolute z-50 w-full mt-1 bg-bg-secondary/80 backdrop-blur-lg border border-border/50 rounded-md shadow-lg max-h-60 overflow-y-auto">
             {suggestions.map((s) => (
               <button
                 key={s.noEtape}
                 type="button"
                 onClick={() => handleSelect(s)}
-                className="w-full text-left px-3 py-2 hover:bg-bg-primary focus:bg-blue-50 focus:outline-none transition-colors border-b border-border last:border-b-0"
+                className="w-full text-left px-3 py-2 hover:bg-bg-primary/50 focus:bg-primary/10 focus:outline-none transition-colors border-b border-border/50 last:border-b-0"
               >
                 <div className="font-medium text-sm text-text-primary">{s.nomEtape}</div>
                 <div className="text-xs text-placeholder">ID: {s.noEtape}</div>
@@ -141,7 +148,7 @@ const EtapeMultiSelect: React.FC<Props> = ({
 
       <div className="flex flex-wrap gap-2 mt-2">
         {value.map(v => (
-          <div key={v.noEtape} className="inline-flex items-center gap-2 bg-bg-secondary border border-border rounded-md px-2 py-1">
+          <div key={v.noEtape} className="inline-flex items-center gap-2 bg-primary/8 text-primary border border-primary/20 rounded-full px-3 py-1">
             <Text className="text-sm">{v.nomEtape}</Text>
             {!disabled && <button type="button" onClick={() => handleRemove(v.noEtape)} className="text-sm text-red-500">×</button>}
           </div>

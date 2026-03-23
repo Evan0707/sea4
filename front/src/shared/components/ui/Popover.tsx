@@ -1,5 +1,5 @@
 import { motion, AnimatePresence } from 'framer-motion'
-import { ANIMATIONS } from '../../constants/animations'
+import { ANIMATIONS } from '@/shared/constants/animations'
 import { DotsVerticalSolid } from '@mynaui/icons-react'
 import { useState, useRef, useEffect } from 'react'
 import type { ReactNode, ComponentType } from 'react'
@@ -69,13 +69,14 @@ const Popover = ({ children, icon: Icon = DotsVerticalSolid, iconSize = 20 }: Po
       <AnimatePresence>
         {isOpen && (
           <motion.div
-            variants={ANIMATIONS.scaleIn}
-            initial="hidden"
-            animate="show"
-            exit="exit"
+            initial={{ opacity: 0, scale: 0.8, y: position === 'top' ? 10 : -10 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.9, y: position === 'top' ? 5 : -5 }}
+            transition={{ type: 'spring', stiffness: 400, damping: 25 }}
+            style={{ transformOrigin: position === 'top' ? 'bottom right' : 'top right' }}
             ref={contentRef}
             className={cn(
-              'absolute right-0 w-48 bg-bg-primary rounded-[var(--radius)] shadow-md border border-border z-50 p-1',
+              'absolute right-0 w-56 bg-bg-secondary/60 backdrop-blur-xl rounded-[var(--radius-lg)] shadow-2xl border border-border/50 p-1 z-50',
               position === 'top' ? 'bottom-full mb-2' : 'top-full mt-2'
             )}
           >
@@ -88,11 +89,6 @@ const Popover = ({ children, icon: Icon = DotsVerticalSolid, iconSize = 20 }: Po
 }
 
 const PopoverItem = ({ variant = 'default', children, icon: Icon, onClick }: PopoverItemProps) => {
-  const variants = {
-    default: 'hover:bg-bg-secondary text-text-primary',
-    destructive: 'hover:bg-bg-secondary text-red',
-  }
-
   return (
     <button
       onClick={onClick}

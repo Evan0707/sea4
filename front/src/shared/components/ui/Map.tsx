@@ -87,6 +87,7 @@ export default function Map({
       <Marker
        key={marker.id}
        position={[marker.latitude, marker.longitude]}
+       // eslint-disable-next-line @typescript-eslint/no-explicit-any
        icon={icon as any} // Cast to any to avoid strict type issues with Icon vs DivIcon in react-leaflet typings
       >
        <Popup>

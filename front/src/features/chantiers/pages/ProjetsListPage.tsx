@@ -99,24 +99,20 @@ export const ProjetsListPage = () => {
         />
       </div>
 
-      {error ? (
-        <div className="flex-1 flex flex-col items-center justify-center p-8 bg-red-50 border border-red-200 rounded-lg text-red-600">
-          <Text className="font-semibold mb-2">Erreur de chargement</Text>
-          <Text className="text-sm">Impossible de récupérer la liste des projets.</Text>
-        </div>
-      ) : (
-        <DataList
-          data={projets as Projet[]}
-          columns={columns}
-          loading={loading}
-          sortColumn="dateCreation"
-          sortDirection={sortOrder}
-          onSort={() => setSortOrder(prev => prev === 'asc' ? 'desc' : 'asc')}
-          keyExtractor={(item) => item.noChantier}
-          onRowClick={(item) => navigate(`/chantiers/${item.noChantier}`)}
-          emptyMessage="Aucun projet trouvé"
-        />
-      )}
+      <DataList
+        data={projets as Projet[]}
+        columns={columns}
+        loading={loading}
+        isError={!!error}
+        errorTitle="Erreur de chargement"
+        errorDescription="Impossible de récupérer la liste des projets."
+        sortColumn="dateCreation"
+        sortDirection={sortOrder}
+        onSort={() => setSortOrder(prev => prev === 'asc' ? 'desc' : 'asc')}
+        keyExtractor={(item) => item.noChantier}
+        onRowClick={(item) => navigate(`/chantiers/${item.noChantier}`)}
+        emptyMessage="Aucun projet trouvé"
+      />
     </div>
   );
 };

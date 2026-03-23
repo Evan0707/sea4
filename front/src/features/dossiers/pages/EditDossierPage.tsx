@@ -131,9 +131,8 @@ export const EditDossierPage = () => {
       );
       addToast('Dossier modifié avec succès', 'success');
       navigate('/commercial/dossiers');
-    } catch (error) {
+    } catch {
       addToast('Erreur lors de la modification du dossier', 'error');
-      navigate('/commercial')
     } finally {
       setIsSubmitting(false);
     }
@@ -383,7 +382,7 @@ export const EditDossierPage = () => {
                 <H3 className="mb-3" color="#3B82F6">
                   Informations client
                 </H3>
-                <div className="bg-gray-50 p-4 rounded-lg space-y-2">
+                <div className="bg-bg-secondary p-4 rounded-[var(--radius-lg)] space-y-2">
                   <p>
                     <span className="font-medium">Nom:</span> {clientData.nomClient}
                   </p>
@@ -404,18 +403,15 @@ export const EditDossierPage = () => {
                     </p>
                   )}
                 </div>
-                <button
-                  onClick={() => setCurrentStep(1)}
-                  className="text-primary text-sm mt-2 hover:underline"
-                >
+                <Button variant="Link" onClick={() => setCurrentStep(1)}>
                   Modifier
-                </button>
+                </Button>
               </div>
               <div>
                 <H3 className="mb-3" color="#3B82F6">
                   Informations chantier
                 </H3>
-                <div className="bg-gray-50 p-4 rounded-lg space-y-2">
+                <div className="bg-bg-secondary p-4 rounded-[var(--radius-lg)] space-y-2">
                   {chantierData.adresseChantier && (
                     <p>
                       <span className="font-medium">Adresse:</span>{' '}
@@ -459,12 +455,9 @@ export const EditDossierPage = () => {
                     </p>
                   )}
                 </div>
-                <button
-                  onClick={() => setCurrentStep(2)}
-                  className="text-primary text-sm mt-2 hover:underline"
-                >
+                <Button variant="Link" onClick={() => setCurrentStep(2)}>
                   Modifier
-                </button>
+                </Button>
               </div>
             </div>
           </CardContent>
@@ -474,7 +467,7 @@ export const EditDossierPage = () => {
       <div className="flex justify-between mt-8">
         <div>
           {currentStep > 1 && (
-            <Button variant="Secondary" onClick={handlePrevious} classname="px-8">
+            <Button variant="Secondary" onClick={handlePrevious} className="px-8">
               Précédent
             </Button>
           )}
@@ -487,12 +480,12 @@ export const EditDossierPage = () => {
             confirmText="Oui, annuler"
             cancelText="Non, continuer"
           >
-            <Button variant="Secondary" classname="px-8">
+            <Button variant="Secondary" className="px-8">
               Annuler
             </Button>
           </ConfirmPopover>
           {currentStep < 3 ? (
-            <Button variant="Primary" onClick={handleNext} classname="px-8">
+            <Button variant="Primary" onClick={handleNext} className="px-8">
               Suivant
             </Button>
           ) : (
@@ -500,7 +493,7 @@ export const EditDossierPage = () => {
               variant="Primary"
               onClick={handleSubmit}
               loading={isSubmitting}
-              classname="px-8"
+              className="px-8"
             >
               Enregistrer les modifications
             </Button>

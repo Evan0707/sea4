@@ -1,27 +1,176 @@
 import { useLocation } from 'react-router-dom'
 import SidebarButton from './SidebarButton'
-import type { User } from '@/shared/types/auth'
-import Button from '@/shared/components/ui/Button'
-import { Logout, ChevronLeft, ChevronRight, CogFour } from '@mynaui/icons-react'
+import type { User, UserProfile } from '@/shared/types/auth'
+import { Logout, CogFour, ChevronLeft, ChevronRight } from '@mynaui/icons-react'
 import type { NavItem } from '@/shared/config/navigation'
 import Logo from '@/shared/assets/Logo.svg'
 import { useState, useEffect } from 'react'
 import ConfirmPopover from '../ui/ConfirmPopover'
-import { H2 } from '../ui/Typography'
+import { Avatar } from '../ui/Avatar'
+import { formatRole } from '@/shared/utils/formatters'
+import { cn } from '@/shared/lib/utils'
 
 interface SidebarProps {
-  user: User | null
+  user: User | UserProfile | null
   items: NavItem[]
   onLogout: () => void
-  // mobile props
   mobileOpen?: boolean
   onClose?: () => void
 }
 
-export function Sidebar({ user, items, onLogout, mobileOpen = false, onClose }: SidebarProps) {
+function SidebarContent({
+  user,
+  items,
+  onLogout,
+  collapsed = false,
+  onClose,
+  onToggleCollapse,
+}: SidebarProps & { collapsed?: boolean; onToggleCollapse?: () => void }) {
   const location = useLocation()
   const filtered = items.filter(item => user?.roles?.some(r => item.roles.includes(r)))
 
+  const getSettingsPath = () => {
+    if (user?.roles?.includes('ROLE_ADMIN')) return '/admin/settings'
+    if (user?.roles?.includes('ROLE_MAITRE_OEUVRE')) return '/maitre-doeuvre/settings'
+    if (user?.roles?.includes('ROLE_COMMERCIAL')) return '/commercial/settings'
+    return '/settings'
+  }
+  const settingsPath = getSettingsPath()
+
+  const userProfile = user as UserProfile | null;
+  const displayName = userProfile?.prenom || userProfile?.nom
+    ? `${userProfile?.prenom ?? ''} ${userProfile?.nom ?? ''}`.trim()
+    : userProfile?.username ?? ''
+
+  return (
+    <div className="flex flex-col h-full overflow-hidden">
+
+      {/* ── Logo / Brand ──────────────────────────────────────── */}
+      <div className={cn(
+        'flex items-center gap-2.5 px-3 py-4 border-b border-border/60',
+        collapsed && 'justify-center'
+      )}>
+        <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ">
+          <img src={Logo} width={20} className="" alt="Logo" />
+        </div>
+        {!collapsed && (
+          <span className="font-bold text-base text-text-primary tracking-tight">Bati'Parti</span>
+        )}
+        {onToggleCollapse && !collapsed && (
+          <button
+            type="button"
+            onClick={onToggleCollapse}
+            className="ml-auto p-1 rounded-md text-placeholder hover:bg-bg-tertiary hover:text-text-primary transition-colors"
+            aria-label="Réduire la barre latérale"
+            title="Réduire (Ctrl/Cmd+B)"
+          >
+            <ChevronLeft className="w-4 h-4" />
+          </button>
+        )}
+        {onToggleCollapse && collapsed && (
+          <button
+            type="button"
+            onClick={onToggleCollapse}
+            className="p-1 rounded-md text-placeholder hover:bg-bg-tertiary hover:text-text-primary transition-colors"
+            aria-label="Étendre la barre latérale"
+            title="Étendre (Ctrl/Cmd+B)"
+          >
+            <ChevronRight className="w-4 h-4" />
+          </button>
+        )}
+      </div>
+
+      {/* ── Nav ───────────────────────────────────────────────── */}
+      <nav className="flex-1 overflow-y-auto overflow-x-hidden px-2 py-3">
+        <ul className="space-y-0.5">
+          {filtered.map(item => (
+            <li key={item.path}>
+              <SidebarButton
+                to={item.path}
+                icon={item.icon}
+                label={item.label}
+                collapsed={collapsed}
+                active={
+                  item.path === location.pathname ||
+                  (location.pathname.startsWith(item.path) &&
+                    !['/admin', '/commercial', '/maitre-doeuvre'].includes(item.path))
+                }
+                onClick={() => onClose?.()}
+              />
+            </li>
+          ))}
+        </ul>
+      </nav>
+
+      {/* ── Bottom section ────────────────────────────────────── */}
+      <div className="border-t border-border/60 px-2 py-3 space-y-0.5">
+        <SidebarButton
+          to={settingsPath}
+          icon={<CogFour className="w-5 h-5" />}
+          label="Paramètres"
+          collapsed={collapsed}
+          active={location.pathname === settingsPath}
+          onClick={() => onClose?.()}
+        />
+
+        <ConfirmPopover
+          title="Déconnexion"
+          message="Voulez-vous vraiment vous déconnecter ?"
+          onConfirm={() => { onClose?.(); onLogout(); }}
+          confirmText="Se déconnecter"
+          cancelText="Annuler"
+        >
+          <button
+            className={cn(
+              'w-full flex items-center rounded-[var(--radius)] px-2.5 py-2 text-sm font-medium transition-all duration-150',
+              'text-red/80 hover:bg-red/8 hover:text-red',
+              collapsed ? 'justify-center' : 'gap-3'
+            )}
+            title={collapsed ? 'Déconnexion' : undefined}
+          >
+            <Logout className="w-5 h-5 shrink-0" />
+            {!collapsed && <span>Déconnexion</span>}
+          </button>
+        </ConfirmPopover>
+      </div>
+
+      {/* ── User profile ──────────────────────────────────────── */}
+      {!collapsed && user && (
+        <div className="border-t border-border/60 px-3 py-3">
+          <div className="flex items-center gap-2.5 py-1.5 px-1 rounded-[var(--radius)] hover:bg-bg-tertiary transition-colors cursor-default">
+            <Avatar
+              size="sm"
+              fallback={displayName}
+              className="shrink-0 ring-1 ring-border/40"
+            />
+            <div className="min-w-0 flex-1">
+              <p className="text-xs font-semibold text-text-primary truncate leading-tight">
+                {displayName}
+              </p>
+              <p className="text-[11px] text-placeholder truncate leading-tight mt-0.5">
+                {user?.roles?.[0] ? formatRole(user.roles[0]) : ''}
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Collapsed: show avatar only */}
+      {collapsed && user && (
+        <div className="border-t border-border/60 px-2 py-3 flex justify-center">
+          <Avatar
+            size="sm"
+            fallback={displayName}
+            className="ring-1 ring-border/40"
+            title={displayName}
+          />
+        </div>
+      )}
+    </div>
+  )
+}
+
+export function Sidebar({ user, items, onLogout, mobileOpen = false, onClose }: SidebarProps) {
   const [collapsed, setCollapsed] = useState(
     () => localStorage.getItem('sidebar:collapsed') === '1'
   )
@@ -29,16 +178,6 @@ export function Sidebar({ user, items, onLogout, mobileOpen = false, onClose }: 
   useEffect(() => {
     localStorage.setItem('sidebar:collapsed', collapsed ? '1' : '0')
   }, [collapsed])
-
-  // Déterminer le chemin settings basé sur le rôle
-  const getSettingsPath = () => {
-    if (user?.roles?.includes('ROLE_ADMIN')) return '/admin/settings'
-    if (user?.roles?.includes('ROLE_MAITRE_OEUVRE')) return '/maitre-doeuvre/settings'
-    if (user?.roles?.includes('ROLE_COMMERCIAL')) return '/commercial/settings'
-    return '/settings'
-  }
-
-  const settingsPath = getSettingsPath()
 
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
@@ -55,143 +194,45 @@ export function Sidebar({ user, items, onLogout, mobileOpen = false, onClose }: 
 
   return (
     <>
-      {/* Desktop sidebar (md+) */}
-      <aside className={`${collapsed ? 'w-20' : 'w-64'} hidden lg:flex bg-bg-secondary h-screen sticky top-0 flex-col border-r border-border text-white p-3 transition-all duration-300 overflow-y-auto overflow-x-hidden`}>
-        <div className={`mb-8 absolute flex items-center w-full mt-2 ${collapsed ? 'justify-center left-0' : 'left-5'}`}>
-          <img src={Logo} width={35} className={collapsed ? '' : 'mr-3'} />
-          {!collapsed && <H2 className='text-xl ml-3' weight='bold'>Bati'Parti</H2>}
-          <button
-            type="button"
-            onClick={() => setCollapsed(v => !v)}
-            className={`text-placeholder absolute top-[50%] translate-y-[-50%] transition-all duration-300 ${collapsed ? 'left-0 right-0 h-full top-0 bottom-0' : 'right-10'}`}
-            aria-label={collapsed ? 'Étendre la barre latérale' : 'Réduire la barre latérale'}
-            aria-keyshortcuts="Ctrl+B Meta+B"
-            title={`${collapsed ? 'Étendre' : 'Réduire'} (Ctrl/Cmd+B)`}
-          >
-            {collapsed ? <ChevronRight strokeWidth={2} className='opacity-0' /> : <ChevronLeft strokeWidth={2} />}
-          </button>
-        </div>
-        <nav>
-          <ul className="space-y-1 mt-22">
-            {filtered.map(item => (
-              <li key={item.path}>
-                <SidebarButton
-                  to={item.path}
-                  icon={item.icon}
-                  label={item.label}
-                  collapsed={collapsed}
-                  active={
-                    item.path === location.pathname ||
-                    (location.pathname.startsWith(item.path) &&
-                      !['/admin', '/commercial', '/maitre-doeuvre'].includes(item.path))
-                  }
-                />
-              </li>
-            ))}
-          </ul>
-        </nav>
-        <div className="mt-auto pt-6">
-          <SidebarButton
-            to={settingsPath}
-            icon={<CogFour className='text-text-white' />}
-            label="Paramètre"
-            collapsed={collapsed}
-            active={location.pathname === settingsPath}
-            className="mb-2"
-          />
-
-          {collapsed ? (
-            <ConfirmPopover
-              title="Déconnexion"
-              message="Voulez-vous vraiment vous déconnecter de votre session ?"
-              onConfirm={onLogout}
-              confirmText="Se déconnecter"
-              cancelText="Annuler"
-            >
-              <button
-                className="w-full flex items-center justify-center py-2 rounded-[var(--radius)] text-red hover:bg-red/8 transition-colors"
-                aria-label="Déconnexion"
-                title="Déconnexion"
-              >
-                <Logout size={24} />
-              </button>
-            </ConfirmPopover>
-          ) : (
-            <ConfirmPopover
-              title="Déconnexion"
-              message="Voulez-vous vraiment vous déconnecter de votre session ?"
-              onConfirm={onLogout}
-              confirmText="Se déconnecter"
-              cancelText="Annuler"
-            >
-              <Button variant="Destructive" classname="w-full justify-start px-3 overflow-hidden">
-                <Logout size={24} />
-                Déconnexion
-              </Button>
-            </ConfirmPopover>
-          )}
-        </div>
+      {/* Desktop sidebar */}
+      <aside className={cn(
+        'hidden lg:flex flex-col bg-bg-secondary h-screen sticky top-0 border-r border-border transition-all duration-300 overflow-hidden',
+        collapsed ? 'w-[60px]' : 'w-[220px]'
+      )}>
+        <SidebarContent
+          user={user}
+          items={items}
+          onLogout={onLogout}
+          collapsed={collapsed}
+          onToggleCollapse={() => setCollapsed(v => !v)}
+        />
       </aside>
 
-      {/* Mobile overlay sidebar */}
-      <div className={`lg:hidden fixed inset-0 z-50 ${mobileOpen ? 'block' : 'pointer-events-none'}`} aria-hidden={!mobileOpen}>
-        {/* backdrop */}
+      {/* Mobile overlay */}
+      <div
+        className={cn('lg:hidden fixed inset-0 z-50', !mobileOpen && 'pointer-events-none')}
+        aria-hidden={!mobileOpen}
+      >
         <div
-          className={`absolute inset-0 bg-black/40 transition-opacity ${mobileOpen ? 'opacity-100' : 'opacity-0'}`}
+          className={cn(
+            'absolute inset-0 bg-black/50 backdrop-blur-sm transition-opacity duration-300',
+            mobileOpen ? 'opacity-100' : 'opacity-0'
+          )}
           onClick={() => onClose?.()}
         />
-        <aside className={`absolute left-0 top-0 bottom-0 w-64 bg-bg-secondary p-3 transform transition-transform ${mobileOpen ? 'translate-x-0' : '-translate-x-full'}`}>
-          <div className="mb-8 flex items-center">
-            <img src={Logo} width={35} className="mr-3" />
-            <H2 className='text-xl ml-3' weight='bold'>Bati'Parti</H2>
-            <button className="ml-auto p-2" onClick={() => onClose?.()} aria-label="Fermer le menu">✕</button>
-          </div>
-          <nav>
-            <ul className="space-y-1 mt-2">
-              {filtered.map(item => (
-                <li key={item.path}>
-                  <SidebarButton
-                    to={item.path}
-                    icon={item.icon}
-                    label={item.label}
-                    collapsed={false}
-                    active={
-                      item.path === location.pathname ||
-                      (location.pathname.startsWith(item.path) &&
-                        !['/admin', '/commercial', '/maitre-doeuvre'].includes(item.path))
-                    }
-                    onClick={() => onClose?.()}
-                  />
-                </li>
-              ))}
-            </ul>
-          </nav>
-          <div className="mt-auto pt-6">
-            <SidebarButton
-              to={settingsPath}
-              icon={<CogFour className='text-text-white' />}
-              label="Paramètre"
-              collapsed={false}
-              active={location.pathname === settingsPath}
-              className="mb-2"
-              onClick={() => onClose?.()}
-            />
-            <div className="mt-4">
-              <ConfirmPopover
-                title="Déconnexion"
-                message="Voulez-vous vraiment vous déconnecter de votre session ?"
-                onConfirm={() => { onClose?.(); onLogout(); }}
-                confirmText="Se déconnecter"
-                cancelText="Annuler"
-              >
-                <Button variant="Destructive" icon={Logout} >
-                  Déconnexion
-                </Button>
-              </ConfirmPopover>
-            </div>
-          </div>
-        </aside >
-      </div >
+        <aside className={cn(
+          'absolute left-0 top-0 bottom-0 w-[220px] bg-bg-secondary border-r border-border transform transition-transform duration-300',
+          mobileOpen ? 'translate-x-0' : '-translate-x-full'
+        )}>
+          <SidebarContent
+            user={user}
+            items={items}
+            onLogout={onLogout}
+            collapsed={false}
+            onClose={onClose}
+          />
+        </aside>
+      </div>
     </>
   )
 }

@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Input from '@/shared/components/ui/Input'
@@ -9,6 +10,7 @@ import Select from '@/shared/components/ui/Select'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { createUserSchema, type CreateUserFormData } from '@/shared/utils/validators'
+import { Card, CardContent, CardHeader, CardTitle } from '@/shared/components/ui/Card'
 
 
 const roles = [
@@ -57,76 +59,100 @@ export default function NewUtilisateurPage() {
       await apiClient.post('/admin/utilisateurs', data)
       addToast('Utilisateur créé', 'success')
       navigate('/admin/utilisateurs')
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       const msg = err?.response?.data?.error || 'Erreur lors de la création'
       addToast(msg, 'error')
     }
   }
 
-
-
   return (
-    <div className="p-4 md:p-8 h-screen flex flex-col">
-      <H1 className="mb-6">Nouvel utilisateur</H1>
+    <div className="p-6 h-full flex flex-col max-w-4xl mx-auto w-full">
+      <div className="mb-6">
+        <H1 className="mb-2">Nouvel utilisateur</H1>
+      </div>
 
-      {/*Début du formulaire*/}
+      <Card className="w-full">
+        <CardHeader>
+          <CardTitle>Identifiants et rôle</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <Input
+                label="Prénom"
+                type="text"
+                name="prenom"
+                placeholder="John"
+                register={register('prenom')}
+                error={errors.prenom?.message}
+                required
+              />
 
-      <form onSubmit={handleSubmit(onSubmit)} className="w-full max-w-3xl mx-auto space-y-4 bg-bg-secondary p-4 md:p-6 rounded-lg border border-border">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <Input
-            label="Prénom"
-            name="prenom"
-            type="text"
-            placeholder="John"
-            register={register('prenom')}
-            error={errors.prenom?.message as string | undefined}
-          />
+              <Input
+                label="Nom"
+                type="text"
+                name="nom"
+                placeholder="Doe"
+                register={register('nom')}
+                error={errors.nom?.message}
+                required
+              />
+            </div>
 
-          <Input
-            label="Nom"
-            name="nom"
-            type="text"
-            placeholder="Doe"
-            register={register('nom')}
-            error={errors.nom?.message as string | undefined}
-          />
-        </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <Input
+                label="Login"
+                type="text"
+                name="login"
+                register={register('login')}
+                onChange={() => setIsLoginEdited(true)}
+                error={errors.login?.message}
+                required
+              />
 
-        <Input
-          label="Login"
-          name="login"
-          type="text"
-          register={register('login')}
-          onChange={() => setIsLoginEdited(true)}
-          error={errors.login?.message as string | undefined}
-        />
+              <Input
+                label="Mot de passe"
+                type="password"
+                name="password"
+                register={register('password')}
+                error={errors.password?.message}
+                required
+              />
+            </div>
 
-        <div className="relative">
-          <Input
-            label="Mot de passe"
-            name="password"
-            type="password"
-            register={register('password')}
-            error={errors.password?.message as string | undefined}
-          />
-        </div>
+            <Select
+              name="role"
+              label="Rôle"
+              options={roles}
+              register={register('role')}
+              error={errors.role?.message}
+              required
+              info
+              message="Le rôle définit les droits d'accès de l'utilisateur aux différentes sections de l'application."
+            />
 
-
-        <div>
-          <Select
-            name="role"
-            label="Rôle"
-            options={roles}
-            register={register('role')}
-            error={errors.role?.message as string | undefined}
-          />
-        </div>
-
-        <div className="flex justify-end pr-4 gap-2">
-          <Button variant="Secondary" onClick={() => navigate('/admin/utilisateurs')}>Annuler</Button>
-          <Button variant="Primary" type="submit" loading={isSubmitting}>Créer</Button>
-        </div>
-      </form>
+            <div className="flex justify-end gap-3 pt-4 border-t border-border mt-4">
+              <Button 
+                variant="Secondary" 
+                type="button"
+                size="md"
+                onClick={() => navigate('/admin/utilisateurs')}
+              >
+                Annuler
+              </Button>
+              <Button 
+                variant="Primary" 
+                type="submit" 
+                size="md"
+                loading={isSubmitting}
+              >
+                Créer l'utilisateur
+              </Button>
+            </div>
+          </form>
+        </CardContent>
+      </Card>
     </div>
   )
 }

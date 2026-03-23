@@ -1,5 +1,5 @@
 import { motion, AnimatePresence } from 'framer-motion'
-import { ANIMATIONS } from '../../constants/animations'
+import { ANIMATIONS } from '@/shared/constants/animations'
 import { useState, useRef, useEffect, type ReactNode } from 'react'
 
 interface TooltipProps {

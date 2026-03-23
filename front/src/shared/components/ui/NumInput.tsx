@@ -1,7 +1,8 @@
 import React, { useState, useCallback } from 'react'
-import { DangerCircle, ChevronUp, ChevronDown } from '@mynaui/icons-react'
+import { DangerCircle, ChevronUp, ChevronDown, InfoCircleSolid } from '@mynaui/icons-react'
 import type { UseFormRegisterReturn } from 'react-hook-form'
 import { cn } from '@/shared/lib/utils'
+import Tooltip from './Tooltip'
 import { Label } from './Typography'
 
 export type NumInputProps = {
@@ -19,6 +20,10 @@ export type NumInputProps = {
   step?: number
   size?: 'small' | 'default'
   unit?: string
+  required?: boolean
+  disabled?: boolean
+  info?: boolean
+  message?: string
 }
 
 const NumInput: React.FC<NumInputProps> = ({
@@ -36,6 +41,10 @@ const NumInput: React.FC<NumInputProps> = ({
   step = 0.01,
   size = 'default',
   unit = '€',
+  required = false,
+  disabled = false,
+  info = false,
+  message = '',
 }) => {
   const [internalValue, setInternalValue] = useState<number | ''>(defaultValue ?? '')
   const value = controlledValue ?? internalValue
@@ -44,17 +53,16 @@ const NumInput: React.FC<NumInputProps> = ({
   const inputId = name || label
   const describedBy = hasError ? `${inputId}-error` : undefined
 
-  const reg = register ?? ({} as UseFormRegisterReturn)
-
   const handleChange = useCallback((newValue: number | '') => {
     if (controlledValue === undefined) setInternalValue(newValue)
     const numValue = newValue === '' ? 0 : newValue
+    const fieldName = register?.name ?? name
     const syntheticEvent = {
-      target: { name: reg.name ?? name, value: numValue.toString() },
+      target: { name: fieldName, value: numValue.toString() },
     } as unknown as React.ChangeEvent<HTMLInputElement>
-    reg.onChange?.(syntheticEvent)
+    register?.onChange?.(syntheticEvent)
     onChange?.(numValue)
-  }, [controlledValue, onChange, reg, name])
+  }, [controlledValue, onChange, register, name])
 
   const increment = () => {
     const current = value === '' ? 0 : value
@@ -79,20 +87,44 @@ const NumInput: React.FC<NumInputProps> = ({
 
   const handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {
     setIsEditing(false)
-    reg.onBlur?.(e)
+    register?.onBlur?.(e)
   }
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'ArrowUp') { e.preventDefault(); e.shiftKey ? handleChange(parseFloat(Math.min(max, (value === '' ? 0 : value) + step * 100).toFixed(10))) : increment() }
-    if (e.key === 'ArrowDown') { e.preventDefault(); e.shiftKey ? handleChange(parseFloat(Math.max(min, (value === '' ? 0 : value) - step * 100).toFixed(10))) : decrement() }
+    if (e.key === 'ArrowUp') {
+      e.preventDefault()
+      if (e.shiftKey) {
+        handleChange(parseFloat(Math.min(max, (value === '' ? 0 : value) + step * 100).toFixed(10)))
+      } else {
+        increment()
+      }
+    }
+    if (e.key === 'ArrowDown') {
+      e.preventDefault()
+      if (e.shiftKey) {
+        handleChange(parseFloat(Math.max(min, (value === '' ? 0 : value) - step * 100).toFixed(10)))
+      } else {
+        decrement()
+      }
+    }
   }
 
   return (
     <div className={cn(size === 'small' && 'flex items-center gap-2', className)}>
-      {label && (
-        <Label className="block mb-1.5 text-text-primary" weight="medium" htmlFor={inputId}>
-          {label}
-        </Label>
+      {(label || info) && (
+        <div className="flex items-center mb-1.5 font-medium text-text-primary">
+          {label && (
+            <Label className="block" htmlFor={inputId}>
+              {label}
+              {required && <span className="text-red ml-1">*</span>}
+            </Label>
+          )}
+          {info && (
+            <Tooltip content={message}>
+              <InfoCircleSolid size={14} className="text-text-secondary ml-1.5 cursor-help" />
+            </Tooltip>
+          )}
+        </div>
       )}
 
       <div
@@ -141,8 +173,8 @@ const NumInput: React.FC<NumInputProps> = ({
           onFocus={() => setIsEditing(true)}
           onBlur={handleBlur}
           onKeyDown={handleKeyDown}
-          name={reg.name ?? name}
-          ref={reg.ref}
+          name={register?.name ?? name}
+          ref={register?.ref}
         />
 
         {/* Unit + error icon */}

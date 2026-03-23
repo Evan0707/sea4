@@ -4,6 +4,7 @@ import type { UseFormRegisterReturn } from 'react-hook-form'
 import { cn } from '@/shared/lib/utils'
 import Tooltip from './Tooltip'
 import { Label } from './Typography'
+import { motion, AnimatePresence } from 'framer-motion'
 
 export type InputProps = {
   name: string
@@ -74,13 +75,14 @@ const Input: React.FC<InputProps> = ({
   }
 
   return (
-    <div className={cn('relative mb-6', width, className)}>
+    <div className={cn('relative', width, className)}>
       {/* Label row */}
       {(label || info) && (
         <div className="flex items-center mb-1.5">
           {label && (
             <Label className="text-text-primary" weight="medium" htmlFor={inputId}>
               {label}
+              {required && <span className="text-red ml-1">*</span>}
             </Label>
           )}
           {info && (
@@ -146,11 +148,20 @@ const Input: React.FC<InputProps> = ({
       </div>
 
       {/* Error message */}
-      {hasError && (
-        <p id={describedBy} className="mt-1.5 text-xs font-medium text-red">
-          {error}
-        </p>
-      )}
+      <AnimatePresence>
+        {hasError && (
+          <motion.p
+            id={describedBy}
+            initial={{ opacity: 0, height: 0, x: 0 }}
+            animate={{ opacity: 1, height: 'auto', x: [0, -5, 5, -3, 3, 0] }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.3 }}
+            className="mt-1.5 text-xs font-medium text-red overflow-hidden origin-left"
+          >
+            {error}
+          </motion.p>
+        )}
+      </AnimatePresence>
     </div>
   )
 }

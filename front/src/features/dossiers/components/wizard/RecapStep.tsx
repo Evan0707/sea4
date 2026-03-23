@@ -1,6 +1,11 @@
-import { H2, H3 } from '@/shared/components/ui/Typography';
+
+import { Text } from '@/shared/components/ui/Typography';
+import { Card, CardContent, CardHeader, CardTitle } from '@/shared/components/ui/Card';
 import type { ClientFormData, ChantierFormData } from '@/shared/utils/validators';
-import { useMaitresOeuvre, useModeles } from '../../hooks/useDossierData';
+import { useMaitresOeuvre, useModeles } from '@/features/dossiers/hooks/useDossierData';
+import { PencilSolid } from '@mynaui/icons-react';
+import Button from '@/shared/components/ui/Button';
+import Skeleton from '@/shared/components/ui/Skeleton';
 
 interface RecapStepProps {
   clientData: ClientFormData;
@@ -9,125 +14,80 @@ interface RecapStepProps {
 }
 
 export const RecapStep = ({ clientData, chantierData, onEditStep }: RecapStepProps) => {
-  // utilisation des hooks pour recuperer les maitres d'oeuvre et les modeles
-  const { data: maitresOeuvre = [], isLoading: loadingMoe, isError: errorMoe } = useMaitresOeuvre();
-  const { data: modeles = [], isLoading: loadingModeles, isError: errorModeles } = useModeles();
+  const { data: maitresOeuvre = [], isLoading: loadingMoe } = useMaitresOeuvre();
+  const { data: modeles = [], isLoading: loadingModeles } = useModeles();
 
   if (loadingMoe || loadingModeles) {
     return (
-      <div className="p-4 md:p-8 rounded-lg border border-border bg-bg-secondary animate-pulse h-64 flex flex-col justify-center items-center">
-        <div className="text-placeholder">Chargement du récapitulatif...</div>
-      </div>
+      <Card className="w-full">
+        <CardHeader>
+          <CardTitle>Chargement du récapitulatif...</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <Skeleton className="h-24 w-full" />
+          <Skeleton className="h-24 w-full" />
+        </CardContent>
+      </Card>
     );
   }
 
-  if (errorMoe || errorModeles) {
-    return (
-      <div className="p-4 md:p-8 rounded-lg border border-red-200 bg-red-50 text-red-600">
-        <H2 className="mb-2 text-red-600">Erreur</H2>
-        <p>Impossible de charger les données nécessaires au récapitulatif. Veuillez réessayer.</p>
-      </div>
-    );
-  }
+  const DataField = ({ label, value }: { label: string; value: string | null | undefined }) => (
+    <div className="flex flex-col p-3 rounded-lg bg-bg-secondary/40 border border-border/40">
+      <Text variant="small" className="text-placeholder uppercase tracking-wider font-bold mb-1" style={{ fontSize: '10px' }}>
+        {label}
+      </Text>
+      <Text className="font-medium truncate">{value || 'Non renseigné'}</Text>
+    </div>
+  );
+
+  const selectedMOE = maitresOeuvre.find((moe) => String(moe.noMOE) === String(chantierData.noMOE));
+  const selectedModele = modeles.find((m) => m.noModele === chantierData.noModele);
 
   return (
-    <div className="p-4 md:p-8 rounded-lg border border-border bg-bg-secondary">
-      <H2 className="mb-6">Récapitulatif</H2>
-      <div className="space-y-6">
-        <div>
-          <H3 className="mb-3" color="#3B82F6">
-            Informations client
-          </H3>
-          <div className="bg-bg-primary p-4 rounded-lg space-y-2">
-            <p>
-              <span className="font-bold text-text-primary">Nom:</span>
-                <span className=" text-text-primary"> {clientData.nomClient}</span>
-            </p>
-            <p>
-              <span className="font-bold text-text-primary">Prénom:</span>{' '}
-                <span className=" text-text-primary"> {clientData.prenomClient}</span>
-            </p>
-            {clientData.adresseClient && (
-              <p>
-                <span className="font-bold text-text-primary">Adresse:</span>{' '}
-                  <span className=" text-text-primary"> {clientData.adresseClient}</span>
-              </p>
-            )}
-            {clientData.cpClient && clientData.villeClient && (
-              <p>
-                <span className="font-bold text-text-primary">Ville:</span>{' '}
-                  <span className=" text-text-primary"> {clientData.cpClient} {clientData.villeClient}</span>
-              </p>
-            )}
-          </div>
-          <button
-            onClick={() => onEditStep(1)}
-            className="text-primary text-sm mt-2 hover:underline"
-          >
+    <div className="grid grid-cols-1 gap-6">
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
+          <CardTitle>Récapitulatif - Client</CardTitle>
+          <Button variant="Secondary" size="sm" icon={PencilSolid} onClick={() => onEditStep(1)}>
             Modifier
-          </button>
-        </div>
+          </Button>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <DataField label="Nom" value={clientData.nomClient} />
+            <DataField label="Prénom" value={clientData.prenomClient} />
+            <div className="md:col-span-2">
+              <DataField
+                label="Adresse de résidence"
+                value={clientData.adresseClient ? `${clientData.adresseClient}, ${clientData.cpClient} ${clientData.villeClient}` : 'Non renseignée'}
+              />
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
-        <div>
-          <H3 className="mb-3" color="#3B82F6">
-            Informations chantier
-          </H3>
-          <div className="bg-bg-primary p-4 rounded-lg space-y-2">
-            {chantierData.adresseChantier && (
-                <p>
-                    <span className="font-bold text-text-primary">Adresse:</span>{' '}
-                    <span className=" text-text-primary"> {clientData.adresseClient}</span>
-                </p>
-            )}
-            {chantierData.cpChantier && chantierData.villeChantier && (
-                <p>
-                    <span className="font-bold text-text-primary">Ville:</span>{' '}
-                    <span className=" text-text-primary"> {clientData.cpClient} {clientData.villeClient}</span>
-                </p>
-            )}
-            <p>
-              <span className="font-bold text-text-primary">Date de création:</span>{' '}
-                <span className=" text-text-primary"> {new Date(chantierData.dateCreation).toLocaleDateString('fr-FR')}</span>
-            </p>
-            <p>
-              <span className="font-bold text-text-primary">Statut:</span>{' '}
-                <span className=" text-text-primary">{chantierData.statutChantier}</span>
-            </p>
-            {chantierData.noMOE && (
-              <p>
-                <span className="font-bold text-text-primary">Maître d'œuvre:</span>{' '}
-                  <span className=" text-text-primary">
-                {
-                  maitresOeuvre.find((moe) => String(moe.noMOE) == String(chantierData.noMOE))
-                    ?.prenomMOE
-                }{' '}
-                {
-                  maitresOeuvre.find((moe) => String(moe.noMOE) == String(chantierData.noMOE))
-                    ?.nomMOE
-                }
-                </span>
-              </p>
-            )}
-            {chantierData.noModele && (
-              <p>
-                <span className="font-bold text-text-primary">Modèle:</span>{' '}
-                  <span className="text-text-primary">
-                {
-                  modeles.find((m) => m.noModele === chantierData.noModele)
-                    ?.nomModele
-                }
-                </span>
-              </p>
-            )}
-          </div>
-          <button
-            onClick={() => onEditStep(2)}
-            className="text-primary text-sm mt-2 hover:underline"
-          >
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
+          <CardTitle>Récapitulatif - Projet</CardTitle>
+          <Button variant="Secondary" size="sm" icon={PencilSolid} onClick={() => onEditStep(2)}>
             Modifier
-          </button>
-        </div>
-      </div>
+          </Button>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div className="md:col-span-2">
+              <DataField
+                label="Adresse du chantier"
+                value={chantierData.adresseChantier ? `${chantierData.adresseChantier}, ${chantierData.cpChantier} ${chantierData.villeChantier}` : 'Non renseignée'}
+              />
+            </div>
+            <DataField label="Date de création" value={new Date(chantierData.dateCreation).toLocaleDateString('fr-FR')} />
+            <DataField label="Statut" value={chantierData.statutChantier} />
+            <DataField label="Maître d'œuvre" value={selectedMOE ? `${selectedMOE.prenomMOE} ${selectedMOE.nomMOE}` : 'Aucun'} />
+            <DataField label="Modèle" value={selectedModele ? selectedModele.nomModele : 'Aucun'} />
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 };

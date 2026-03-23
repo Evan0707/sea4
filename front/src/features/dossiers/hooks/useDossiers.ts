@@ -32,6 +32,7 @@ export const useDossiers = (filters: DossierFilters = {}) => {
    addToast('Dossier supprimé avec succès', 'success');
    queryClient.invalidateQueries({ queryKey: ['dossiers'] });
   },
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   onError: (error: any) => {
    const msg = error.response?.data?.message || error.response?.data?.error || 'Erreur lors de la suppression du dossier';
    addToast(msg, 'error');
@@ -70,15 +71,14 @@ export const useDossierEtapes = (id: string | undefined) => {
   queryFn: async () => {
    if (!id) return [];
    try {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const response = await apiClient.get<any[]>(`/dossiers/${id}/etapes`);
     return response.data;
-   } catch (e) {
-    try {
-     const response = await apiClient.get<any[]>(`/chantier/${id}/etape-chantiers`);
-     return response.data;
-    } catch (e2) {
-     return [];
-    }
+   } catch {
+    // Fallback sur l'ancien endpoint — si celui-ci échoue aussi, l'erreur est propagée à React Query
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const response = await apiClient.get<any[]>(`/chantier/${id}/etape-chantiers`);
+    return response.data;
    }
   },
   enabled: !!id,

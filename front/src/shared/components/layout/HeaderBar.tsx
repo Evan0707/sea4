@@ -1,8 +1,8 @@
 import type { User } from '@/shared/types/auth'
 import { formatRole } from '@/shared/utils/formatters'
-import profile from '@/shared/assets/Profile.png'
 import { Text } from '../ui/Typography'
 import { Menu } from '@mynaui/icons-react'
+import { Avatar } from '../ui/Avatar'
 import { useLayout } from '@/shared/context/LayoutContext'
 import { Breadcrumbs } from '../ui/Breadcrumbs'
 import { useToast } from '@/shared/hooks/useToast'
@@ -14,7 +14,10 @@ interface HeaderBarProps {
 
 export function HeaderBar({ user, onMenu }: HeaderBarProps) {
   const { actions } = useLayout();
-  const displayName = (user as any)?.nom || (user as any)?.prenom ? `${(user as any)?.nom ?? ''}${(user as any)?.prenom ? ' ' + (user as any).prenom : ''}` : user?.username
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const u = user as any;
+  const displayName = u?.nom || u?.prenom ? `${u?.prenom ?? ''}${u?.nom ? ' ' + u.nom : ''}` : user?.username
   const { addToast } = useToast();
 
   return (
@@ -36,13 +39,13 @@ export function HeaderBar({ user, onMenu }: HeaderBarProps) {
         <div className="flex items-center gap-2">
           {/* <NotificationDropdown /> */}
 
-          <div onClick={() => addToast('Notification', 'info')} className="hidden lg:flex items-center gap-3 pl-4 border-l border-border/50 ml-2">
+          <div onClick={() => addToast('Notification', 'error')} className="hidden lg:flex items-center gap-3 pl-4 border-l border-border/50 ml-2">
             <div className="flex items-center gap-3 py-1.5 px-3 rounded-full hover:bg-bg-secondary/50 border border-transparent hover:border-border/50 transition-all cursor-pointer group">
               <div className="text-right hidden xl:block">
                 <Text className="text-sm font-semibold leading-none group-hover:text-primary transition-colors">{displayName}</Text>
                 <Text variant='caption' className="text-muted-foreground">{user?.roles?.[0] && formatRole(user.roles[0])}</Text>
               </div>
-              <img src={profile} className="w-9 h-9 rounded-full bg-gray-100 object-cover border border-border/20" alt="Profile" />
+              <Avatar size="sm" fallback={displayName as string} src={u?.avatar} className="border border-border/20 shadow-sm" />
             </div>
           </div>
         </div>

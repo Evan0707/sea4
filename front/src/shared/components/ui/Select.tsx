@@ -1,8 +1,10 @@
 import React, { useState, useRef, useEffect } from 'react'
-import { DangerCircle, ChevronDown, Check } from '@mynaui/icons-react'
+import { DangerCircle, ChevronDown, Check, InfoCircleSolid } from '@mynaui/icons-react'
 import type { UseFormRegisterReturn } from 'react-hook-form'
 import { cn } from '@/shared/lib/utils'
+import Tooltip from './Tooltip'
 import { Label } from './Typography'
+import { motion, AnimatePresence } from 'framer-motion'
 
 export type Option = {
   value: string
@@ -22,6 +24,9 @@ export type SelectProps = {
   defaultValue?: string
   size?: 'small' | 'default'
   disabled?: boolean
+  required?: boolean
+  info?: boolean
+  message?: string
 }
 
 const Select: React.FC<SelectProps> = ({
@@ -37,6 +42,9 @@ const Select: React.FC<SelectProps> = ({
   defaultValue,
   size = 'default',
   disabled = false,
+  required = false,
+  info = false,
+  message = '',
 }) => {
   const [isOpen, setIsOpen] = useState(false)
   const [selectedOption, setSelectedOption] = useState<Option | null>(() => {
@@ -85,10 +93,20 @@ const Select: React.FC<SelectProps> = ({
       className={cn('relative', size === 'small' && 'flex items-center gap-2', className)}
       ref={dropdownRef}
     >
-      {label && (
-        <Label className="mb-1.5 block text-text-primary" weight="medium" htmlFor={inputId}>
-          {label}
-        </Label>
+      {(label || info) && (
+        <div className="flex items-center mb-1.5">
+          {label && (
+            <Label className="block text-text-primary" weight="medium" htmlFor={inputId}>
+              {label}
+              {required && <span className="text-red ml-1">*</span>}
+            </Label>
+          )}
+          {info && (
+            <Tooltip content={message}>
+              <InfoCircleSolid size={14} className="text-text-secondary ml-1.5 cursor-help" />
+            </Tooltip>
+          )}
+        </div>
       )}
 
       {/* Trigger */}
@@ -101,14 +119,9 @@ const Select: React.FC<SelectProps> = ({
         aria-describedby={describedBy}
         onClick={() => !disabled && setIsOpen((v) => !v)}
         className={cn(
-          'flex h-9 w-full items-center justify-between gap-2 rounded-[var(--radius)] border bg-bg-primary px-3 text-sm transition-[border-color,box-shadow] cursor-pointer',
-          'focus:outline-none focus:ring-2 focus:ring-primary/25 focus:border-primary',
-          hasError
-            ? 'border-red focus:ring-red/25'
-            : isOpen
-              ? 'border-primary ring-2 ring-primary/25'
-              : 'border-border hover:border-primary/50',
-          disabled && 'opacity-60 cursor-not-allowed bg-bg-secondary'
+          'flex h-9 w-full items-center justify-between whitespace-nowrap rounded-[var(--radius)] border border-border bg-transparent px-3 py-2 text-sm shadow-sm ring-offset-bg-primary placeholder:text-placeholder focus:outline-none focus:ring-1 focus:ring-primary disabled:cursor-not-allowed disabled:opacity-50 [&>span]:line-clamp-1 transition-colors hover:bg-bg-secondary/50',
+          hasError && 'border-red focus:ring-red',
+          isOpen && 'ring-1 ring-primary'
         )}
       >
         <span className={cn('flex-1 truncate text-left', !selectedOption && 'text-placeholder')}>
@@ -118,7 +131,7 @@ const Select: React.FC<SelectProps> = ({
           {hasError && <DangerCircle aria-hidden size={15} className="text-red" />}
           <ChevronDown
             className={cn(
-              'w-4 h-4 text-text-secondary transition-transform duration-200',
+              'h-4 w-4 opacity-50 transition-transform duration-200',
               isOpen && 'rotate-180'
             )}
           />
@@ -148,7 +161,8 @@ const Select: React.FC<SelectProps> = ({
       {isOpen && (
         <div
           role="listbox"
-          className="absolute z-50 mt-1 w-full overflow-hidden rounded-[var(--radius)] border border-border bg-bg-primary shadow-md animate-in fade-in-0 zoom-in-95"
+          className="absolute z-50 mt-1 max-h-96 min-w-[8rem] w-full overflow-hidden rounded-md border border-border/50 bg-bg-secondary/80 backdrop-blur-lg text-text-primary shadow-lg data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95"
+          data-state={isOpen ? 'open' : 'closed'}
         >
           <div className="max-h-60 overflow-y-auto p-1">
             {options.map((option) => {
@@ -160,15 +174,15 @@ const Select: React.FC<SelectProps> = ({
                   aria-selected={isSelected}
                   onClick={() => handleSelect(option)}
                   className={cn(
-                    'flex cursor-pointer items-center gap-2 rounded-[calc(var(--radius)-2px)] px-2 py-1.5 text-sm text-text-primary select-none transition-colors',
-                    isSelected
-                      ? 'bg-primary/8 text-primary font-medium'
-                      : 'hover:bg-bg-secondary'
+                    'relative flex w-full cursor-default select-none items-center rounded-sm py-1.5 pl-8 pr-2 text-sm outline-none focus:bg-bg-secondary focus:text-text-primary data-[disabled]:pointer-events-none data-[disabled]:opacity-50 hover:bg-bg-secondary transition-colors',
+                    isSelected && 'bg-bg-secondary font-medium'
                   )}
                 >
-                  <Check
-                    className={cn('w-4 h-4 shrink-0', isSelected ? 'opacity-100' : 'opacity-0')}
-                  />
+                  <span className="absolute left-2 flex h-3.5 w-3.5 items-center justify-center">
+                    <Check
+                      className={cn('h-4 w-4 shrink-0', isSelected ? 'opacity-100' : 'opacity-0')}
+                    />
+                  </span>
                   {option.label}
                 </div>
               )
@@ -177,11 +191,20 @@ const Select: React.FC<SelectProps> = ({
         </div>
       )}
 
-      {hasError && (
-        <p id={describedBy} className="mt-1.5 text-xs font-medium text-red">
-          {error}
-        </p>
-      )}
+      <AnimatePresence>
+        {hasError && (
+          <motion.p
+            id={describedBy}
+            initial={{ opacity: 0, height: 0, x: 0 }}
+            animate={{ opacity: 1, height: 'auto', x: [0, -5, 5, -3, 3, 0] }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.3 }}
+            className="mt-1.5 text-xs font-medium text-red overflow-hidden origin-left"
+          >
+            {error}
+          </motion.p>
+        )}
+      </AnimatePresence>
     </div>
   )
 }

@@ -1,16 +1,18 @@
 import { useState, useEffect } from 'react';
-import { H3, H2, Text, Label } from '@/shared/components/ui/Typography';
-import { User, CogFour, Download, Check } from '@mynaui/icons-react';
+import { H2, Text, Label } from '@/shared/components/ui/Typography';
 import { useThemeContext } from '@/shared/context/ThemeProvider';
 import { useAuth } from '@/features/auth/context/AuthContext';
-
 import { useToast } from '@/shared/hooks/useToast';
 import Button from '@/shared/components/ui/Button';
 import Input from '@/shared/components/ui/Input';
-import axios from 'axios';
-import SYSTEM from '@/shared/assets/SYSTEM.png'
-import DARK from '@/shared/assets/DARK.png'
-import LIGHT from '@/shared/assets/LIGHT.png'
+import { Switch } from '@/shared/components/ui/Switch';
+import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/shared/components/ui/Card';
+import apiClient from '@/shared/api/client';
+import Skeleton from '@/shared/components/ui/Skeleton';
+import { Check, TriangleSolid } from '@mynaui/icons-react';
+import SYSTEM from '@/shared/assets/SYSTEM.png';
+import DARK from '@/shared/assets/DARK.png';
+import LIGHT from '@/shared/assets/LIGHT.png';
 
 type SettingSection = 'profil' | 'preferences' | 'export';
 type DateFormat = 'dd/MM/yyyy' | 'MM/dd/yyyy' | 'yyyy-MM-dd';
@@ -30,57 +32,45 @@ export const SettingsPage = () => {
   // Export state
   const [exportLoading, setExportLoading] = useState(false);
 
-  // Date format state
+  // Preference state
   const [dateFormat, setDateFormat] = useState<DateFormat>(() => {
     const saved = localStorage.getItem('dateFormat');
     return (saved as DateFormat) || 'dd/MM/yyyy';
   });
-
-
+  const [compactMode, setCompactMode] = useState(() => {
+    return localStorage.getItem('compactMode') === 'true';
+  });
 
   useEffect(() => {
     localStorage.setItem('dateFormat', dateFormat);
   }, [dateFormat]);
 
-  const formatExampleDate = (format: DateFormat) => {
-    const date = new Date('2025-11-05');
-    const day = String(date.getDate()).padStart(2, '0');
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const year = date.getFullYear();
+  useEffect(() => {
+    localStorage.setItem('compactMode', String(compactMode));
+  }, [compactMode]);
 
-    switch (format) {
-      case 'dd/MM/yyyy':
-        return `${day}/${month}/${year}`;
-      case 'MM/dd/yyyy':
-        return `${month}/${day}/${year}`;
-      case 'yyyy-MM-dd':
-        return `${year}-${month}-${day}`;
-    }
-  };
-
-  // Charger les infos du profil
   useEffect(() => {
     const fetchProfil = async () => {
       setProfilLoading(true);
       try {
-        const response = await axios.get('http://localhost:8000/api/profil');
+        const response = await apiClient.get('/profil');
         setNom(response.data.nom || '');
         setPrenom(response.data.prenom || '');
-      } catch (error) {
-        console.error('Erreur chargement profil:', error);
+      } catch {
+        addToast('Impossible de charger le profil', 'error');
       } finally {
         setProfilLoading(false);
       }
     };
     fetchProfil();
-  }, []);
+  }, [addToast]);
 
   const handleSaveProfil = async () => {
     setProfilSaving(true);
     try {
-      await axios.put('http://localhost:8000/api/profil', { nom, prenom });
-      addToast('Profil mis à jour', 'success');
-    } catch (error) {
+      await apiClient.put('/profil', { nom, prenom });
+      addToast('Profil mis à jour avec succès', 'success');
+    } catch {
       addToast('Erreur lors de la mise à jour', 'error');
     } finally {
       setProfilSaving(false);
@@ -90,7 +80,7 @@ export const SettingsPage = () => {
   const handleExportChantiers = async () => {
     setExportLoading(true);
     try {
-      const response = await axios.get('http://localhost:8000/api/mes-chantiers/export', {
+      const response = await apiClient.get('/mes-chantiers/export', {
         responseType: 'blob'
       });
       const url = window.URL.createObjectURL(new Blob([response.data]));
@@ -100,184 +90,255 @@ export const SettingsPage = () => {
       document.body.appendChild(link);
       link.click();
       link.remove();
-      addToast('Export téléchargé', 'success');
-    } catch (error) {
+      addToast('Export téléchargé avec succès', 'success');
+    } catch {
       addToast('Erreur lors de l\'export', 'error');
     } finally {
       setExportLoading(false);
     }
   };
 
-  const sections = [
-    { id: 'profil' as const, label: 'Profil', icon: User },
-    { id: 'preferences' as const, label: 'Préférences', icon: CogFour },
+  const roleLabels: Record<string, string> = {
+    ROLE_ADMIN: 'Administrateur',
+    ROLE_MAITRE_OEUVRE: "Maître d'œuvre",
+    ROLE_COMMERCIAL: 'Commercial',
+    ROLE_ARTISAN: 'Artisan',
+  };
 
-    ...(user?.roles.includes('ROLE_MAITRE_OEUVRE') ? [{ id: 'export' as const, label: 'Export de données', icon: Download }] : []),
+  const getRoleLabel = () => {
+    const role = user?.roles.find(r => r !== 'ROLE_USER');
+    return role ? roleLabels[role] || role : 'Utilisateur';
+  };
+
+  const sections = [
+    { id: 'profil' as const, label: 'Général' },
+    { id: 'preferences' as const, label: 'Préférences' },
+    ...(user?.roles.includes('ROLE_MAITRE_OEUVRE') || user?.roles.includes('ROLE_ADMIN')
+      ? [{ id: 'export' as const, label: 'Avancé' }]
+      : []),
   ];
 
   const renderSection = () => {
     switch (activeSection) {
       case 'profil':
         return (
-          <div>
-            <H2 className="mb-6">Mon profil</H2>
-            {profilLoading ? (
-              <Text className="text-placeholder">Chargement...</Text>
-            ) : (
-              <div className="space-y-4 max-w-md">
-                <Input
-                  label="Nom"
-                  value={nom}
-                  type='text'
-                  name='nom'
-                  onChange={(e) => setNom(e.target.value)}
-                  placeholder="Votre nom"
-                />
-                <Input
-                  label="Prénom"
-                  value={prenom}
-                  type='text'
-                  name='prenom'
-                  onChange={(e) => setPrenom(e.target.value)}
-                  placeholder="Votre prénom"
-                />
-                <div className="pt-4">
-                  <Button
-                    variant="Primary"
-                    onClick={handleSaveProfil}
-                    loading={profilSaving}
-                  >
-                    Enregistrer
-                  </Button>
+          <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
+            <Card padding="none">
+              <CardHeader className="p-6 pb-0">
+                <CardTitle>Identité</CardTitle>
+                <CardDescription>Utilisé pour vous identifier dans l'application et sur vos documents.</CardDescription>
+              </CardHeader>
+              <CardContent className="p-6">
+                {profilLoading ? (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="space-y-1"><Skeleton className="h-4 w-16" /><Skeleton className="h-9 w-full" /></div>
+                    <div className="space-y-1"><Skeleton className="h-4 w-16" /><Skeleton className="h-9 w-full" /></div>
+                  </div>
+                ) : (
+                  <div className="space-y-6">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div className="space-y-1">
+                        <Label className="text-sm">Prénom</Label>
+                        <Input
+                          value={prenom}
+                          type="text"
+                          name="prenom"
+                          onChange={(e) => setPrenom(e.target.value)}
+                          placeholder="John"
+                          className="h-9"
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <Label className="text-sm">Nom</Label>
+                        <Input
+                          value={nom}
+                          type="text"
+                          name="nom"
+                          onChange={(e) => setNom(e.target.value)}
+                          placeholder="Doe"
+                          className="h-9"
+                        />
+                      </div>
+                    </div>
+                    <Text className="text-xs text-text-secondary">
+                      Ceci est votre nom d'affichage public. Il apparaîtra sur vos devis et factures.
+                    </Text>
+                  </div>
+                )}
+              </CardContent>
+              <CardFooter className="px-6 py-4 bg-bg-secondary/50 border-t border-border mt-0 pt-0">
+                <Button
+                  variant="Primary"
+                  className="w-auto h-9 px-4 text-sm"
+                  onClick={handleSaveProfil}
+                  loading={profilSaving}
+                  disabled={profilLoading}
+                >
+                  Enregistrer
+                </Button>
+              </CardFooter>
+            </Card>
+
+            <Card padding="none">
+              <CardHeader className="p-6 pb-0">
+                <CardTitle>Informations du compte</CardTitle>
+                <CardDescription>Détails de votre compte et de votre rôle dans l'application.</CardDescription>
+              </CardHeader>
+              <CardContent className="p-6">
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between py-2">
+                    <div className="space-y-0.5">
+                      <Label className="text-sm font-medium">Identifiant</Label>
+                      <Text className="text-xs text-text-secondary">Votre identifiant de connexion.</Text>
+                    </div>
+                    <Text className="text-sm font-mono bg-bg-secondary px-3 py-1.5 rounded-md border border-border">
+                      {user?.username || '—'}
+                    </Text>
+                  </div>
+                  <hr className="border-border/50" />
+                  <div className="flex items-center justify-between py-2">
+                    <div className="space-y-0.5">
+                      <Label className="text-sm font-medium">Rôle</Label>
+                      <Text className="text-xs text-text-secondary">Détermine vos permissions dans l'application.</Text>
+                    </div>
+                    <span className="text-sm font-medium bg-primary/10 text-primary px-3 py-1.5 rounded-full">
+                      {getRoleLabel()}
+                    </span>
+                  </div>
                 </div>
-              </div>
-            )}
+              </CardContent>
+            </Card>
           </div>
         );
+
       case 'preferences':
         return (
-          <div>
-            <H2 className="mb-6">Préférences</H2>
-
-            {/* Thème système */}
-            <div className="space-y-6">
-              <div>
-                <Label className="mb-3 block">Thème de l'interface</Label>
-                <div className="grid grid-cols-3 gap-3">
-                  <button
-                    onClick={() => setTheme('light')}
-                    className={`flex flex-col relative items-center gap-3 rounded-lg border-2 transition-all overflow-hidden ${theme === 'light'
-                        ? 'border-primary bg-primary/5'
-                        : 'border-border hover:border-primary/20'
-                      }`}
-                  >
-                    <img src={LIGHT} className={`box-border ${theme === 'light' && 'border-2 rounded-md border-bg-secondary'}`} />
-                    {theme === 'light' &&
-                      <div className='p-2 bg-primary rounded-[100%] absolute bottom-2 right-2'>
-                        <Check className='text-white' />
-                      </div>
-                    }
-                  </button>
-
-                  <button
-                    onClick={() => setTheme('dark')}
-                    className={`flex flex-col items-center gap-3 relative rounded-lg border-2 transition-all overflow-hidden ${theme === 'dark'
-                        ? 'border-primary bg-primary/5'
-                        : 'border-border hover:border-primary/20'
-                      }`}
-                  >
-                    <img src={DARK} className={`box-border ${theme === 'dark' && 'border-2 rounded-md border-bg-secondary'}`} />
-                    {theme === 'dark' &&
-                      <div className='p-2 bg-primary rounded-[100%] absolute bottom-2 right-2'>
-                        <Check className='text-white' />
-                      </div>
-                    }
-                  </button>
-
-                  <button
-                    onClick={() => setTheme('system')}
-                    className={`flex flex-col items-center gap-3 relative rounded-lg border-2 transition-all overflow-hidden ${theme === 'system'
-                        ? 'border-primary bg-primary/5'
-                        : 'border-border hover:border-primary/20'
-                      }`}
-                  >
-                    <img src={SYSTEM} className={`box-border ${theme === 'system' && 'border-2 rounded-md border-bg-secondary'}`} />
-                    {theme === 'system' &&
-                      <div className='p-2 bg-primary rounded-[100%] absolute bottom-2 right-2'>
-                        <Check className='text-white' />
-                      </div>
-                    }
-                  </button>
+          <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
+            <Card padding="none">
+              <CardHeader className="p-6 pb-0">
+                <CardTitle>Apparence</CardTitle>
+                <CardDescription>Personnalisez l'apparence de l'application.</CardDescription>
+              </CardHeader>
+              <CardContent className="p-6 space-y-0">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  {(['light', 'dark', 'system'] as const).map((t) => {
+                    const images: Record<string, string> = { light: LIGHT, dark: DARK, system: SYSTEM };
+                    const labels: Record<string, string> = { light: 'Clair', dark: 'Sombre', system: 'Système' };
+                    return (
+                      <button
+                        key={t}
+                        onClick={() => setTheme(t)}
+                        className={`flex flex-col relative items-center gap-2 rounded-xl border-2 transition-all overflow-hidden ${theme === t
+                          ? 'border-primary bg-primary/5 shadow-sm'
+                          : 'border-border hover:border-primary/30 hover:bg-bg-secondary'
+                          }`}
+                      >
+                        <img src={images[t]} className="w-full object-cover aspect-video" alt={`Thème ${labels[t]}`} />
+                        {theme === t &&
+                          <div className="p-1 bg-primary rounded-full absolute bottom-2 right-2 shadow-sm">
+                            <Check className="text-white w-3 h-3" />
+                          </div>
+                        }
+                        <div className="w-full text-center py-2 px-2 border-t border-border/50 bg-bg-primary">
+                          <Text weight="medium" className="text-sm">{labels[t]}</Text>
+                        </div>
+                      </button>
+                    );
+                  })}
                 </div>
-                <Text className='mt-3' weight='semibold'>{theme}</Text>
-                <Text variant="small" className="text-text-secondary mt-2">
-                  Le thème système suit automatiquement les préférences de votre appareil
-                </Text>
-              </div>
 
-              {/* Format de date */}
-              <div className="pt-6 border-t border-border">
-                <Label className="mb-3 block">Format de date</Label>
-                <div className="space-y-2">
+                <div className="flex items-center justify-between mt-6 pt-4 border-t border-border/50">
+                  <div className="space-y-0.5">
+                    <Label className="text-sm font-medium">Mode compact</Label>
+                    <Text className="text-xs text-text-secondary">Réduit l'espacement dans les tableaux et listes.</Text>
+                  </div>
+                  <Switch
+                    checked={compactMode}
+                    onCheckedChange={(c) => {
+                      setCompactMode(c);
+                      addToast(`Mode compact ${c ? 'activé' : 'désactivé'}`, 'info');
+                    }}
+                  />
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card padding="none">
+              <CardHeader className="p-6 pb-0">
+                <CardTitle>Affichage des données</CardTitle>
+                <CardDescription>Configurez comment les données sont affichées dans l'application.</CardDescription>
+              </CardHeader>
+              <CardContent className="p-6">
+                <div className="flex flex-col sm:flex-row gap-3">
                   {(['dd/MM/yyyy', 'MM/dd/yyyy', 'yyyy-MM-dd'] as DateFormat[]).map((format) => (
                     <button
                       key={format}
                       onClick={() => setDateFormat(format)}
-                      className={`w-full flex items-center justify-between px-4 py-3 rounded-lg border-2 transition-all ${dateFormat === format
-                          ? 'border-primary bg-primary/5'
-                          : 'border-border hover:border-primary/20'
+                      className={`flex items-center justify-center px-4 py-2 text-sm font-mono rounded-md border transition-all ${dateFormat === format
+                        ? 'border-primary bg-primary/10 text-primary font-medium'
+                        : 'border-border bg-bg-primary text-text-secondary hover:bg-bg-secondary hover:text-text-primary'
                         }`}
                     >
-                      <div className="flex flex-col items-start">
-                        <Text weight="medium">{format}</Text>
-                        <Text variant="small" className="text-text-secondary">
-                          Exemple: {formatExampleDate(format)}
-                        </Text>
-                      </div>
-                      {dateFormat === format && (
-                        <div className="p-1.5 bg-primary rounded-full">
-                          <Check className="text-white" size={16} />
-                        </div>
-                      )}
+                      {format}
                     </button>
                   ))}
                 </div>
-                <Text variant="small" className="text-text-secondary mt-2">
-                  Ce format sera utilisé pour l'affichage des dates dans toute l'application
-                </Text>
-              </div>
-            </div>
+              </CardContent>
+            </Card>
           </div>
         );
 
       case 'export':
         return (
-          <div>
-            <H2 className="mb-6">Export de données</H2>
-            <Text className="text-text-secondary mb-6">
-              Téléchargez vos données au format CSV pour les analyser ou les archiver.
-            </Text>
+          <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
+            <Card padding="none">
+              <CardHeader className="p-6 pb-0">
+                <CardTitle>Exporter les données</CardTitle>
+                <CardDescription>Téléchargez tous vos projets et données au format CSV.</CardDescription>
+              </CardHeader>
+              <CardContent className="p-6">
+                <Text className="text-sm text-text-primary">
+                  L'export inclut tous les détails des projets, les montants financiers et les statuts actuels.
+                </Text>
+              </CardContent>
+              <CardFooter className="px-6 py-4 bg-bg-secondary/50 border-t border-border mt-0 pt-0">
+                <Button
+                  variant="Secondary"
+                  className="w-auto h-9 px-4 text-sm"
+                  onClick={handleExportChantiers}
+                  loading={exportLoading}
+                >
+                  Télécharger CSV
+                </Button>
+              </CardFooter>
+            </Card>
 
-            <div className="space-y-4">
-              <div className="p-4 bg-bg-primary rounded-lg border border-border">
+            <Card padding="none" className="border-red/20">
+              <CardHeader className="p-6 pb-0">
+                <CardTitle>
+                  <span className="flex items-center gap-2 text-red">
+                    <TriangleSolid className="w-5 h-5" />
+                    Zone de danger
+                  </span>
+                </CardTitle>
+                <CardDescription>Actions irréversibles liées à votre compte.</CardDescription>
+              </CardHeader>
+              <CardContent className="p-6">
                 <div className="flex items-center justify-between">
-                  <div>
-                    <Text weight="semibold">Export des chantiers</Text>
-                    <Text variant="small" className="text-placeholder mt-1">
-                      Télécharge la liste de tous vos chantiers avec leur statut et montants
-                    </Text>
+                  <div className="space-y-0.5">
+                    <Label className="text-sm font-medium text-red">Supprimer le compte</Label>
+                    <Text className="text-xs text-text-secondary">Supprimez définitivement votre compte et toutes les données associées.</Text>
                   </div>
                   <Button
-                    variant="Secondary"
-                    onClick={handleExportChantiers}
-                    loading={exportLoading}
+                    variant="Destructive"
+                    className="w-auto h-9 px-4 text-sm"
+                    onClick={() => addToast('Veuillez contacter le support pour supprimer votre compte', 'error')}
                   >
-                    <Download className="w-4 h-4 mr-2" />
-                    Télécharger CSV
+                    Supprimer le compte
                   </Button>
                 </div>
-              </div>
-            </div>
+              </CardContent>
+            </Card>
           </div>
         );
       default:
@@ -286,37 +347,38 @@ export const SettingsPage = () => {
   };
 
   return (
-    <div className="flex h-screen bg-bg-primary">
-      {/* Sidebar */}
-      <div className="w-64 bg-bg-secondary border-r border-border py-4 px-3">
-        <H3 className="mb-4" >Paramètres</H3>
-        <nav className="space-y-1">
-          {sections.map((section) => {
-            const Icon = section.icon;
-            const isActive = activeSection === section.id;
-            return (
-              <button
-                key={section.id}
-                onClick={() => setActiveSection(section.id)}
-                className={`w-full flex items-center gap-3 px-4 py-2 rounded-lg transition-colors ${isActive
-                    ? 'bg-border/60 text-text-primary'
-                    : 'hover:bg-border/35 text-text-secondary border-transparent'
-                  }`}
-              >
-                <Icon className="w-5 h-5" />
-                <Text className={`font-medium ${isActive ? 'text-text-primary' : 'text-text-secondary'}`}>
-                  {section.label}
-                </Text>
-              </button>
-            );
-          })}
-        </nav>
-      </div>
+    <div className="flex flex-col h-full bg-bg-primary">
 
-      {/* Content */}
-      <div className="flex-1 p-8 overflow-y-auto bg-bg-primary">
-        <div className="max-w-4xl mx-auto bg-bg-secondary rounded-lg border border-border p-8">
-          {renderSection()}
+
+      {/* Main Content Area */}
+      <div className="flex flex-1 flex-col md:flex-row overflow-hidden bg-bg-primary">
+        {/* Sidebar */}
+        <aside className="w-full md:w-64 shrink-0 overflow-y-auto border-r border-border py-6 px-4">
+          <H2 className="text-xl font-bold tracking-tight text-text-primary mb-5">Paramètres</H2>
+          <nav className="flex space-x-2 md:flex-col md:space-x-0 md:space-y-1">
+            {sections.map((section) => {
+              const isActive = activeSection === section.id;
+              return (
+                <button
+                  key={section.id}
+                  onClick={() => setActiveSection(section.id)}
+                  className={`flex w-full items-center justify-start rounded-md px-3 py-2 text-sm transition-colors ${isActive
+                    ? 'bg-bg-secondary text-text-primary font-semibold shadow-sm'
+                    : 'text-text-secondary font-medium hover:bg-bg-secondary/50 hover:text-text-primary'
+                    }`}
+                >
+                  {section.label}
+                </button>
+              );
+            })}
+          </nav>
+        </aside>
+
+        {/* Content */}
+        <div className="flex-1 overflow-y-auto p-6 md:p-10">
+          <div className="max-w-3xl">
+            {renderSection()}
+          </div>
         </div>
       </div>
     </div>

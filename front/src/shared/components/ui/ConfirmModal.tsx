@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react'
 import { createPortal } from 'react-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import { ANIMATIONS } from '../../constants/animations'
+import { ANIMATIONS } from '@/shared/constants/animations'
 import Button from './Button'
 import { H3 } from './Typography'
 
@@ -53,7 +53,7 @@ const ConfirmModal = ({
        animate="show"
        exit="exit"
        ref={modalRef}
-       className="bg-bg-primary rounded-[var(--radius-lg)] shadow-xl border border-border p-6 min-w-[320px] max-w-[400px] pointer-events-auto"
+       className="bg-bg-secondary/60 backdrop-blur-xl rounded-[var(--radius-lg)] shadow-2xl border border-border/50 p-6 min-w-[320px] max-w-[400px] pointer-events-auto"
        onClick={(e) => e.stopPropagation()}
       >
        <H3 className="font-semibold text-text-primary mb-2">{title}</H3>

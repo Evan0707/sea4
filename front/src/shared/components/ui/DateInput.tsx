@@ -24,6 +24,7 @@ export type DateInputProps = {
   min?: string
   max?: string
   size?: 'small' | 'default'
+  required?: boolean
 }
 
 const DateInput: React.FC<DateInputProps> = ({
@@ -41,6 +42,7 @@ const DateInput: React.FC<DateInputProps> = ({
   min,
   max,
   size = 'default',
+  required = false,
 }) => {
   const [selectedDate, setSelectedDate] = useState<Date | null>(
     value ? new Date(value) : defaultValue ? new Date(defaultValue) : null
@@ -80,6 +82,7 @@ const DateInput: React.FC<DateInputProps> = ({
           {label && (
             <Label weight="medium" className="text-text-primary whitespace-nowrap" htmlFor={inputId}>
               {label}
+              {required && <span className="text-red ml-1">*</span>}
             </Label>
           )}
           {info && (

@@ -26,6 +26,7 @@ export interface CalendarEvent {
  start: string; // YYYY-MM-DD
  end: string;   // YYYY-MM-DD
  type: 'chantier' | 'indisponibilite';
+ // eslint-disable-next-line @typescript-eslint/no-explicit-any
  details?: any;
 }
 
@@ -96,8 +97,10 @@ const Calendar: React.FC<CalendarProps> = ({ events, onEventClick, onDateClick, 
 
   // 3. Algorithme de placement (Tetris-like) pour éviter les chevauchements
   weekEvents.sort((a, b) => a.colStart - b.colStart || (b.span - a.span)); // Trier par début puis longueur
-
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const rows: any[][] = []; // [Row1: [evt1, evt2], Row2: [evt3]]
+ 
 
   const positionedEvents = weekEvents.map(evt => {
    let rowIndex = 0;
@@ -168,7 +171,7 @@ const Calendar: React.FC<CalendarProps> = ({ events, onEventClick, onDateClick, 
        {/* Fond de grille (Jours) */}
        <div className="absolute inset-0 grid grid-cols-7 w-full h-full bg-bg-primary hover:bg-bg-secondary
         text-text-primary">
-        {week.days.map((day, dayIndex) => {
+        {week.days.map((day) => {
          const isCurrentMonth = isSameMonth(day, monthStart);
          const isToday = isSameDay(day, new Date());
          const isSunday = day.getDay() === 0;

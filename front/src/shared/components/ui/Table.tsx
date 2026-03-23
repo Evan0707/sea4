@@ -64,7 +64,7 @@ export const Table = <T,>({
            `text-${col.align || 'left'}`
           )}
          >
-          {col.render ? col.render(item, rowIndex) : (item as any)[col.key as string]}
+          {col.render ? col.render(item, rowIndex) : (item as Record<string, React.ReactNode>)[col.key as string]}
          </td>
         ))}
        </tr>

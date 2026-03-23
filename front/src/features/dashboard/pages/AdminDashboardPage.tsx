@@ -3,129 +3,66 @@ import { Text } from '@/shared/components/ui/Typography';
 import { usePageHeader } from '@/shared/context/LayoutContext';
 import Skeleton from '@/shared/components/ui/Skeleton';
 import { Card, CardHeader, CardTitle, CardContent } from '@/shared/components/ui/Card';
-import { UsersGroup, Tool, Folder, CheckCircle, ClockCircle, UserSquare } from '@mynaui/icons-react';
+import { UsersGroup, Tool, Folder, CheckCircle, ClockCircle, UserSquare, ArrowRight } from '@mynaui/icons-react';
+import Button from '@/shared/components/ui/Button';
 import { useAdminStats } from '../hooks/useDashboardStats';
+import { MonochromeBarChart } from '@/components/ui/monochrome-bar-chart';
+import { RoundedPieChart } from '@/components/ui/rounded-pie-chart';
 
-const StatCard = ({
-  icon: Icon,
-  title,
-  value,
-  subtitle,
-  color = 'primary'
-}: {
-  icon: any;
-  title: string;
-  value: string | number;
-  subtitle?: string;
-  color?: 'primary' | 'green' | 'orange' | 'blue' | 'purple';
-}) => {
-  const colorClasses = {
-    primary: 'bg-primary/10 text-primary',
-    green: 'bg-green-500/10 text-green-600',
-    orange: 'bg-orange-500/10 text-orange-600',
-    blue: 'bg-blue-500/10 text-blue-600',
-    purple: 'bg-purple-500/10 text-purple-600',
-  };
+import { MiniSparkline } from '@/components/ui/mini-sparkline';
+import { StatCard } from '@/shared/components/dashboard/StatCard';
+import { RoleBadge } from '@/shared/components/ui/RoleBadge';
 
-  return (
-    <Card className="h-full" padding="none">
-      <CardContent className="flex items-start gap-4 p-5">
-        <div className={`p-3 rounded-lg ${colorClasses[color]}`}>
-          <Icon className="w-6 h-6" />
-        </div>
-        <div>
-          <Text className="text-sm text-placeholder">{title}</Text>
-          <Text className="text-2xl font-bold mt-1">{value}</Text>
-          {subtitle && <Text className="text-xs text-placeholder mt-1">{subtitle}</Text>}
-        </div>
-      </CardContent>
-    </Card>
-  );
-};
-
-
-const SimpleBarChart = ({ data, labels, maxHeight = 200 }: { data: number[]; labels: string[]; maxHeight?: number }) => {
-  const maxValue = Math.max(...data, 1);
-
-  return (
-    <div className="flex items-end gap-2 h-full" style={{ height: maxHeight }}>
-      {data.map((value, i) => (
-        <div key={i} className="flex-1 flex flex-col items-center gap-1">
-          <div
-            className="w-full bg-primary rounded-t transition-all duration-500 min-h-[4px]"
-            style={{ height: `${(value / maxValue) * (maxHeight - 40)}px` }}
-          />
-          <Text className="text-[10px] text-placeholder truncate w-full text-center">
-            {labels[i]?.slice(0, 3)}
-          </Text>
-        </div>
-      ))}
-    </div>
-  );
-};
-
-const SimplePieChart = ({ data }: { data: { label: string; value: number; color: string }[] }) => {
-  const total = data.reduce((acc, d) => acc + d.value, 0);
-  if (total === 0) return <Text className="text-placeholder text-center py-8">Aucune donnée</Text>;
-
-  let currentAngle = 0;
-
-  return (
-    <div className="flex items-center gap-6">
-      <svg viewBox="0 0 100 100" className="w-40 h-40">
-        {data.map((d, i) => {
-          const angle = (d.value / total) * 360;
-          const startAngle = currentAngle;
-          currentAngle += angle;
-
-          const x1 = 50 + 40 * Math.cos((startAngle - 90) * Math.PI / 180);
-          const y1 = 50 + 40 * Math.sin((startAngle - 90) * Math.PI / 180);
-          const x2 = 50 + 40 * Math.cos((startAngle + angle - 90) * Math.PI / 180);
-          const y2 = 50 + 40 * Math.sin((startAngle + angle - 90) * Math.PI / 180);
-
-          const largeArc = angle > 180 ? 1 : 0;
-
-          return (
-            <path
-              key={i}
-              d={`M 50 50 L ${x1} ${y1} A 40 40 0 ${largeArc} 1 ${x2} ${y2} Z`}
-              fill={d.color}
-              className="transition-all duration-300 hover:opacity-80"
-            />
-          );
-        })}
-        <circle cx="50" cy="50" r="20" className="fill-bg-secondary" />
-      </svg>
-      <div className="space-y-2">
-        {data.map((d, i) => (
-          <div key={i} className="flex items-center gap-2">
-            <div className="w-3 h-3 rounded-full" style={{ backgroundColor: d.color }} />
-            <Text className="text-sm">{d.label}: {d.value}</Text>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-};
-
-
+// RoleBadge now imported from shared UI components
 
 export const AdminDashboardPage = () => {
   const navigate = useNavigate();
   const { data: stats, isLoading: loading, isError } = useAdminStats();
 
-  usePageHeader('Tableau de bord', undefined, 'Vue d\'ensemble de l\'activité.');
+  usePageHeader('Tableau de bord', undefined, "Vue d'ensemble de l'activité.");
 
   if (loading) {
     return (
-      <div className="p-8">
-        <Skeleton className="w-64 h-10 mb-8" />
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-          {[...Array(4)].map((_, i) => <Skeleton key={i} className="h-28" />)}
+      <div className="p-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-3 mb-6">
+          {[...Array(5)].map((_, i) => (
+            <Card key={i} className="flex items-start gap-3 h-full" padding="none">
+              <CardContent className="p-5 flex items-start gap-4 w-full">
+                <Skeleton className="w-12 h-12 rounded-lg shrink-0" />
+                <div className="flex-1 space-y-2 mt-1">
+                  <Skeleton className="h-3 w-20" />
+                  <Skeleton className="h-7 w-16" />
+                  <Skeleton className="h-3 w-28" />
+                </div>
+              </CardContent>
+            </Card>
+          ))}
         </div>
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <Skeleton className="h-80" />
-          <Skeleton className="h-80" />
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+          <Card className="lg:col-span-2">
+            <CardHeader><Skeleton className="h-6 w-48 mb-2" /><Skeleton className="h-4 w-64" /></CardHeader>
+            <CardContent className="h-[250px] flex items-end justify-around gap-2 pb-4 mt-6">
+              {[...Array(8)].map((_, i) => <div key={i} className="w-full bg-border rounded-t-sm animate-pulse" style={{ height: `${Math.random() * 80 + 20}%` }} />)}
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader><Skeleton className="h-6 w-32 mb-2" /><Skeleton className="h-4 w-48" /></CardHeader>
+            <CardContent className="h-[250px] flex items-center justify-center mt-6">
+              <Skeleton className="h-[200px] w-[200px] rounded-full" />
+            </CardContent>
+          </Card>
+          <Card className="lg:col-span-2">
+            <CardHeader><Skeleton className="h-6 w-64 mb-2" /><Skeleton className="h-4 w-96" /></CardHeader>
+            <CardContent className="space-y-4 mt-6">
+              {[...Array(4)].map((_, i) => <Skeleton key={i} className="h-14 w-full" />)}
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader><Skeleton className="h-6 w-40 mb-2" /><Skeleton className="h-4 w-56" /></CardHeader>
+            <CardContent className="space-y-4 mt-6">
+              {[...Array(4)].map((_, i) => <div key={i} className="flex gap-4"><Skeleton className="h-10 w-10 rounded-full shrink-0" /><div className="flex-1 space-y-2"><Skeleton className="h-4 w-full" /><Skeleton className="h-3 w-2/3" /></div></div>)}
+            </CardContent>
+          </Card>
         </div>
       </div>
     );
@@ -134,7 +71,7 @@ export const AdminDashboardPage = () => {
   if (isError || !stats) {
     return (
       <div className="p-8 h-full flex flex-col items-center justify-center">
-        <div className="bg-red-50 text-red-600 p-6 rounded-lg text-center border border-red-200">
+        <div className="bg-red/5 border border-red/20 rounded-[var(--radius-lg)] text-red p-6 text-center">
           <Text className="text-lg font-bold mb-2">Impossible de charger le tableau de bord</Text>
           <Text className="text-sm">Une erreur est survenue lors de la récupération de vos statistiques.</Text>
         </div>
@@ -143,159 +80,92 @@ export const AdminDashboardPage = () => {
   }
 
   const usersPieData = [
-    { value: stats.utilisateurs.admins, label: 'Admins', color: '#ef4444' },
-    { value: stats.utilisateurs.commerciaux, label: 'Commerciaux', color: '#f59e0b' },
-    { value: stats.utilisateurs.moe, label: 'MOE', color: '#6366f1' },
+    { value: stats.utilisateurs.admins, label: 'Admins', color: '#f87171' }, // Red-400
+    { value: stats.utilisateurs.commerciaux, label: 'Commerciaux', color: '#fbbf24' }, // Amber-400
+    { value: stats.utilisateurs.moe, label: 'MOE', color: 'var(--primary)' },
   ].filter(d => d.value > 0);
 
   const chantiersPieData = [
     { value: stats.chantiers.aCompleter, label: 'À compléter', color: '#94a3b8' },
-    { value: stats.chantiers.aVenir, label: 'À venir', color: '#f59e0b' },
-    { value: stats.chantiers.enCours, label: 'En chantier', color: '#6366f1' },
+    { value: stats.chantiers.aVenir, label: 'À venir', color: '#fbbf24' }, // Amber-400
+    { value: stats.chantiers.enCours, label: 'En chantier', color: 'var(--primary)' },
     { value: stats.chantiers.termines, label: 'Terminés', color: '#22c55e' },
   ].filter(d => d.value > 0);
 
-  const getRoleBadge = (role: string) => {
-    const colors: Record<string, string> = {
-      admin: 'bg-bg-primary text-red-500 border-red-500',
-      commercial: 'bg-bg-primary text-orange-500 border-orange-500',
-      maitre_oeuvre: 'bg-bg-primary text-indigo-500 border-indigo-500',
-    };
-    const labels: Record<string, string> = {
-      admin: 'Admin',
-      commercial: 'Commercial',
-      maitre_oeuvre: 'MOE',
-    };
-    return (
-      <span className={`px-2 py-0.5 rounded text-xs font-medium border ${colors[role] || 'bg-gray-50 text-gray-700 border-gray-200'}`}>
-        {labels[role] || role}
-      </span>
-    );
-  };
-
   return (
-    <div className="p-8">
+    <div className="p-6">
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
-        <StatCard
-          icon={UsersGroup}
-          title="Utilisateurs"
-          value={stats.utilisateurs.total}
-          subtitle={`${stats.utilisateurs.moe} MOE actifs`}
-          color="primary"
-        />
-        <StatCard
-          icon={Tool}
-          title="Artisans"
-          value={stats.utilisateurs.artisans}
-          subtitle="Partenaires"
-          color="purple"
-        />
-        <StatCard
-          icon={Folder}
-          title="Chantiers"
-          value={stats.chantiers.total}
-          subtitle={`${stats.chantiers.aCompleter} à compléter`}
-          color="blue"
-        />
-        <StatCard
-          icon={ClockCircle}
-          title="En cours"
-          value={stats.chantiers.enCours}
-          subtitle="Chantiers actifs"
-          color="orange"
-        />
-        <StatCard
-          icon={CheckCircle}
-          title="Terminés"
-          value={stats.chantiers.termines}
-          subtitle="Chantiers livrés"
-          color="green"
-        />
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-3 mb-6">
+        <StatCard icon={UsersGroup} title="Utilisateurs" value={stats.utilisateurs.total} subtitle={`${stats.utilisateurs.moe} MOE actifs`} trendColor="text-primary" />
+        <StatCard icon={Tool} title="Artisans" value={stats.utilisateurs.artisans} subtitle="Partenaires" trendColor="text-purple-500" />
+        <StatCard icon={Folder} title="Chantiers" value={stats.chantiers.total} subtitle={`${stats.chantiers.aCompleter} à compléter`} trendColor="text-blue-400" />
+        <StatCard icon={ClockCircle} title="En cours" value={stats.chantiers.enCours} subtitle="Chantiers actifs" trendColor="text-primary" />
+        <StatCard icon={CheckCircle} title="Terminés" value={stats.chantiers.termines} subtitle="Chantiers livrés" trendColor="text-green-500" />
       </div>
 
       {/* Content Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-        {/* Chantiers par mois - Span 2 */}
-        {/* Chantiers par mois - Span 2 */}
-        <Card className="lg:col-span-2">
-          <CardHeader>
-            <CardTitle className="text-lg">Chantiers par mois</CardTitle>
-          </CardHeader>
-          <CardContent>
-            {stats.charts.chantiersByMonth.some(v => v > 0) ? (
-              <SimpleBarChart
-                data={stats.charts.chantiersByMonth}
-                labels={stats.charts.monthLabels}
-                maxHeight={250}
-              />
-            ) : (
-              <div className="h-48 flex items-center justify-center">
-                <Text className="text-placeholder">Aucun chantier créé</Text>
-              </div>
-            )}
-          </CardContent>
-        </Card>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-6">
 
-        {/* Chantiers par statut - Span 1 */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg">Chantiers par statut</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex justify-center">
-              <SimplePieChart data={chantiersPieData} />
-            </div>
-          </CardContent>
-        </Card>
+        {/* Bar chart — Chantiers par mois (span 2) */}
+        <div className="lg:col-span-2 h-[400px]">
+          <MonochromeBarChart
+            data={stats.charts.chantiersByMonth}
+            labels={stats.charts.monthLabels}
+            title="Chantiers par mois"
+            dataName="chantiers"
+            classNameFill="fill-primary"
+            emptyMessage="Aucun chantier créé"
+          />
+        </div>
 
-        {/* Utilisateurs par rôle - Span 1 */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg">Utilisateurs par rôle</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex justify-center">
-              <SimplePieChart data={usersPieData} />
-            </div>
-          </CardContent>
-        </Card>
+        {/* Pie chart — Chantiers par statut */}
+        <RoundedPieChart data={chantiersPieData} title="Chantiers par statut" emptyMessage="Aucun chantier" />
 
-        {/* Utilisateurs récents - Span 2 */}
-        {/* Utilisateurs récents - Span 2 */}
+        {/* Pie chart — Utilisateurs par rôle */}
+        <RoundedPieChart data={usersPieData} title="Utilisateurs par rôle" emptyMessage="Aucun utilisateur" />
+
+        {/* Utilisateurs récents (span 2) */}
         <Card className="lg:col-span-2">
           <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle className="text-lg">Utilisateurs récents</CardTitle>
-            <button
-              onClick={() => navigate('/admin/utilisateurs')}
-              className="text-xs text-primary hover:underline"
-            >
+            <CardTitle className="text-sm text-placeholder">Utilisateurs récents</CardTitle>
+            <Button variant="Link" onClick={() => navigate('/admin/utilisateurs')} iconRight={ArrowRight}>
               Voir tout
-            </button>
+            </Button>
           </CardHeader>
           <CardContent>
             {stats.recentUsers.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {stats.recentUsers.map((u) => (
                   <div
                     key={u.id}
-                    className="flex items-center justify-between p-3 bg-bg-primary rounded-lg border border-border"
+                    className="group relative p-4 bg-bg-primary rounded-[var(--radius-lg)] border border-border/60 hover:border-text-primary/20 hover:shadow-sm cursor-pointer transition-all duration-300 overflow-hidden flex flex-col justify-between"
                     onClick={() => navigate(`/admin/utilisateurs/${u.id}`)}
+                    role="button"
+                    tabIndex={0}
+                    onKeyDown={(e) => e.key === 'Enter' && navigate(`/admin/utilisateurs/${u.id}`)}
                   >
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-                        <UserSquare className="w-5 h-5 text-primary" />
+
+                    <div className="flex items-start justify-between mb-3">
+                      <div className="flex items-center gap-3">
+                        <UserSquare className="w-6 h-6" />
+                        <div className="space-y-1 pr-2">
+                          <Text className="font-semibold text-sm text-text-primary transition-colors">
+                            {u.prenom && u.nom ? `${u.prenom} ${u.nom}` : u.login}
+                          </Text>
+                          <Text className="text-xs text-text-secondary">{u.login}</Text>
+                        </div>
                       </div>
-                      <div className="min-w-0">
-                        <Text className="font-medium truncate">
-                          {u.prenom && u.nom ? `${u.prenom} ${u.nom}` : u.login}
-                        </Text>
-                        <Text className="text-xs text-placeholder truncate">{u.login}</Text>
+                      <div className="shrink-0 ml-2">
+                        <RoleBadge role={u.role} />
                       </div>
                     </div>
-                    <div className="shrink-0 ml-2">
-                      {getRoleBadge(u.role)}
+
+                    <div className="flex items-center justify-between pt-3 border-t border-border/40">
+                      <Text className="text-[11px] text-placeholder font-medium tracking-wide uppercase">
+                        ID: {u.id}
+                      </Text>
+                      <ArrowRight className="w-4 h-4 text-text-primary opacity-0 -translate-x-3 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300" />
                     </div>
                   </div>
                 ))}

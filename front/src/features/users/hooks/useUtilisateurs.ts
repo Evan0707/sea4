@@ -30,6 +30,7 @@ export const useUtilisateurs = (filters: UserFilters) => {
    toast.addToast('Utilisateur supprimé avec succès', 'success');
    queryClient.invalidateQueries({ queryKey: ['utilisateurs'] });
   },
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   onError: (error: any) => {
    console.error('Erreur suppression utilisateur', error);
    const backendMessage = error.response?.data?.details || error.response?.data?.error || 'Erreur lors de la suppression de l\'utilisateur';

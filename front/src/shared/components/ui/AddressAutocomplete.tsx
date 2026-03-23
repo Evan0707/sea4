@@ -9,7 +9,8 @@ interface AddressAutocompleteProps {
   onChange: (value: string) => void;
   onAddressSelect?: (address: AddressResult) => void;
   error?: string;
-  info?: string;
+  info?: boolean;
+  message?: string;
   placeholder?: string;
   required?: boolean;
 }
@@ -40,8 +41,9 @@ export const AddressAutocomplete: React.FC<AddressAutocompleteProps> = ({
   onChange,
   onAddressSelect,
   error,
-  info,
-  placeholder = 'Commencez à taper une adresse...',
+  info = false,
+  message = '',
+  placeholder = "Rechercher une adresse...",
   required = false,
 }) => {
   const [suggestions, setSuggestions] = useState<AddressResult[]>([]);
@@ -114,7 +116,7 @@ export const AddressAutocomplete: React.FC<AddressAutocompleteProps> = ({
     onChange(address.label);
     setIsOpen(false);
     setSuggestions([]);
-    
+
     if (onAddressSelect) {
       onAddressSelect(address);
     }
@@ -123,13 +125,13 @@ export const AddressAutocomplete: React.FC<AddressAutocompleteProps> = ({
   return (
     <div className="flex flex-col gap-1 relative" ref={wrapperRef}>
       <div className="flex items-center gap-2">
-        <Label className="text-sm font-bold text-text-primary m-1" htmlFor={inputId}>
+        <Label className="text-sm font-bold text-text-primary" htmlFor={inputId}>
           {label}
-          {required && <span className="text-red-500 ml-1">*</span>}
+          {required && <span className="text-red ml-1">*</span>}
         </Label>
         {info && (
-          <Tooltip content={info}>
-            <InfoCircleSolid size={14} className="text-text-secondary" />
+          <Tooltip content={message}>
+            <InfoCircleSolid size={14} className="text-text-secondary cursor-help" />
           </Tooltip>
         )}
       </div>
@@ -141,11 +143,10 @@ export const AddressAutocomplete: React.FC<AddressAutocompleteProps> = ({
           value={value}
           onChange={handleInputChange}
           placeholder={placeholder}
-          className={`w-full px-3 py-2 border-[1.5px] border-border rounded-md focus-within:border-primary focus-within:outline-[1px] outline-border  placeholder-placeholder text-text-primary ${
-            error
+          className={`w-full px-3 py-2 border-[1px] border-border rounded-md focus-within:border-primary focus-within:outline-[1px] outline-border  placeholder-placeholder text-text-primary ${error
               ? 'border-red focus:ring-red'
               : 'border-border focus:ring-blue-500'
-          }`}
+            }`}
         />
 
         {isLoading && (
@@ -155,13 +156,13 @@ export const AddressAutocomplete: React.FC<AddressAutocompleteProps> = ({
         )}
 
         {isOpen && suggestions.length > 0 && (
-          <div className="absolute z-50 w-full mt-1 bg-bg-secondary border border-border rounded-md shadow-lg max-h-60 overflow-y-auto">
+          <div className="absolute z-50 w-full mt-1 bg-bg-secondary/80 backdrop-blur-lg border border-border/50 rounded-md shadow-lg max-h-60 overflow-y-auto">
             {suggestions.map((suggestion, index) => (
               <button
                 key={index}
                 type="button"
                 onClick={() => handleSelectSuggestion(suggestion)}
-                className="w-full text-left px-3 py-2 hover:bg-bg-primary focus:bg-blue-50 focus:outline-none transition-colors border-b border-border last:border-b-0"
+                className="w-full text-left px-3 py-2 hover:bg-bg-primary/50 focus:bg-primary/10 focus:outline-none transition-colors border-b border-border/50 last:border-b-0"
               >
                 <div className="font-medium text-sm text-text-primary">
                   {suggestion.street}
@@ -174,7 +175,7 @@ export const AddressAutocomplete: React.FC<AddressAutocompleteProps> = ({
           </div>
         )}
       </div>
-      
+
       {error && <Text className='text-[13px] text-red absolute ml-1 mt-1 bottom-[-23px]' weight='semibold' color='text-red'>{error}</Text>}
     </div>
   );
