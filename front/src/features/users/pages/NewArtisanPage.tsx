@@ -22,6 +22,7 @@ const NewArtisanPage = () => {
   const [adresse, setAdresse] = useState('');
   const [cp, setCp] = useState('');
   const [ville, setVille] = useState('');
+  const [mdp, setMDP] = useState('');
   const [etapes, setEtapes] = useState<Etape[]>([]);
   const [saving, setSaving] = useState(false);
 
@@ -38,6 +39,7 @@ const NewArtisanPage = () => {
         adresseArtisan: adresse,
         cpArtisan: cp,
         villeArtisan: ville,
+        mdpArtisan: mdp,
       };
       if (etapes.length) payload.etapes = etapes;
 
@@ -83,6 +85,10 @@ const NewArtisanPage = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <Input type='text' label='Code postal' name='cpArtisan' value={cp} onChange={(e) => setCp(e.target.value)} />
             <Input type='text' label='Ville' name='villeArtisan' value={ville} onChange={(e) => setVille(e.target.value)} />
+          </div>
+
+          <div className="grid grid-cols-1 gap-4">
+              <Input type='password' label='Mot de passe' name='mot_de_passe' value={mdp} onChange={(e) => setMDP(e.target.value)} />
           </div>
 
           <EtapeMultiSelect value={etapes} onChange={(items) => setEtapes(items)} />

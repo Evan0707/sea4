@@ -1,6 +1,6 @@
 import './App.css';
 import './styles/datepicker-custom.css';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import {BrowserRouter, Routes, Route, Navigate} from 'react-router-dom';
 import { Login } from '../features/auth/pages/LoginPage';
 import Error404 from './pages/Error404Page';
 import { ProtectedRoute } from '../features/auth/components/ProtectedRoute';
@@ -36,6 +36,8 @@ import { LayoutProvider } from '@/shared/context/LayoutContext';
 import { ChantiersMapPage } from '../features/dashboard/pages/ChantiersMapPage';
 import { ModelesListPage } from '../features/chantiers/pages/ModelesListPage';
 import { ModeleEditPage } from '../features/chantiers/pages/ModeleEditPage';
+import {ArtisanDashboardPage} from "@/features/dashboard/pages/ArtisanDashboardPage.tsx";
+import {ArtisanChantierPage} from "@/features/users/pages/ArtisanChantierPage.tsx";
 
 function App() {
   return (
@@ -131,6 +133,31 @@ function AppRoutes() {
           />
         </Route>
       </Route>
+
+
+      {/* Artisan Routes */}
+        <Route
+            element={
+            <ProtectedRoute
+                isAuthenticated={isAuthenticated}
+                userRoles={user?.roles ?? []}
+                allowedRoles={['ROLE_ARTISAN']}
+                />
+            }
+            >
+            <Route element={<DashboardLayout />}>
+                <Route
+                    path="/artisan"
+                    element={<ArtisanDashboardPage />}
+                />
+                <Route
+                    path="/artisan/:id"
+                    element={<ArtisanChantierPage />}
+                />
+            </Route>
+        </Route>
+
+
 
       {/* Admin Routes */}
       <Route

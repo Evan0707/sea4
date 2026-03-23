@@ -10,6 +10,7 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
 /**
  * Contrôleur gérant les opérations liées aux artisans.
@@ -128,7 +129,8 @@ class ArtisanController extends AbstractController
     public function create(
         Request $request,
         EntityManagerInterface $entityManager,
-        ValidatorInterface $validator
+        ValidatorInterface $validator,
+        UserPasswordHasherInterface $passwordHasher
     ): JsonResponse {
         $data = json_decode($request->getContent(), true);
 
@@ -147,6 +149,11 @@ class ArtisanController extends AbstractController
         $artisan->setVille($data['villeArtisan'] ?? null);
         $artisan->setEmail($data['emailArtisan'] ?? null);
         $artisan->setTelephone($data['telArtisan'] ?? null);
+
+        if (!empty($data['mdpArtisan'])) {
+            $hashed = $passwordHasher->hashPassword($artisan, $data['mdpArtisan']);
+            $artisan->setPassword($hashed);
+        }
 
         if (isset($data['etapes']) && is_array($data['etapes'])) {
             foreach ($data['etapes'] as $item) {
@@ -205,7 +212,8 @@ class ArtisanController extends AbstractController
         int $id,
         Request $request,
         EntityManagerInterface $entityManager,
-        ValidatorInterface $validator
+        ValidatorInterface $validator,
+        UserPasswordHasherInterface $passwordHasher
     ): JsonResponse {
         $data = json_decode($request->getContent(), true);
 
@@ -237,6 +245,11 @@ class ArtisanController extends AbstractController
             $artisan->setTelephone($data['telArtisan']);
         }
 
+        if (!empty($data['mdpArtisan'])) {
+            $hashed = $passwordHasher->hashPassword($artisan, $data['mdpArtisan']);
+            $artisan->setPassword($hashed);
+        }
+
         // Valider l'artisan
         $errors = $validator->validate($artisan);
         if (count($errors) > 0) {
@@ -251,7 +264,7 @@ class ArtisanController extends AbstractController
         }
 
         if (isset($data['etapes']) && is_array($data['etapes'])) {
-      
+
             $requested = [];
             foreach ($data['etapes'] as $item) {
                 if (is_array($item) && isset($item['noEtape'])) {
@@ -261,7 +274,7 @@ class ArtisanController extends AbstractController
                 }
             }
 
-        
+
             $current = [];
             foreach ($artisan->getEtapesQualifiees() as $e) {
                 $current[] = $e->getId();
@@ -276,7 +289,7 @@ class ArtisanController extends AbstractController
                 }
             }
 
-  
+
             foreach ($requested as $reqId) {
                 if (!in_array($reqId, $current, true)) {
                     $et = $entityManager->getRepository(\App\Entity\Etape::class)->find($reqId);
@@ -376,7 +389,7 @@ class ArtisanController extends AbstractController
         $etapeRepo = $entityManager->getRepository(\App\Entity\Etape::class);
         $allEtapes = $etapeRepo->findAll();
 
-  
+
         $etapeMap = [];
         foreach ($allEtapes as $etape) {
             $normalized = $this->normalizeString($etape->getNom());
@@ -402,7 +415,7 @@ class ArtisanController extends AbstractController
                     foreach ($quals as $qual) {
                         if (empty($qual)) continue;
                         $normalizedQual = $this->normalizeString($qual);
-                        
+
                         $matchedEtape = null;
                         foreach ($etapeMap as $normalizedName => $etape) {
                             if (str_contains($normalizedName, $normalizedQual) || str_contains($normalizedQual, $normalizedName)) {
@@ -410,7 +423,7 @@ class ArtisanController extends AbstractController
                                 break;
                             }
                         }
-                        
+
                         if ($matchedEtape) {
                             $artisan->addEtapeQualifiee($matchedEtape);
                         }
@@ -453,28 +466,28 @@ class ArtisanController extends AbstractController
         // Assignments (Chantiers)
         $assignments = [];
         foreach ($artisan->getEtapeChantiers() as $ec) {
-            
+
             $dateStart = $ec->getDateDebut() ?? $ec->getDateDebutTheorique();
 
             if ($dateStart) {
                 $chantier = $ec->getChantier();
                 $etape = $ec->getEtape();
-                
+
                 // Determine end date
                 $dateEnd = $ec->getDateFin();
                 if (!$dateEnd) {
                     $dateEnd = clone $dateStart;
-                    
+
                     // Priority 1: Custom duration (nbJoursPrevu)
                     $nbJours = $ec->getNbJoursPrevu();
-                    
+
                     // Priority 2: Model duration
                     if (!$nbJours && $etape) {
-                     
+
                     }
 
                     if ($nbJours && $nbJours > 0) {
-                        
+
                         $dateEnd->modify('+' . ($nbJours - 1) . ' days');
                     }
                 }
@@ -484,7 +497,7 @@ class ArtisanController extends AbstractController
                     'type' => 'chantier',
                     'title' => ($chantier ? $chantier->getNomChantier() : 'Chantier inconnu') . ' - ' . ($etape ? $etape->getNom() : 'Étape inconnue'),
                     'start' => $dateStart->format('Y-m-d'),
-                    'end' => $dateEnd ? $dateEnd->format('Y-m-d') : $dateStart->format('Y-m-d'), 
+                    'end' => $dateEnd ? $dateEnd->format('Y-m-d') : $dateStart->format('Y-m-d'),
                     'details' => [
                         'chantierId' => $chantier ? $chantier->getId() : null,
                         'adresse' => $chantier ? ($chantier->getAdresse() . ' ' . $chantier->getVille()) : '',
@@ -539,7 +552,7 @@ class ArtisanController extends AbstractController
         try {
             $start = new \DateTime($startStr);
             $end = new \DateTime($endStr);
-            
+
             if ($start > $end) {
                 return $this->json(['message' => 'La date de début doit être antérieure à la date de fin'], 400);
             }
@@ -549,7 +562,7 @@ class ArtisanController extends AbstractController
             $indispo->setDateFin($end);
             $indispo->setMotif($motif);
             $indispo->setArtisan($artisan);
-            
+
             $entityManager->persist($indispo);
             $entityManager->flush();
 

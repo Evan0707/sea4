@@ -53,7 +53,8 @@ export const Login = () => {
       const roleRedirects = {
         'ROLE_ADMIN': '/admin',
         'ROLE_COMMERCIAL': '/commercial',
-        'ROLE_MAITRE_OEUVRE': '/maitre-doeuvre'
+        'ROLE_MAITRE_OEUVRE': '/maitre-doeuvre',
+        'ROLE_ARTISAN': '/artisan'
       };
 
       for (const [role, path] of Object.entries(roleRedirects)) {
