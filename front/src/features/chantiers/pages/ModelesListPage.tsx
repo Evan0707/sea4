@@ -16,7 +16,7 @@ export const ModelesListPage = () => {
 	const { addToast } = useToast();
 	const [modelsToDelete, setModelsToDelete] = useState<number[]>([]);
 
-	const { data: modeles = [], isLoading, isError } = useModeles();
+	const { data: modeles = [], isLoading, isError, refetch } = useModeles();
 	const deleteMutation = useDeleteModele();
 
 	// Gestion de l'edition
@@ -121,6 +121,7 @@ export const ModelesListPage = () => {
 				emptyMessage="Aucun modèle trouvé"
 				selectable={true}
 				onDeleteSelected={(keys) => setModelsToDelete(keys as number[])}
+				onRefresh={refetch}
 			/>
 
 			<ConfirmModal

@@ -8,21 +8,21 @@ interface RoleBadgeProps {
 }
 
 const ROLE_CONFIG: Record<string, { label: string; className: string }> = {
-  admin: { 
-    label: 'Admin', 
-    className: 'bg-red/8 text-red border-red/20' 
+  admin: {
+    label: 'Admin',
+    className: 'bg-red/8 text-red border-red/20'
   },
-  commercial: { 
-    label: 'Commercial', 
-    className: 'bg-orange-500/8 text-orange-700 border-orange-500/20' 
+  commercial: {
+    label: 'Commercial',
+    className: 'bg-orange-500/8 text-orange-700 border-orange-500/20'
   },
-  maitre_oeuvre: { 
-    label: 'MOE', 
-    className: 'bg-primary/8 text-primary border-primary/20' 
+  maitre_oeuvre: {
+    label: 'MOE',
+    className: 'bg-primary/8 text-primary border-primary/20'
   },
   moe: { // Alias for maitre_oeuvre
-    label: 'MOE', 
-    className: 'bg-primary/8 text-primary border-primary/20' 
+    label: 'MOE',
+    className: 'bg-primary/8 text-primary border-primary/20'
   }
 };
 
@@ -36,9 +36,9 @@ export const RoleBadge: React.FC<RoleBadgeProps> = ({ role, className }) => {
   const config = ROLE_CONFIG[key];
 
   return (
-    <span 
+    <span
       className={cn(
-        'inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-bold uppercase tracking-wider border whitespace-nowrap transition-all duration-200',
+        'inline-flex items-center px-2 py-0.5 rounded-md text-[10px] tracking-wider border whitespace-nowrap transition-all duration-200',
         config?.className ?? 'bg-bg-secondary text-text-secondary border-border',
         className
       )}

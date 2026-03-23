@@ -21,7 +21,7 @@ export const DossiersListPage = () => {
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
   const [dossiersToDelete, setDossiersToDelete] = useState<number[]>([]);
 
-  const { dossiers, loading, error, deleteDossier } = useDossiers({
+  const { dossiers, loading, error, deleteDossier, refetch } = useDossiers({
     search: debouncedSearch,
     sortOrder,
   });
@@ -195,6 +195,7 @@ export const DossiersListPage = () => {
         emptyMessage="Aucun dossier trouvé"
         selectable={true}
         onDeleteSelected={(keys) => setDossiersToDelete(keys as number[])}
+        onRefresh={refetch}
       />
 
       <ConfirmModal

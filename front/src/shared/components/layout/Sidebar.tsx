@@ -47,7 +47,7 @@ function SidebarContent({
 
       {/* ── Logo / Brand ──────────────────────────────────────── */}
       <div className={cn(
-        'flex items-center gap-2.5 px-3 py-4 border-b border-border/60',
+        'flex items-center gap-2.5 px-3 py-3 border-b border-border/60',
         collapsed && 'justify-center'
       )}>
         <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ">

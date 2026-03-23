@@ -19,7 +19,7 @@ export const MesProjetsListPage = () => {
 
   usePageHeader('Mes Chantiers', undefined, 'Suivi de vos projets en cours.');
 
-  const { chantiers, loading, error } = useChantiers({
+  const { chantiers, loading, error, refetch } = useChantiers({
     endpoint: '/mes-chantiers',
     filters: {
       search: debouncedSearch,
@@ -117,6 +117,7 @@ export const MesProjetsListPage = () => {
         keyExtractor={(item) => item.noChantier}
         onRowClick={(item) => navigate(`/maitre-doeuvre/chantiers/${item.noChantier}`)}
         emptyMessage="Aucun chantier trouvé"
+        onRefresh={refetch}
       />
     </div>
   );

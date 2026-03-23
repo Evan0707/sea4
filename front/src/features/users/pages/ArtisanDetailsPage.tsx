@@ -168,7 +168,7 @@ const ArtisanDetailsPage = () => {
           </div>
           <Skeleton className="h-10 w-28 rounded-[var(--radius)] shrink-0" />
         </Card>
-        <div className="grid grid-cols-3 gap-4">
+        <div className="grid grid-cols-3 gap-4 animate-in fade-in slide-in-from-bottom-4 duration-500 delay-75">
           {[...Array(3)].map((_, i) => (
             <Card key={i} className="flex items-center gap-4 py-4">
               <Skeleton className="h-10 w-10 rounded-[var(--radius-lg)] shrink-0" />

@@ -22,7 +22,7 @@ export const AdminChantiersListPage = () => {
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
   const [chantiersToDelete, setChantiersToDelete] = useState<number[]>([]);
 
-  const { chantiers, loading, deleteChantier, error } = useChantiers({
+  const { chantiers, loading, deleteChantier, error, refetch } = useChantiers({
     endpoint: '/admin/chantiers',
     filters: {
       search: debouncedSearch,
@@ -172,6 +172,7 @@ export const AdminChantiersListPage = () => {
         emptyMessage="Aucun chantier trouvé"
         selectable={true}
         onDeleteSelected={(keys) => setChantiersToDelete(keys as number[])}
+        onRefresh={refetch}
       />
 
       <ConfirmModal

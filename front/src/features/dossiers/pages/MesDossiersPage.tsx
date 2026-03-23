@@ -152,6 +152,7 @@ export const MesDossiersPage = () => {
         emptyMessage="Aucun dossier trouvé"
         selectable={true}
         onDeleteSelected={(keys) => setDossiersToDelete(keys as number[])}
+        onRefresh={refetch}
       />
 
       <ConfirmModal

@@ -220,7 +220,8 @@ export const EditDossierPage = () => {
                   clientForm.setValue('villeClient', address.city);
                 }}
                 error={clientForm.formState.errors.adresseClient?.message}
-                info="Commencez à taper l'adresse pour voir les suggestions"
+                info
+                message="Commencez à taper l'adresse pour voir les suggestions"
                 placeholder="123 rue de la Paix"
               />
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -265,7 +266,8 @@ export const EditDossierPage = () => {
                   chantierForm.setValue('villeChantier', address.city);
                 }}
                 error={chantierForm.formState.errors.adresseChantier?.message}
-                info="Commencez à taper l'adresse du chantier"
+                info
+                message="Commencez à taper l'adresse du chantier"
                 placeholder="456 avenue du Bâtiment"
               />
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

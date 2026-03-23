@@ -342,6 +342,7 @@ export const ArtisansListPage = () => {
         selectable
         onDeleteSelected={handleDeleteSelected}
         deleteLabel="Supprimer la sélection"
+        onRefresh={fetchArtisans}
       />
 
       <ConfirmModal

@@ -18,7 +18,7 @@ export const ProjetsListPage = () => {
 
   usePageHeader('Tous les projets', undefined, 'Consultez la liste de tous les projets.');
 
-  const { chantiers: projets, loading, error } = useChantiers({
+  const { chantiers: projets, loading, error, refetch } = useChantiers({
     filters: {
       search: debouncedSearch,
       sortOrder
@@ -112,6 +112,7 @@ export const ProjetsListPage = () => {
         keyExtractor={(item) => item.noChantier}
         onRowClick={(item) => navigate(`/chantiers/${item.noChantier}`)}
         emptyMessage="Aucun projet trouvé"
+        onRefresh={refetch}
       />
     </div>
   );

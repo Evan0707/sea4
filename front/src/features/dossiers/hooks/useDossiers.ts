@@ -10,7 +10,7 @@ export const useDossiers = (filters: DossierFilters = {}) => {
  const { addToast } = useToast();
 
  // Fonction pour recuperer les dossiers
- const { data: dossiers = [], isLoading: loading, error } = useQuery({
+ const { data: dossiers = [], isLoading: loading, error, refetch } = useQuery({
   queryKey: ['dossiers', filters],
   queryFn: async () => {
    const response = await apiClient.get<Dossier[]>('/dossier', {
@@ -47,7 +47,8 @@ export const useDossiers = (filters: DossierFilters = {}) => {
   dossiers,
   loading,
   error: error ? (error as Error).message : null,
-  deleteDossier
+  deleteDossier,
+  refetch
  };
 };
 

@@ -24,7 +24,7 @@ export const UtilisateursListPage = () => {
   const [usersToDelete, setUsersToDelete] = useState<number[]>([]);
 
   // Utilisation du hook personnalisé pour récupérer les utilisateurs
-  const { utilisateurs, loading, deleteUtilisateur, error } = useUtilisateurs({
+  const { utilisateurs, loading, deleteUtilisateur, error, fetchUtilisateurs } = useUtilisateurs({
     search: debouncedSearch,
     sortOrder,
   });
@@ -161,6 +161,7 @@ export const UtilisateursListPage = () => {
         emptyMessage="Aucun utilisateur trouvé"
         selectable={true}
         onDeleteSelected={(keys) => setUsersToDelete(keys as number[])}
+        onRefresh={fetchUtilisateurs}
       />
 
       <ConfirmModal
