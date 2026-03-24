@@ -11,6 +11,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
+use Symfony\Bundle\SecurityBundle\Security;
 
 /**
  * Contrôleur gérant les opérations liées aux artisans.
@@ -669,5 +670,111 @@ class ArtisanController extends AbstractController
         $str = preg_replace('/[\x{0300}-\x{036f}]/u', '', $str);
         $str = preg_replace('/[^a-z0-9]/', '', $str);
         return trim($str);
+    }
+
+    #[route('/api/artisan/mes-chantiers', name: 'api_artisans_mes_chantiers', methods: ['GET'])]
+public function mesChantiers(
+    Request $request,
+    EntityManagerInterface $entityManager,
+    Security $security
+    ): JsonResponse {
+        $artisan = $security->getUser();
+        if (!$artisan instanceof Artisan) {
+            return $this->json(['message' => 'Accès refusé'], 403);
+        }
+
+        $search = $request->query->get('search', '');
+        $sortOrder = in_array($request->query->get('sortOrder', 'asc'), ['asc', 'desc'])
+            ? $request->query->get('sortOrder', 'asc')
+            : 'asc';
+        $result = [];
+
+        foreach ($artisan->getEtapeChantiers() as $etapeChantier) {
+            $chantier = $etapeChantier->getChantier();
+            if (!$chantier) continue;
+
+            if (!empty($search)) {
+                $q = strtolower($search);
+                $matchNom = str_contains(strtolower($chantier->getNomChantier() ?? ''), $q);
+                $matchVille = str_contains(strtolower($chantier->getVille() ?? ''), $q);
+                $matchEtape = str_contains(strtolower($etapeChantier->getEtape()?->getNom() ?? ''), $q);
+                if (!$matchNom && !$matchVille && !$matchEtape) continue;
+            }
+
+            $result[] = [
+                'noChantier' => $chantier->getId(),
+                'nomChantier' => $chantier->getNomChantier(),
+                'adresse' => $chantier->getAdresse(),
+                'cp' => $chantier->getCodePostal(),
+                'ville' => $chantier->getVille(),
+                'dateDebut' => $etapeChantier->getDateDebut()?->format('Y-m-d')
+                            ?? $etapeChantier->getDateDebutTheorique()->format('Y-m-d'),
+                'dateFin' => $etapeChantier->getDateFin()?->format('Y-m-d'),
+                'statut' => $etapeChantier->getStatut(),
+                'etape' => $etapeChantier->getEtape()?->getNom(),
+            ];
+        }
+
+        // Tri en fonction de la date de début
+        usort($result, function ($a, $b) use ($sortOrder) {
+            $dateA = $a['dateDebut'] ?? '';
+            $dateB = $b['dateDebut'] ?? '';
+            return $sortOrder === 'asc'
+                ? strcmp($dateA, $dateB)
+                : strcmp($dateB, $dateA);
+        });
+
+        return $this->json($result);
+    }
+
+    #[Route('/api/artisan/mes-chantiers/{id}', name: 'api_artisan_mes_chantiers_liste', methods: ['GET'], requirements: ['id' => '\d+'])]
+    public function mesChantierShow(
+        int $id,
+        EntityManagerInterface $entityManager,
+        Security $security
+    ): JsonResponse {
+        // Récupérer l'artisan connecté
+        $artisan = $security->getUser();
+        if (!$artisan instanceof Artisan) {
+            return $this->json(['message' => 'Accès refusé'], 403);
+        }
+
+        // Chercher le chantier parmi les étapes de l'artisan
+        $chantier = $entityManager->getRepository(\App\Entity\Chantier::class)->find($id);
+        if (!$chantier) {
+            return $this->json(['message' => 'Chantier non trouvé'], 404);
+        }
+
+        // Vérifier que l'artisan est bien assigné à ce chantier
+        $etapesArtisan = [];
+        foreach ($artisan->getEtapeChantiers() as $etapeChantier) {
+            if ($etapeChantier->getChantier()?->getId() !== $id) continue;
+
+            $etapesArtisan[] = [
+                'noEtape'   => $etapeChantier->getEtape()?->getId(),
+                'nomEtape'  => $etapeChantier->getEtape()?->getNom(),
+                'dateDebut' => $etapeChantier->getDateDebut()?->format('Y-m-d')
+                    ?? $etapeChantier->getDateDebutTheorique()?->format('Y-m-d'),
+                'dateFin'   => $etapeChantier->getDateFin()?->format('Y-m-d'),
+                'statut'    => $etapeChantier->getStatut() ?? $chantier->getStatut(),
+            ];
+        }
+
+        // L'artisan n'a aucune étape sur ce chantier → accès refusé
+        if (empty($etapesArtisan)) {
+            return $this->json(['message' => 'Accès refusé à ce chantier'], 403);
+        }
+
+        return $this->json([
+            'noChantier'  => $chantier->getId(),
+            'nomChantier' => $chantier->getNomChantier(),
+            'adresse'     => $chantier->getAdresse(),
+            'cp'          => $chantier->getCp(),
+            'ville'       => $chantier->getVille(),
+            'dateDebut'   => $chantier->getDateDebut()?->format('Y-m-d'),
+            'dateFin'     => $chantier->getDateFin()?->format('Y-m-d'),
+            'statut'      => $chantier->getStatut() ?? 'en_cours',
+            'etapes'      => $etapesArtisan,
+        ]);
     }
 }

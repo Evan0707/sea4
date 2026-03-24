@@ -18,6 +18,7 @@ const variantStyles: Record<StatusVariant, string> = {
 
 // Helper function to guess variant from status text if not provided
 const getVariantFromStatus = (status: string): StatusVariant => {
+ if (!status) return 'default';
  const s = status.toLowerCase();
  if (s.includes('terminé') || s.includes('validé') || s.includes('complété')) return 'success';
  if (s.includes('cours') || s.includes('attente')) return 'info';
@@ -31,6 +32,7 @@ export const StatusBadge: React.FC<StatusBadgeProps> = ({
  variant,
  className = ''
 }) => {
+ if (!status) return null;
  const finalVariant = variant || getVariantFromStatus(status);
 
  return (
