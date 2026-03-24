@@ -87,10 +87,10 @@ applications:
     # are available in the PATH during the build process and in the runtime environment. They’re installed before
     # the build hook runs using a package manager for the language.
     # More information: https://docs.upsun.com/create-apps/app-reference/single-runtime-image.html#dependencies
-    dependencies:
-      nodejs:
-        n: "*"
-        npx: "*"
+    # dependencies:
+    #   nodejs:
+    #     n: "*"
+    #     npx: "*"
 
     # Hooks allow you to customize your code/environment as the project moves through the build and deploy stages
     # More information: https://docs.upsun.com/create-apps/app-reference/single-runtime-image.html#hooks
@@ -101,9 +101,6 @@ applications:
         set -eux
         export APP_ENV=prod
         composer --no-ansi --no-interaction install --no-progress --prefer-dist --optimize-autoloader --no-dev
-        n auto || n lts
-        hash -r
-        npm i
         
       # The deploy hook is run after the app container has been started, but before it has started accepting requests.
       # More information: https://docs.upsun.com/create-apps/hooks/hooks-comparison.html#deploy-hook
