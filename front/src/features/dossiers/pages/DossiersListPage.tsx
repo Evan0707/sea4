@@ -41,6 +41,7 @@ export const DossiersListPage = () => {
     return () => clearTimeout(timer);
   }, [search]);
 
+  // Gestion de l'export
   const handleExport = useCallback(() => {
     const exportColumns: CsvColumn<Dossier>[] = [
       { key: 'nom', header: 'Nom' },
@@ -61,7 +62,7 @@ export const DossiersListPage = () => {
     <Button variant="Secondary" icon={Download} onClick={handleExport}>
       Exporter CSV
     </Button>
-  ), [handleExport]);
+  ), [handleExport, navigate]);
 
   usePageHeader(
     'Dossiers',

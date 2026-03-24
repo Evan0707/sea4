@@ -1,15 +1,16 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { DataList, type Column } from '@/shared/components/ui/DataList';
 import Button from '@/shared/components/ui/Button';
 import { Text } from '@/shared/components/ui/Typography';
-import { Plus, Pencil, Trash, Grid } from '@mynaui/icons-react';
+import { Plus, Pencil, Trash, Grid, Download } from '@mynaui/icons-react';
 import Popover from '@/shared/components/ui/Popover';
 import { useModeles, useDeleteModele } from '@/features/dossiers/hooks/useDossierData';
 import type { Modele } from '@/shared/types/dossier';
 import { useToast } from '@/shared/hooks/useToast';
 import ConfirmModal from '@/shared/components/ui/ConfirmModal';
 import { usePageHeader } from '@/shared/context/LayoutContext';
+import { exportToCSV, type CsvColumn } from '@/shared/utils/csvExporter';
 
 export const ModelesListPage = () => {
 	const navigate = useNavigate();
@@ -38,16 +39,32 @@ export const ModelesListPage = () => {
 		}
 	};
 
-	// Mettre en place les actions du header
-	const headerActions = useMemo(() => (
-		<Button
-			variant="Primary"
-			icon={Plus}
-			onClick={() => navigate('/admin/modeles/new')}
-		>
-			Nouveau Modèle
-		</Button>
-	), [navigate]);
+ // Exportation model csv
+ const handleExport = useCallback(() =>{
+    const exportColumns: CsvColumn<Modele>[] = [
+        { key: 'noModele', header: 'Numero Modele'},
+        { key: 'nomModele', header: 'Nom Modele'},
+        { key: 'descriptionModele', header: 'Description Modele'},
+    ];
+    exportToCSV(modeles as Modele[], exportColumns, 'modeles')
+ }, [modeles])
+
+ // Mettre en place les actions du header
+ const headerActions = useMemo(() => (
+    <div className='flex gap-2'>
+    <Button variant="Secondary" icon={Download} onClick={handleExport}>
+        Exporter CSV
+      </Button>
+
+  <Button
+   variant="Primary"
+   icon={Plus}
+   onClick={() => navigate('/admin/modeles/new')}
+  >
+   Nouveau Modèle
+  </Button>
+  </div>
+ ), [handleExport, navigate]);
 
 	usePageHeader(
 		'Modèles de Maisons',

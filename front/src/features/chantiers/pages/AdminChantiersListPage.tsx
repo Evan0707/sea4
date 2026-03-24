@@ -57,7 +57,7 @@ export const AdminChantiersListPage = () => {
       { key: 'status', header: 'Statut' },
     ];
     exportToCSV(chantiers as Chantier[], exportColumns, 'chantiers');
-  }, [chantiers]);
+  }, [chantiers] );
 
   // actions en-tête
   const headerActions = useMemo(() => (
@@ -69,7 +69,7 @@ export const AdminChantiersListPage = () => {
         Voir la carte
       </Button>
     </div>
-  ), [navigate, handleExport]);
+  ), [handleExport, navigate]);
 
   // en-tête de la page
   usePageHeader(

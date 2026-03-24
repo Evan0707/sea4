@@ -60,8 +60,8 @@ export const UtilisateursListPage = () => {
   // Configuration des actions dans le header
   const headerActions = useMemo(() => (
     <div className="flex items-center gap-2">
-      <Button variant='Secondary' onClick={handleExport} icon={Download}>
-        Exporter
+      <Button variant="Secondary" onClick={handleExport} icon={Download}>
+        Exporter CSV
       </Button>
       <Button variant='Primary' onClick={() => navigate('/admin/utilisateurs/new')} icon={Pencil}>
         Nouveau
