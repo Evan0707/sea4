@@ -8,6 +8,18 @@ security:
             entity:
                 class: App\Entity\Utilisateur
                 property: login
+
+        # Provider pour l'artisan car il se connecte avec son mail
+        artisan_provider:
+            entity:
+                class: App\Entity\Artisan
+                property: email
+
+        # On chaîne les providers pour chercher dans l'un puis dans l'autre
+        chain_provider:
+            chain:
+                providers: [app_user_provider, artisan_provider]
+
     firewalls:
         dev:
             pattern: ^/(_(profiler|wdt)|css|images|js)/
@@ -15,6 +27,7 @@ security:
         login:
             pattern: ^/api/login
             stateless: true
+            provider: chain_provider
             json_login:
                 check_path: /api/login_check
                 username_path: username
@@ -24,6 +37,7 @@ security:
         api:
             pattern: ^/api
             stateless: true
+            provider: chain_provider
             jwt: ~
 
             # activate different ways to authenticate
@@ -37,10 +51,20 @@ security:
     access_control:
         - { path: ^/api/login, roles: PUBLIC_ACCESS }
         - { path: ^/api/login_check, roles: PUBLIC_ACCESS }
-        - { path: ^/api/register, roles: ROLE_ADMIN }
+        - { path: ^/api/register, roles: PUBLIC_ACCESS }
+        - { path: ^/api/modeles, roles: PUBLIC_ACCESS }
+        - { path: ^/api/maitres-oeuvre, roles: PUBLIC_ACCESS }
+        - { path: ^/api/chantiers, roles: PUBLIC_ACCESS }
+        - { path: ^/api/etapes, roles: PUBLIC_ACCESS }
         - { path: ^/api/admin, roles: ROLE_ADMIN }
+        - { path: ^/api/artisan/mes-chantiers, roles: ROLE_ARTISAN }
+        - { path: ^/api/artisan, roles: PUBLIC_ACCESS }
         - { path: ^/api/commercial, roles: ROLE_COMMERCIAL }
         - { path: ^/api/maitre_oeuvre, roles: ROLE_MAITRE_OEUVRE }
+        - { path: ^/api/dossier, roles: PUBLIC_ACCESS }
+        - { path: ^/api/dossiers, roles: PUBLIC_ACCESS }
+        - { path: ^/api/mes-dossiers, roles: PUBLIC_ACCESS }
+        - { path: ^/api/utilisateurs, roles: PUBLIC_ACCESS }
         - { path: ^/api, roles: IS_AUTHENTICATED_FULLY }
 
 when@test:

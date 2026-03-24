@@ -10,6 +10,7 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Doctrine\ORM\EntityManagerInterface;
+use App\Entity\Artisan;
 
 /**
  * Contrôleur gérant les utilisateurs (liste, profil, suppression).
@@ -50,7 +51,7 @@ class UtilisateurController extends AbstractController
             ->setParameter('q', "%$q%");
         }
 
-     
+
         $qb->orderBy('u.login', $sortOrder);
 
         $rows = $qb->getQuery()->getResult();
@@ -88,8 +89,21 @@ class UtilisateurController extends AbstractController
     #[Route('/me', name: 'utilisateurs_me', methods: ['GET'])]
     public function me(): JsonResponse
     {
-       
+
         $u = $this->getUser();
+
+        //Si l'utilisateur est un Artisan
+        if ($u instanceof Artisan) {
+            return $this->json([
+                'noUtilisateur' => $u->getId(),
+                'login' => $u->getEmail(),
+                'nom' => $u->getNom(),
+                'prenom' => $u->getPrenom(),
+                'role' => 'artisan',
+            ]);
+        }
+
+
         if (!$u instanceof Utilisateur) {
             return $this->json(['error' => 'Not authenticated'], 401);
         }
@@ -158,6 +172,17 @@ class UtilisateurController extends AbstractController
     {
         /** @var Utilisateur|null $u */
         $u = $this->getUser();
+
+        if ($u instanceof Artisan) {
+            return $this->json([
+                'noUtilisateur' => $u->getId(),
+                'login'         => $u->getEmail(),
+                'nom'           => $u->getNom(),
+                'prenom'        => $u->getPrenom(),
+                'role'          => 'artisan',
+            ]);
+        }
+
         if (!$u instanceof Utilisateur) {
             return $this->json(['error' => 'Not authenticated'], 401);
         }
@@ -188,8 +213,19 @@ class UtilisateurController extends AbstractController
     #[Route('/profil', name: 'profil_update', methods: ['PUT'])]
     public function updateProfil(Request $request, EntityManagerInterface $em): JsonResponse
     {
- 
+
         $u = $this->getUser();
+
+        if ($u instanceof Artisan) {
+            return $this->json([
+                'noUtilisateur' => $u->getId(),
+                'login'         => $u->getEmail(),
+                'nom'           => $u->getNom(),
+                'prenom'        => $u->getPrenom(),
+                'role'          => 'artisan',
+            ]);
+        }
+
         if (!$u instanceof Utilisateur) {
             return $this->json(['error' => 'Not authenticated'], 401);
         }

@@ -60,6 +60,8 @@ const UtilisateurItem = ({
         return 'Commercial';
       case 'maitre_oeuvre':
         return 'Maître d\'œuvre';
+      case 'artisan':
+        return 'Artisan';
       default:
         return role;
     }

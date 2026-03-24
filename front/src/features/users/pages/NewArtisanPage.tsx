@@ -1,19 +1,13 @@
-
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
 import apiClient from '@/shared/api/client';
 import Input from '@/shared/components/ui/Input';
 import { AddressAutocomplete } from '@/shared/components/ui/AddressAutocomplete';
 import Button from '@/shared/components/ui/Button';
 import EtapeMultiSelect from '@/shared/components/ui/EtapeMultiSelect';
 import { useToast } from '@/shared/hooks/useToast';
-import { usePageHeader } from '@/shared/context/LayoutContext';
-import { artisanSchema, type ArtisanFormData } from '@/shared/utils/validators';
-import { Card, CardContent, CardHeader, CardTitle } from '@/shared/components/ui/Card';
-import { H1, Text } from '@/shared/components/ui/Typography';
 
+import { usePageHeader } from '@/shared/context/LayoutContext';
 
 interface Etape { noEtape: number; nomEtape: string }
 
@@ -21,173 +15,90 @@ const NewArtisanPage = () => {
   usePageHeader('Nouveau Artisan');
   const navigate = useNavigate();
   const { addToast } = useToast();
+  const [nom, setNom] = useState('');
+  const [prenom, setPrenom] = useState('');
+  const [email, setEmail] = useState('');
+  const [telephone, setTelephone] = useState('');
+  const [adresse, setAdresse] = useState('');
+  const [cp, setCp] = useState('');
+  const [ville, setVille] = useState('');
+  const [mdp, setMDP] = useState('');
   const [etapes, setEtapes] = useState<Etape[]>([]);
+  const [saving, setSaving] = useState(false);
 
-  const { register, handleSubmit, setValue, watch, formState: { errors, isSubmitting } } = useForm<ArtisanFormData>({
-    resolver: zodResolver(artisanSchema),
-    defaultValues: {
-      nomArtisan: '',
-      prenomArtisan: '',
-      emailArtisan: '',
-      telArtisan: '',
-      adresseArtisan: '',
-      cpArtisan: '',
-      villeArtisan: '',
-    }
-  });
-
-  const adresseArtisan = watch('adresseArtisan');
-
-  const onSubmit = async (data: ArtisanFormData) => {
+  // Gestion de la soumission du formulaire
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSaving(true);
     try {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const payload: any = {
-        nomArtisan: data.nomArtisan,
-        prenomArtisan: data.prenomArtisan || undefined,
-        emailArtisan: data.emailArtisan || undefined,
-        telArtisan: data.telArtisan || undefined,
-        adresseArtisan: data.adresseArtisan || undefined,
-        cpArtisan: data.cpArtisan || undefined,
-        villeArtisan: data.villeArtisan || undefined,
+        nomArtisan: nom,
+        prenomArtisan: prenom,
+        emailArtisan: email,
+        telArtisan: telephone,
+        adresseArtisan: adresse,
+        cpArtisan: cp,
+        villeArtisan: ville,
+        mdpArtisan: mdp,
       };
       if (etapes.length) payload.etapes = etapes;
 
       await apiClient.post('/artisan', payload);
       addToast('Artisan créé avec succès', 'success');
       navigate(-1);
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
+      console.error('Erreur create artisan', err);
       const message = err.response?.data?.message || 'Erreur lors de la création';
       addToast(message, 'error');
+    } finally {
+      setSaving(false);
     }
   };
 
   return (
-    <div className="p-6 h-full flex flex-col max-w-4xl mx-auto w-full overflow-y-auto">
-      <div className="mb-6">
-        <H1 className="mb-2">Nouveau Artisan</H1>
+    <div className="p-4 md:p-8 h-screen flex flex-col">
+      <div className="flex-1 overflow-y-auto w-full max-w-3xl mx-auto">
+        <form onSubmit={handleSubmit} className="space-y-4 bg-bg-secondary p-4 md:p-6 rounded-lg border border-border">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <Input type='text' label='Nom' name='nomArtisan' value={nom} onChange={(e) => setNom(e.target.value)} required />
+            <Input type='text' label='Prénom' name='prenomArtisan' value={prenom} onChange={(e) => setPrenom(e.target.value)} />
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <Input type='email' label='Email' name='emailArtisan' value={email} onChange={(e) => setEmail(e.target.value)} placeholder="contact@artisan.com" />
+            <Input type='tel' label='Téléphone' name='telArtisan' value={telephone} onChange={(e) => setTelephone(e.target.value)} placeholder="06 12 34 56 78" />
+          </div>
+
+          <AddressAutocomplete
+            label="Adresse"
+            value={adresse}
+            onChange={(value) => setAdresse(value)}
+            onAddressSelect={(address) => {
+              setAdresse(address.label);
+              setCp(address.postcode);
+              setVille(address.city);
+            }}
+            info="Commencez à taper l'adresse pour voir les suggestions"
+            placeholder="123 rue de la Paix"
+          />
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <Input type='text' label='Code postal' name='cpArtisan' value={cp} onChange={(e) => setCp(e.target.value)} />
+            <Input type='text' label='Ville' name='villeArtisan' value={ville} onChange={(e) => setVille(e.target.value)} />
+          </div>
+
+          <div className="grid grid-cols-1 gap-4">
+              <Input type='password' label='Mot de passe' name='mot_de_passe' value={mdp} onChange={(e) => setMDP(e.target.value)} />
+          </div>
+
+          <EtapeMultiSelect value={etapes} onChange={(items) => setEtapes(items)} />
+
+          <div className="flex gap-3">
+            <Button type="button" variant="Secondary" onClick={() => navigate(-1)}>Annuler</Button>
+            <Button type='submit' variant="Primary" loading={saving}>Créer</Button>
+          </div>
+        </form>
       </div>
-
-      <Card className="w-full">
-        <CardHeader>
-          <CardTitle>Informations générales</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <Input
-                type="text"
-                label="Nom"
-                name="nomArtisan"
-                register={register('nomArtisan')}
-                error={errors.nomArtisan?.message}
-                required
-              />
-              <Input
-                type="text"
-                label="Prénom"
-                name="prenomArtisan"
-                register={register('prenomArtisan')}
-                error={errors.prenomArtisan?.message}
-              />
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <Input
-                type="email"
-                label="Email"
-                name="emailArtisan"
-                placeholder="contact@artisan.com"
-                register={register('emailArtisan')}
-                error={errors.emailArtisan?.message}
-              />
-              <Input
-                type="tel"
-                label="Téléphone"
-                name="telArtisan"
-                placeholder="06 12 34 56 78"
-                register={register('telArtisan')}
-                error={errors.telArtisan?.message}
-              />
-            </div>
-
-            <div className="space-y-4">
-              <div className="flex items-center gap-2">
-                <Text variant="caption" className="font-semibold text-text-primary uppercase tracking-wider">Localisation</Text>
-                <div className="h-px flex-1 bg-border" />
-              </div>
-
-                <AddressAutocomplete
-                  label="Adresse"
-                  value={adresseArtisan}
-                  onChange={(value) => setValue('adresseArtisan', value)}
-                  onAddressSelect={(address) => {
-                    setValue('adresseArtisan', address.label);
-                    setValue('cpArtisan', address.postcode);
-                    setValue('villeArtisan', address.city);
-                  }}
-                  info
-                  message="Commencez à taper l'adresse pour voir les suggestions de localisation précise."
-                  placeholder="123 rue de la Paix"
-                  required
-                />
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <Input
-                  type="text"
-                  label="Code postal"
-                  name="cpArtisan"
-                  register={register('cpArtisan')}
-                  error={errors.cpArtisan?.message}
-                  required
-                />
-                <Input
-                  type="text"
-                  label="Ville"
-                  name="villeArtisan"
-                  register={register('villeArtisan')}
-                  error={errors.villeArtisan?.message}
-                  required
-                />
-              </div>
-            </div>
-
-            <div className="space-y-4">
-              <div className="flex items-center gap-2">
-                <Text variant="caption" className="font-semibold text-text-primary uppercase tracking-wider">Qualifications</Text>
-                <div className="h-px flex-1 bg-border" />
-              </div>
-              <EtapeMultiSelect 
-                label="Domaines d'intervention"
-                value={etapes} 
-                onChange={(items) => setEtapes(items)} 
-                info
-                message="Sélectionnez les étapes ou corps de métier sur lesquels cet artisan intervient par défaut."
-                required
-              />
-            </div>
-
-            <div className="flex justify-end gap-3 pt-6 border-t border-border">
-              <Button
-                variant="Secondary"
-                type="button"
-                size="md"
-                onClick={() => navigate(-1)}
-              >
-                Annuler
-              </Button>
-              <Button
-                variant="Primary"
-                type="submit"
-                size="md"
-                loading={isSubmitting}
-              >
-                Créer l'artisan
-              </Button>
-            </div>
-          </form>
-        </CardContent>
-      </Card>
     </div>
   );
 };

@@ -3,14 +3,15 @@
 namespace App\Entity;
 
 use App\Repository\ArtisanRepository;
-use App\Entity\IndisponibiliteArtisan;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
+use Symfony\Component\Security\Core\User\UserInterface;
 
 #[ORM\Table(name: 'artisan', schema: 'batiparti')]
 #[ORM\Entity(repositoryClass: ArtisanRepository::class)]
-class Artisan
+class Artisan implements UserInterface, PasswordAuthenticatedUserInterface
 {
     #[ORM\Id]
     #[ORM\GeneratedValue(strategy: 'IDENTITY')]
@@ -37,6 +38,9 @@ class Artisan
 
     #[ORM\Column(name: 'telArtisan', length: 15, nullable: true)]
     private ?string $telephone = null;
+
+    #[ORM\Column(name: '"mdpArtisan"', length: 255, nullable: true)]
+    private ?string $password = null;
 
     #[ORM\Column(name: 'actif', type: 'boolean', options: ['default' => true])]
     private bool $actif = true;
@@ -259,5 +263,31 @@ class Artisan
             $etapeChantier->removeArtisan($this);
         }
         return $this;
+    }
+
+    public function getUserIdentifier(): string
+    {
+        return (string) $this->email;
+    }
+
+    public function getRoles(): array
+    {
+        return ['ROLE_ARTISAN'];
+    }
+
+    public function getPassword(): ?string
+    {
+        return $this->password;
+    }
+
+    public function setPassword(?string $password): static
+    {
+        $this->password = $password;
+        return $this;
+    }
+
+    public function eraseCredentials(): void
+    {
+        // TODO: Implement eraseCredentials() method.
     }
 }
