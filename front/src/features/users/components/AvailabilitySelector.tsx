@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { X, Check, DangerTriangle } from '@mynaui/icons-react';
 import Button from '@/shared/components/ui/Button';
 import SearchBar from '@/shared/components/ui/SearchBar';
@@ -24,6 +24,7 @@ interface AvailabilitySelectorProps {
 export const AvailabilitySelector = ({ isOpen, onClose, onSelect, etape, currentArtisanId }: AvailabilitySelectorProps) => {
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
+  const [searchTerm, setSearchTerm] = useState('');
   const [artisans, setArtisans] = useState<Artisan[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -45,7 +46,7 @@ export const AvailabilitySelector = ({ isOpen, onClose, onSelect, etape, current
   }, [isOpen, dateDebutTheorique, nbJours]);
 
   // Recherche des artisans disponibles
-  const searchAvailableArtisans = async () => {
+  const searchAvailableArtisans = useCallback(async () => {
     if (!startDate || !endDate) return;
 
     setLoading(true);
@@ -65,18 +66,16 @@ export const AvailabilitySelector = ({ isOpen, onClose, onSelect, etape, current
     } finally {
       setLoading(false);
     }
-  };
+  }, [startDate, endDate, etape.noEtape]);
 
   // Gestion de la recherche des artisans disponibles
   useEffect(() => {
     if (isOpen && startDate && endDate) {
       searchAvailableArtisans();
     }
-  }, [isOpen, startDate, endDate]);
+  }, [isOpen, startDate, endDate, searchAvailableArtisans]);
 
   if (!isOpen) return null;
-
-  const [searchTerm, setSearchTerm] = useState('');
 
   const filteredArtisans = artisans.filter(artisan => {
     const searchLower = searchTerm.toLowerCase();

@@ -19,17 +19,17 @@ export const DossiersListPage = () => {
   const [search, setSearch] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
-  const [dossierToDelete, setDossierToDelete] = useState<number | null>(null);
+  const [dossiersToDelete, setDossiersToDelete] = useState<number[]>([]);
 
-  const { dossiers, loading, error, deleteDossier } = useDossiers({
+  const { dossiers, loading, error, deleteDossier, refetch } = useDossiers({
     search: debouncedSearch,
     sortOrder,
   });
 
   const confirmDelete = async () => {
-    if (dossierToDelete) {
-      await deleteDossier(dossierToDelete);
-      setDossierToDelete(null);
+    if (dossiersToDelete.length > 0) {
+      await Promise.all(dossiersToDelete.map(id => deleteDossier(id)));
+      setDossiersToDelete([]);
     }
   };
 
@@ -152,7 +152,7 @@ export const DossiersListPage = () => {
             )}
             <Popover.Item
               variant="destructive"
-              onClick={() => setDossierToDelete(d.noChantier)}
+              onClick={() => setDossiersToDelete([d.noChantier])}
               icon={Trash}
             >
               Supprimer
@@ -175,16 +175,13 @@ export const DossiersListPage = () => {
 
       </div>
 
-      {error && (
-        <div className="mb-4 p-4 bg-red-50 text-red-600 rounded-md">
-          {error}
-        </div>
-      )}
-
       <DataList
         data={dossiers}
         columns={columns}
         loading={loading}
+        isError={!!error}
+        errorTitle="Erreur de chargement"
+        errorDescription="Impossible de récupérer la liste des dossiers."
         sortColumn="start"
         sortDirection={sortOrder}
         onSort={() => setSortOrder(prev => prev === 'asc' ? 'desc' : 'asc')}
@@ -197,14 +194,19 @@ export const DossiersListPage = () => {
           }
         }}
         emptyMessage="Aucun dossier trouvé"
+        selectable={true}
+        onDeleteSelected={(keys) => setDossiersToDelete(keys as number[])}
+        onRefresh={refetch}
       />
 
       <ConfirmModal
-        isOpen={!!dossierToDelete}
-        onClose={() => setDossierToDelete(null)}
+        isOpen={dossiersToDelete.length > 0}
+        onClose={() => setDossiersToDelete([])}
         onConfirm={confirmDelete}
-        title="Supprimer le dossier"
-        message="Êtes-vous sûr de vouloir supprimer ce dossier ? Cette action est irréversible."
+        title={dossiersToDelete.length > 1 ? "Supprimer les dossiers" : "Supprimer le dossier"}
+        message={dossiersToDelete.length > 1
+          ? `Êtes-vous sûr de vouloir supprimer ces ${dossiersToDelete.length} dossiers ? Cette action est irréversible.`
+          : "Êtes-vous sûr de vouloir supprimer ce dossier ? Cette action est irréversible."}
         confirmText="Supprimer"
       />
     </div>

@@ -3,18 +3,19 @@ import { useArtisan, useArtisanPlanning } from '../hooks/useArtisans';
 import { useParams, useNavigate } from 'react-router-dom';
 import { usePageHeader } from '@/shared/context/LayoutContext';
 import Button from '@/shared/components/ui/Button';
-import { Pencil, ArrowLeft, Envelope, Telephone, Location, X } from '@mynaui/icons-react';
+import { Pencil, ArrowLeft, Envelope, Telephone, Location, X, Calendar, Briefcase, DangerTriangle } from '@mynaui/icons-react';
 import { H1, Text, H3 } from '@/shared/components/ui/Typography';
 import Skeleton from '@/shared/components/ui/Skeleton';
 import apiClient from '@/shared/api/client';
 import CalendarComponent, { type CalendarEvent } from '@/shared/components/ui/CalendarComponent';
 import { useToast } from '@/shared/hooks/useToast';
 import Input from '@/shared/components/ui/Input';
-import { format, isWithinInterval, parseISO } from 'date-fns';
+import { format, isWithinInterval, parseISO, isAfter, startOfToday } from 'date-fns';
 import DateInput from '@/shared/components/ui/DateInput';
 import CopyToClipboard from '@/shared/components/ui/CopyToClipboard';
 import { Card } from '@/shared/components/ui/Card';
 import ConfirmModal from '@/shared/components/ui/ConfirmModal';
+import { Avatar } from '@/shared/components/ui/Avatar';
 
 
 
@@ -23,7 +24,7 @@ const ArtisanDetailsPage = () => {
   const navigate = useNavigate();
   const toast = useToast();
 
-  const { data: artisan, isLoading: loadingArtisan } = useArtisan(id);
+  const { data: artisan, isLoading: loadingArtisan, isError: artisanError } = useArtisan(id);
   const { data: planningData, refetch: refreshPlanning } = useArtisanPlanning(id);
   const planning = planningData || { assignments: [], unavailability: [] };
 
@@ -37,6 +38,16 @@ const ArtisanDetailsPage = () => {
   const [motif, setMotif] = useState('');
   const [eventToDelete, setEventToDelete] = useState<CalendarEvent | null>(null);
 
+  const fullName = artisan
+    ? `${artisan.nomArtisan ?? ''}${artisan.prenomArtisan ? ' ' + artisan.prenomArtisan : ''}`.trim()
+    : '';
+
+  // Stats
+  const today = startOfToday();
+  const upcomingMissions = planning.assignments.filter((e: CalendarEvent) => isAfter(parseISO(e.end), today)).length;
+  const upcomingUnavailabilities = planning.unavailability.filter((e: CalendarEvent) => isAfter(parseISO(e.end), today)).length;
+  const qualificationsCount = artisan?.etapes?.length ?? 0;
+
   // Configuration des actions du header
   const headerActions = useMemo(() => (
     <div className="flex items-center gap-2">
@@ -46,8 +57,9 @@ const ArtisanDetailsPage = () => {
     </div>
   ), [navigate]);
 
+  // Update page header with artisan name once loaded
   usePageHeader(
-    'Détails Artisan',
+    artisan ? fullName || 'Détails Artisan' : 'Détails Artisan',
     headerActions
   );
 
@@ -94,8 +106,6 @@ const ArtisanDetailsPage = () => {
     const hasOverlap = allEvents.some(event => {
       const evStart = parseISO(event.start);
       const evEnd = parseISO(event.end);
-
-      // Vérification de chevauchement
       return (newStart <= evEnd && newEnd >= evStart);
     });
 
@@ -114,7 +124,6 @@ const ArtisanDetailsPage = () => {
       });
       toast.addToast('Indisponibilité ajoutée', 'success');
       setModalOpen(false);
-      // Refresh data
       refreshPlanning();
     } catch (error) {
       console.error(error);
@@ -131,7 +140,6 @@ const ArtisanDetailsPage = () => {
     try {
       await apiClient.delete(`/artisan/unavailability/${idStr}`);
       toast.addToast('Indisponibilité supprimée', 'success');
-      // Refresh data
       refreshPlanning();
     } catch (error) {
       console.error(error);
@@ -144,11 +152,59 @@ const ArtisanDetailsPage = () => {
 
   if (loading) {
     return (
-      <div className="p-8 space-y-6">
-        <div className="flex gap-6">
-          <Skeleton className="h-64 flex-1 rounded-xl" />
+      <div className="p-8 max-w-[1600px] mx-auto space-y-6">
+        <Card variant="highlight" className="flex flex-col md:flex-row gap-6 items-start">
+          <Skeleton className="h-24 w-24 rounded-full border-4 border-bg-primary shrink-0" />
+          <div className="flex-1 space-y-3 pt-1 w-full">
+            <Skeleton className="h-8 w-64 rounded-[var(--radius-sm)]" />
+            <div className="flex gap-2">
+              {[...Array(3)].map((_, i) => <Skeleton key={i} className="h-6 w-20 rounded-[var(--radius-sm)]" />)}
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-10 gap-y-3 mt-4">
+              <div className="flex gap-2"><Skeleton className="h-8 w-8 rounded-lg shrink-0" /><Skeleton className="h-8 w-full" /></div>
+              <div className="flex gap-2"><Skeleton className="h-8 w-8 rounded-lg shrink-0" /><Skeleton className="h-8 w-full" /></div>
+              <div className="flex gap-2"><Skeleton className="h-8 w-8 rounded-lg shrink-0" /><Skeleton className="h-8 w-full" /></div>
+            </div>
+          </div>
+          <Skeleton className="h-10 w-28 rounded-[var(--radius)] shrink-0" />
+        </Card>
+        <div className="grid grid-cols-3 gap-4 animate-in fade-in slide-in-from-bottom-4 duration-500 delay-75">
+          {[...Array(3)].map((_, i) => (
+            <Card key={i} className="flex items-center gap-4 py-4">
+              <Skeleton className="h-10 w-10 rounded-[var(--radius-lg)] shrink-0" />
+              <div className="space-y-2">
+                <Skeleton className="h-8 w-12" />
+                <Skeleton className="h-3 w-24" />
+              </div>
+            </Card>
+          ))}
         </div>
-        <Skeleton className="h-96 w-full rounded-xl" />
+        <Card className="h-[600px]">
+          <div className="flex justify-between items-center mb-6">
+            <Skeleton className="h-6 w-32" />
+            <div className="flex gap-4">
+              <Skeleton className="h-4 w-24" />
+              <Skeleton className="h-4 w-24" />
+            </div>
+          </div>
+          <Skeleton className="h-[500px] w-full" />
+        </Card>
+      </div>
+    );
+  }
+
+  if (artisanError || (!loadingArtisan && !artisan)) {
+    return (
+      <div className="p-8 h-full flex flex-col items-center justify-center">
+        <div className="bg-red/5 border border-red/20 rounded-[var(--radius-lg)] p-6 text-center max-w-md">
+          <Text className="text-lg font-bold text-red mb-2">Artisan introuvable</Text>
+          <Text className="text-sm text-text-secondary mb-4">
+            {artisanError ? 'Une erreur est survenue lors du chargement.' : "Cet artisan n'existe pas ou a été supprimé."}
+          </Text>
+          <Button variant="Secondary" icon={ArrowLeft} onClick={() => navigate('/admin/artisans')}>
+            Retour aux artisans
+          </Button>
+        </div>
       </div>
     );
   }
@@ -156,21 +212,22 @@ const ArtisanDetailsPage = () => {
   if (!artisan) return null;
 
   return (
-    <div className="p-8 max-w-[1600px] mx-auto space-y-8 relative">
-      {/* Modal */}
+    <div className="p-8 max-w-[1600px] mx-auto space-y-6 relative">
+      {/* Constraint Modal */}
       {modalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="bg-bg-primary p-6 rounded-xl w-full max-w-md border border-border animate-in zoom-in-95 duration-200">
+          <div className="bg-bg-primary p-6 rounded-[var(--radius-lg)] w-full max-w-md border border-border animate-in zoom-in-95 duration-200 shadow-xl">
             <div className="flex justify-between items-center mb-6">
-              <H3 className="text-xl font-bold">Ajouter une contrainte</H3>
-              <button onClick={() => setModalOpen(false)} className="p-1 text-text-secondary hover:text-text-primary hover:bg-bg-secondary rounded transition-colors">
-                <X className="w-5 h-5" />
-              </button>
+              <H3 className="text-lg font-bold">Ajouter une contrainte</H3>
+              <Button variant="Ghost" size="icon" onClick={() => setModalOpen(false)}>
+                <X className="w-4 h-4" />
+              </Button>
             </div>
 
-            <div className="space-y-6">
-              <div className="flex bg-bg-secondary/50 p-1 rounded-lg border border-border">
-                <label className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-md cursor-pointer transition-all text-sm font-medium ${constraintType === 'indisponibilite' ? 'bg-white text-primary shadow-sm ring-1 ring-border/5' : 'text-text-secondary hover:text-text-primary'}`}>
+            <div className="space-y-5">
+              {/* Type selector */}
+              <div className="flex bg-bg-secondary/50 p-1 rounded-[var(--radius-lg)] border border-border">
+                <label className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-md cursor-pointer transition-all text-sm font-medium ${constraintType === 'indisponibilite' ? 'bg-bg-tertiary text-primary shadow-sm ring-1 ring-border/5' : 'text-text-secondary hover:text-text-primary'}`}>
                   <input
                     type="radio"
                     name="type"
@@ -178,9 +235,9 @@ const ArtisanDetailsPage = () => {
                     onChange={() => setConstraintType('indisponibilite')}
                     className="hidden"
                   />
-                  <span>Indisponibilité</span>
+                  Indisponibilité
                 </label>
-                <label className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-md cursor-pointer transition-all text-sm font-medium ${constraintType === 'chantier_externe' ? 'bg-white text-primary shadow-sm ring-1 ring-border/5' : 'text-text-secondary hover:text-text-primary'}`}>
+                <label className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-md cursor-pointer transition-all text-sm font-medium ${constraintType === 'chantier_externe' ? 'bg-bg-tertiary text-primary shadow-sm ring-1 ring-border/5' : 'text-text-secondary hover:text-text-primary'}`}>
                   <input
                     type="radio"
                     name="type"
@@ -188,61 +245,52 @@ const ArtisanDetailsPage = () => {
                     onChange={() => setConstraintType('chantier_externe')}
                     className="hidden"
                   />
-                  <span>Chantier Externe</span>
+                  Chantier Externe
                 </label>
               </div>
 
+              {/* Date range */}
               <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-1.5">
-                  <Text className="text-xs font-semibold text-text-secondary uppercase tracking-wider">Début</Text>
-                  <DateInput
-                    name="startDate"
-                    label="Début"
-                    value={selectedStartDate}
-                    onChange={(e) => {
-                      const newStart = e.target.value;
-                      setSelectedStartDate(newStart);
-                      // If new start is after end, update end
-                      if (selectedEndDate && newStart > selectedEndDate) {
-                        setSelectedEndDate(newStart);
-                      }
-                    }}
-                    max={selectedEndDate}
-                  />
-                </div>
-                <div className="space-y-1.5">
-                  <Text className="text-xs font-semibold text-text-secondary uppercase tracking-wider">Fin</Text>
-                  <DateInput
-                    name="endDate"
-                    label="Fin"
-                    value={selectedEndDate}
-                    onChange={(e) => {
-                      const newEnd = e.target.value;
-                      setSelectedEndDate(newEnd);
-                      // If new end is before start, update start
-                      if (selectedStartDate && newEnd < selectedStartDate) {
-                        setSelectedStartDate(newEnd);
-                      }
-                    }}
-                    min={selectedStartDate}
-                  />
-                </div>
+                <DateInput
+                  name="startDate"
+                  label="Début"
+                  value={selectedStartDate}
+                  onChange={(e) => {
+                    const newStart = e.target.value;
+                    setSelectedStartDate(newStart);
+                    if (selectedEndDate && newStart > selectedEndDate) {
+                      setSelectedEndDate(newStart);
+                    }
+                  }}
+                  max={selectedEndDate}
+                />
+                <DateInput
+                  name="endDate"
+                  label="Fin"
+                  value={selectedEndDate}
+                  onChange={(e) => {
+                    const newEnd = e.target.value;
+                    setSelectedEndDate(newEnd);
+                    if (selectedStartDate && newEnd < selectedStartDate) {
+                      setSelectedStartDate(newEnd);
+                    }
+                  }}
+                  min={selectedStartDate}
+                />
               </div>
 
               {constraintType === 'indisponibilite' && (
-                <div className="space-y-1.5">
-                  <Text className="text-xs font-semibold text-text-secondary uppercase tracking-wider">Motif</Text>
-                  <Input
-                    placeholder="Ex: Congés, Maladie..."
-                    name="motif"
-                    type="text"
-                    value={motif}
-                    onChange={(e) => setMotif(e.target.value)}
-                  />
-                </div>
+                <Input
+                  placeholder="Ex: Congés, Maladie..."
+                  name="motif"
+                  label="Motif (optionnel)"
+                  type="text"
+                  value={motif}
+                  onChange={(e) => setMotif(e.target.value)}
+                />
               )}
 
-              <div className="flex justify-end gap-3 pt-2">
+              <div className="flex justify-end gap-3 pt-1">
                 <Button variant="Secondary" onClick={() => setModalOpen(false)}>Annuler</Button>
                 <Button variant="Primary" onClick={handleSaveConstraint}>Enregistrer</Button>
               </div>
@@ -251,83 +299,149 @@ const ArtisanDetailsPage = () => {
         </div>
       )}
 
-      {/* Header Info Card */}
-      <Card variant="highlight" className="flex flex-col md:flex-row justify-between gap-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-        <div className="flex flex-col gap-4">
-          <div className="flex items-center gap-4">
-            <div className="h-20 w-20 bg-primary text-white rounded-full flex items-center justify-center text-3xl font-bold border-4 border-bg-primary ring-1 ring-border">
-              {artisan.nomArtisan.charAt(0)}{artisan.prenomArtisan.charAt(0)}
-            </div>
-            <div>
-              <H1 className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-primary to-primary/60">{artisan.nomArtisan} {artisan.prenomArtisan}</H1>
-              <div className="flex flex-wrap gap-2 mt-2">
-                {artisan.etapes?.map(e => (
-                  <span key={e.noEtape} className="px-2 py-0.5 bg-bg-secondary border border-border rounded text-xs text-text-secondary whitespace-nowrap">
-                    {e.nomEtape}
-                  </span>
-                ))}
+      {/* Profile Card */}
+      <Card variant="highlight" className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+        <div className="flex flex-col md:flex-row justify-between gap-6">
+          <div className="flex items-start gap-5">
+            <Avatar
+              size="xl"
+              fallback={fullName}
+              className="border-4 border-bg-primary ring-1 ring-border shrink-0"
+            />
+            <div className="flex flex-col gap-3 min-w-0">
+              <div>
+                <H1 className="font-bold text-text-primary leading-tight">
+                  {fullName || 'Artisan'}
+                </H1>
+                {artisan.etapes && artisan.etapes.length > 0 ? (
+                  <div className="flex flex-wrap gap-1.5 mt-2">
+                    {artisan.etapes.map(e => (
+                      <span key={e.noEtape} className="px-2 py-0.5 bg-bg-secondary border border-border rounded text-xs text-text-secondary whitespace-nowrap">
+                        {e.nomEtape}
+                      </span>
+                    ))}
+                  </div>
+                ) : (
+                  <Text className="text-xs text-text-secondary mt-1.5">Aucune qualification renseignée</Text>
+                )}
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-x-10 gap-y-2.5 mt-1">
+                {/* Adresse */}
+                {artisan.adresseArtisan ? (
+                  <div className="flex items-center gap-2.5 text-text-secondary group hover:text-primary transition-colors">
+                    <div className="p-1.5 bg-bg-secondary rounded-lg border border-border transition-colors shrink-0">
+                      <Location className="h-3.5 w-3.5" />
+                    </div>
+                    <div className="flex items-center gap-1.5 min-w-0">
+                      <Text className="truncate text-sm">{artisan.adresseArtisan}, {artisan.cpArtisan} {artisan.villeArtisan}</Text>
+                      <CopyToClipboard text={`${artisan.adresseArtisan}, ${artisan.cpArtisan} ${artisan.villeArtisan}`} />
+                    </div>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-2.5 text-text-secondary/40">
+                    <div className="p-1.5 bg-bg-secondary rounded-lg border border-border shrink-0">
+                      <Location className="h-3.5 w-3.5" />
+                    </div>
+                    <Text className="text-sm italic">Adresse non renseignée</Text>
+                  </div>
+                )}
+
+                {/* Téléphone */}
+                {artisan.telArtisan ? (
+                  <div className="flex items-center gap-2.5 text-text-secondary group hover:text-primary transition-colors">
+                    <div className="p-1.5 bg-bg-secondary rounded-lg border border-border transition-colors shrink-0">
+                      <Telephone className="h-3.5 w-3.5" />
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                      <Text className="text-sm">{artisan.telArtisan}</Text>
+                      <CopyToClipboard text={artisan.telArtisan} />
+                    </div>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-2.5 text-text-secondary/40">
+                    <div className="p-1.5 bg-bg-secondary rounded-lg border border-border shrink-0">
+                      <Telephone className="h-3.5 w-3.5" />
+                    </div>
+                    <Text className="text-sm italic">Téléphone non renseigné</Text>
+                  </div>
+                )}
+
+                {/* Email */}
+                {artisan.emailArtisan ? (
+                  <div className="flex items-center gap-2.5 text-text-secondary group hover:text-primary transition-colors">
+                    <div className="p-1.5 bg-bg-secondary rounded-lg border border-border transition-colors shrink-0">
+                      <Envelope className="h-3.5 w-3.5" />
+                    </div>
+                    <div className="flex items-center gap-1.5 min-w-0">
+                      <Text className="text-sm truncate">{artisan.emailArtisan}</Text>
+                      <CopyToClipboard text={artisan.emailArtisan} />
+                    </div>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-2.5 text-text-secondary/40">
+                    <div className="p-1.5 bg-bg-secondary rounded-lg border border-border shrink-0">
+                      <Envelope className="h-3.5 w-3.5" />
+                    </div>
+                    <Text className="text-sm italic">Email non renseigné</Text>
+                  </div>
+                )}
               </div>
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-3 mt-4">
-            <div className="flex items-center gap-3 text-text-secondary group hover:text-primary transition-colors">
-              <div className="p-2 bg-bg-secondary rounded-lg border border-border group-hover:border-primary/20 transition-colors">
-                <Location className="h-4 w-4" />
-              </div>
-              <div className="flex items-center gap-2">
-                <Text>{artisan.adresseArtisan}, {artisan.cpArtisan} {artisan.villeArtisan}</Text>
-                <CopyToClipboard text={`${artisan.adresseArtisan}, ${artisan.cpArtisan} ${artisan.villeArtisan}`} />
-              </div>
-            </div>
-            {artisan.telArtisan && (
-              <div className="flex items-center gap-3 text-text-secondary group hover:text-primary transition-colors">
-                <div className="p-2 bg-bg-secondary rounded-lg border border-border group-hover:border-primary/20 transition-colors">
-                  <Telephone className="h-4 w-4" />
-                </div>
-                <div className="flex items-center gap-2">
-                  <Text>{artisan.telArtisan}</Text>
-                  <CopyToClipboard text={artisan.telArtisan} />
-                </div>
-              </div>
-            )}
-            {artisan.emailArtisan && (
-              <div className="flex items-center gap-3 text-text-secondary group hover:text-primary transition-colors">
-                <div className="p-2 bg-bg-secondary rounded-lg border border-border group-hover:border-primary/20 transition-colors">
-                  <Envelope className="h-4 w-4" />
-                </div>
-                <div className="flex items-center gap-2">
-                  <Text>{artisan.emailArtisan}</Text>
-                  <CopyToClipboard text={artisan.emailArtisan} />
-                </div>
-              </div>
-            )}
+          <div className="flex items-start shrink-0">
+            <Button
+              variant="Primary"
+              onClick={() => navigate(`/admin/artisans/${id}/edit`)}
+              icon={Pencil}
+              size="sm"
+            >
+              Modifier
+            </Button>
           </div>
-        </div>
-
-        <div className="flex items-start">
-          <Button
-            variant="Primary"
-            onClick={() => navigate(`/admin/artisans/${id}/edit`)}
-            icon={Pencil}
-          >
-            Modifier
-          </Button>
         </div>
       </Card>
 
-      {/* Calendar Section */}
-      <div className="space-y-4">
+      {/* Stats ribbon */}
+      <div className="grid grid-cols-3 gap-4 animate-in fade-in slide-in-from-bottom-4 duration-500 delay-75">
+        <Card className="flex items-center gap-4 py-4">
+          <Briefcase className="h-6 w-6 text-text-primary" />
+          <div>
+            <Text className="text-2xl font-bold text-text-primary leading-none">{qualificationsCount}</Text>
+            <Text className="text-xs text-text-secondary mt-0.5">Qualification{qualificationsCount !== 1 ? 's' : ''}</Text>
+          </div>
+        </Card>
+
+        <Card className="flex items-center gap-4 py-4">
+          <Calendar className="h-6 w-6 text-text-primary" />
+          <div>
+            <Text className="text-2xl font-bold text-text-primary leading-none">{upcomingMissions}</Text>
+            <Text className="text-xs text-text-secondary mt-0.5">Mission{upcomingMissions !== 1 ? 's' : ''} à venir</Text>
+          </div>
+        </Card>
+
+        <Card className="flex items-center gap-4 py-4">
+          <DangerTriangle className={`h-6 w-6 text-text-primary`} />
+          <div>
+            <Text className={`text-2xl font-bold leading-none ${upcomingUnavailabilities > 0 ? 'text-red' : 'text-text-primary'}`}>{upcomingUnavailabilities}</Text>
+            <Text className="text-xs text-text-secondary mt-0.5">Indisponibilité{upcomingUnavailabilities !== 1 ? 's' : ''} à venir</Text>
+          </div>
+        </Card>
+      </div>
+
+      {/* Planning Section */}
+      <Card className="space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-500 delay-100">
         <div className="flex items-center justify-between">
-          <H3>Planning</H3>
+          <H3 className="font-semibold">Planning</H3>
           <div className="flex gap-4 text-sm">
             <div className="flex items-center gap-2">
-              <div className="w-3 h-3 bg-blue-100 border border-blue-500 rounded-sm"></div>
-              <span>Chantiers</span>
+              <div className="w-3 h-3 bg-primary/10 border border-primary rounded-sm"></div>
+              <span className="text-text-secondary">Chantiers</span>
             </div>
             <div className="flex items-center gap-2">
-              <div className="w-3 h-3 bg-red-100 border border-red-500 rounded-sm"></div>
-              <span>Indisponibilités</span>
+              <div className="w-3 h-3 bg-red/10 border border-red rounded-sm"></div>
+              <span className="text-text-secondary">Indisponibilités</span>
             </div>
           </div>
         </div>
@@ -344,16 +458,16 @@ const ArtisanDetailsPage = () => {
           }}
           onDateClick={handleDateClick}
         />
+      </Card>
 
-        <ConfirmModal
-          isOpen={!!eventToDelete}
-          onClose={() => setEventToDelete(null)}
-          onConfirm={confirmDeleteEvent}
-          title="Supprimer l'indisponibilité"
-          message="Confirmer la suppression de cette indisponibilité ?"
-          confirmText="Supprimer"
-        />
-      </div>
+      <ConfirmModal
+        isOpen={!!eventToDelete}
+        onClose={() => setEventToDelete(null)}
+        onConfirm={confirmDeleteEvent}
+        title="Supprimer l'indisponibilité"
+        message="Confirmer la suppression de cette indisponibilité ?"
+        confirmText="Supprimer"
+      />
     </div>
   );
 };

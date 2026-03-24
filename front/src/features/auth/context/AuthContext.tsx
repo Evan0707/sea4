@@ -13,6 +13,8 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | null>(null);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
+  const [isInitializing, setIsInitializing] = useState(true);
+
   // Gestion de l'état de l'utilisateur
   const [user, setUser] = useState<UserProfile | null>(() => {
     const savedToken = localStorage.getItem('token');
@@ -26,7 +28,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           nom: null,
           prenom: null
         };
-      } catch (e) {
+      } catch {
         localStorage.removeItem('token');
         return null;
       }
@@ -34,7 +36,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     return null;
   });
 
-  // QUand un token est present, on tente de recuperer le profile de l'utilisateur
+  // Écouter l'événement de déconnexion forcée (ex: 401 depuis l'intercepteur API)
+  useEffect(() => {
+    const handleForceLogout = () => logout();
+    window.addEventListener('auth:logout', handleForceLogout);
+    return () => window.removeEventListener('auth:logout', handleForceLogout);
+  }, []);
+
+  // Quand un token est present, on tente de recuperer le profile de l'utilisateur
   useEffect(() => {
     let mounted = true
     const fetchProfile = async () => {
@@ -42,14 +51,20 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         const res = await apiClient.get('/me')
         if (!mounted) return
         setUser(prev => prev ? ({ ...prev, nom: res.data.nom ?? null, prenom: res.data.prenom ?? null }) : null)
-      } catch (e) {
-        // Ignorer l'erreur (le token peut être invalide/expiration)
+      } catch {
+        // En cas d'erreur 401 sur /me, on déconnecte l'utilisateur
+        logout();
       }
     }
 
     if (user?.token) {
       fetchProfile()
     }
+
+    // On n'attend plus la réponse de /me pour afficher l'application.
+    // Le token décodé depuis localStorage gère déjà les rôles. 
+    // Ça évite le double chargement: Spinner (Auth) -> Skeleton (Dashboard)
+    setIsInitializing(false);
 
     return () => { mounted = false }
   }, [user?.token])
@@ -72,7 +87,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         try {
           const res = await apiClient.get('/me')
           setUser(prev => prev ? ({ ...prev, nom: res.data.nom ?? null, prenom: res.data.prenom ?? null }) : prev)
-        } catch (e) {
+        } catch {
           // ignore
         }
       })();
@@ -89,7 +104,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   return (
     <AuthContext.Provider value={{ user, login, logout }}>
-      {children}
+      {isInitializing ? (
+        <div className="min-h-screen w-full flex items-center justify-center bg-bg-primary">
+          <div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+        </div>
+      ) : children}
     </AuthContext.Provider>
   );
 };

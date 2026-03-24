@@ -11,11 +11,11 @@ import Popover from '@/shared/components/ui/Popover';
 import { formatDate } from '@/shared/utils/dateFormatter';
 import { useToast } from '@/shared/hooks/useToast';
 
-import type { Chantier } from '../../chantiers/types';
+import type { Chantier } from '@/features/chantiers/types';
 
 import ConfirmModal from '@/shared/components/ui/ConfirmModal';
 
-import { useChantiers } from '../../chantiers/hooks/useChantiers';
+import { useChantiers } from '@/features/chantiers/hooks/useChantiers';
 
 export const MesDossiersPage = () => {
   const navigate = useNavigate();
@@ -23,7 +23,7 @@ export const MesDossiersPage = () => {
   const [search, setSearch] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
-  const [dossierToDelete, setDossierToDelete] = useState<number | null>(null);
+  const [dossiersToDelete, setDossiersToDelete] = useState<number[]>([]);
 
   usePageHeader('Mes dossiers', undefined, 'Gérez vos dossiers en cours.');
 
@@ -36,7 +36,7 @@ export const MesDossiersPage = () => {
   }, [search]);
 
   // Utilisation du hook useChantiers avec endpoint /mes-dossiers
-  const { chantiers: dossiers, loading, refetch: refetch } = useChantiers({
+  const { chantiers: dossiers, loading, error, refetch: refetch } = useChantiers({
     endpoint: '/mes-dossiers',
     filters: {
       search: debouncedSearch,
@@ -46,17 +46,17 @@ export const MesDossiersPage = () => {
 
   // Gestion de la suppression
   const confirmDelete = async () => {
-    if (!dossierToDelete) return;
+    if (dossiersToDelete.length === 0) return;
 
     try {
-      await apiClient.delete(`/chantiers/${dossierToDelete}`);
-      addToast('Chantier supprimé avec succès', 'success');
+      await Promise.all(dossiersToDelete.map(id => apiClient.delete(`/chantiers/${id}`)));
+      addToast(dossiersToDelete.length > 1 ? 'Chantiers supprimés avec succès' : 'Chantier supprimé avec succès', 'success');
       refetch();
     } catch (error) {
       console.error('Erreur lors de la suppression:', error);
-      addToast('Erreur lors de la suppression du chantier', 'error');
+      addToast('Erreur lors de la suppression', 'error');
     }
-    setDossierToDelete(null);
+    setDossiersToDelete([]);
   };
 
   // Configuration des colonnes
@@ -115,7 +115,7 @@ export const MesDossiersPage = () => {
             </Popover.Item>
             <Popover.Item
               variant="destructive"
-              onClick={() => setDossierToDelete(d.noChantier)}
+              onClick={() => setDossiersToDelete([d.noChantier])}
               icon={Trash}
             >
               Supprimer
@@ -140,20 +140,29 @@ export const MesDossiersPage = () => {
         data={dossiers}
         columns={columns}
         loading={loading}
+        isError={!!error}
+        errorTitle="Erreur de chargement"
+        errorDescription="Impossible de récupérer la liste des dossiers."
+        errorAction={{ label: 'Réessayer', onClick: refetch }}
         sortColumn="start"
         sortDirection={sortOrder}
         onSort={() => setSortOrder(prev => prev === 'asc' ? 'desc' : 'asc')}
         keyExtractor={(item) => item.noChantier}
         onRowClick={(item) => navigate(`/maitre-doeuvre/chantiers/${item.noChantier}/completer`)}
         emptyMessage="Aucun dossier trouvé"
+        selectable={true}
+        onDeleteSelected={(keys) => setDossiersToDelete(keys as number[])}
+        onRefresh={refetch}
       />
 
       <ConfirmModal
-        isOpen={!!dossierToDelete}
-        onClose={() => setDossierToDelete(null)}
+        isOpen={dossiersToDelete.length > 0}
+        onClose={() => setDossiersToDelete([])}
         onConfirm={confirmDelete}
-        title="Supprimer le chantier"
-        message="Êtes-vous sûr de vouloir supprimer ce chantier ?"
+        title={dossiersToDelete.length > 1 ? "Supprimer les chantiers" : "Supprimer le chantier"}
+        message={dossiersToDelete.length > 1
+          ? `Êtes-vous sûr de vouloir supprimer ces ${dossiersToDelete.length} chantiers ? Cette action est irréversible.`
+          : "Êtes-vous sûr de vouloir supprimer ce chantier ? Cette action est irréversible."}
         confirmText="Supprimer"
       />
     </div>

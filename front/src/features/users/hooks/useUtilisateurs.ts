@@ -8,7 +8,7 @@ export const useUtilisateurs = (filters: UserFilters) => {
  const queryClient = useQueryClient();
  const queryKey = ['utilisateurs', filters];
 
- const { data: utilisateurs = [], isLoading: loading, refetch: fetchUtilisateurs } = useQuery({
+ const { data: utilisateurs = [], isLoading: loading, refetch: fetchUtilisateurs, error } = useQuery({
   queryKey,
   queryFn: async () => {
    const response = await apiClient.get<Utilisateur[]>('/utilisateurs', {
@@ -30,6 +30,7 @@ export const useUtilisateurs = (filters: UserFilters) => {
    toast.addToast('Utilisateur supprimé avec succès', 'success');
    queryClient.invalidateQueries({ queryKey: ['utilisateurs'] });
   },
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   onError: (error: any) => {
    console.error('Erreur suppression utilisateur', error);
    const backendMessage = error.response?.data?.details || error.response?.data?.error || 'Erreur lors de la suppression de l\'utilisateur';
@@ -42,7 +43,7 @@ export const useUtilisateurs = (filters: UserFilters) => {
   await deleteMutation.mutateAsync(noUtilisateur);
  };
 
- return { utilisateurs, loading, fetchUtilisateurs, deleteUtilisateur };
+ return { utilisateurs, loading, fetchUtilisateurs, deleteUtilisateur, error };
 };
 
 export const useUtilisateur = (id: string | undefined) => {

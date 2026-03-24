@@ -37,19 +37,10 @@ security:
     access_control:
         - { path: ^/api/login, roles: PUBLIC_ACCESS }
         - { path: ^/api/login_check, roles: PUBLIC_ACCESS }
-        - { path: ^/api/register, roles: PUBLIC_ACCESS }
-        - { path: ^/api/modeles, roles: PUBLIC_ACCESS }
-        - { path: ^/api/maitres-oeuvre, roles: PUBLIC_ACCESS }
-        - { path: ^/api/chantiers, roles: PUBLIC_ACCESS }
-        - { path: ^/api/etapes, roles: PUBLIC_ACCESS }
+        - { path: ^/api/register, roles: ROLE_ADMIN }
         - { path: ^/api/admin, roles: ROLE_ADMIN }
-        - { path: ^/api/artisan, roles: PUBLIC_ACCESS }
         - { path: ^/api/commercial, roles: ROLE_COMMERCIAL }
         - { path: ^/api/maitre_oeuvre, roles: ROLE_MAITRE_OEUVRE }
-        - { path: ^/api/dossier, roles: PUBLIC_ACCESS }
-        - { path: ^/api/dossiers, roles: PUBLIC_ACCESS }
-        - { path: ^/api/mes-dossiers, roles: PUBLIC_ACCESS }
-        - { path: ^/api/utilisateurs, roles: PUBLIC_ACCESS }
         - { path: ^/api, roles: IS_AUTHENTICATED_FULLY }
 
 when@test:

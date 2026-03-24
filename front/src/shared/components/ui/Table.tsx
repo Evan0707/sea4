@@ -1,8 +1,9 @@
 import type { ReactNode } from 'react';
+import { cn } from '@/shared/lib/utils';
 
 interface Column<T> {
  header: string;
- key?: string; // Optional if using render
+ key?: string;
  render?: (item: T, index: number) => ReactNode;
  align?: 'left' | 'center' | 'right';
  width?: string;
@@ -23,44 +24,57 @@ export const Table = <T,>({
  keyExtractor,
  emptyMessage = 'Aucune donnée',
  className = '',
- onRowClick
+ onRowClick,
 }: TableProps<T>) => {
  return (
-  <div className={`overflow-x-auto ${className}`}>
+  <div className={cn('w-full overflow-x-auto rounded-[var(--radius-lg)] border border-border', className)}>
    <table className="w-full text-sm">
     <thead>
-     <tr className="border-b border-border">
+     <tr className="border-b border-border bg-bg-secondary/60">
       {columns.map((col, index) => (
        <th
         key={index}
-        className={`py-3 px-4 text-text-primary font-semibold text-${col.align || 'left'} ${col.width || ''}`}
+        className={cn(
+         'px-4 py-3 text-xs font-semibold uppercase tracking-wide text-text-secondary',
+         `text-${col.align || 'left'}`,
+         col.width
+        )}
        >
         {col.header}
        </th>
       ))}
      </tr>
     </thead>
-    <tbody>
+    <tbody className="divide-y divide-border/60">
      {data.length > 0 ? (
       data.map((item, rowIndex) => (
        <tr
         key={keyExtractor(item)}
-        className={`border-b border-border/50 last:border-0 hover:bg-bg-primary/50 transition-colors ${onRowClick ? 'cursor-pointer' : ''}`}
+        className={cn(
+         'bg-bg-primary transition-colors',
+         onRowClick && 'cursor-pointer hover:bg-bg-secondary/50'
+        )}
         onClick={() => onRowClick && onRowClick(item)}
        >
         {columns.map((col, colIndex) => (
          <td
           key={colIndex}
-          className={`py-3 px-4 text-text-primary text-${col.align || 'left'}`}
+          className={cn(
+           'px-4 py-3 text-text-primary',
+           `text-${col.align || 'left'}`
+          )}
          >
-          {col.render ? col.render(item, rowIndex) : (item as any)[col.key as string]}
+          {col.render ? col.render(item, rowIndex) : (item as Record<string, React.ReactNode>)[col.key as string]}
          </td>
         ))}
        </tr>
       ))
      ) : (
       <tr>
-       <td colSpan={columns.length} className="py-8 text-center text-placeholder">
+       <td
+        colSpan={columns.length}
+        className="py-12 text-center text-sm text-placeholder"
+       >
         {emptyMessage}
        </td>
       </tr>

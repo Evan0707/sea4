@@ -31,11 +31,14 @@ export const useChantiers = ({ endpoint = '/chantiers', filters = {} }: UseChant
    if (filters.sortOrder) {
     data = [...data].sort((a, b) => {
      // Handle different field names (dateCreation vs start)
+     // eslint-disable-next-line @typescript-eslint/no-explicit-any
      const dateA = new Date((a as any).dateCreation || (a as any).start).getTime();
+     // eslint-disable-next-line @typescript-eslint/no-explicit-any
      const dateB = new Date((b as any).dateCreation || (b as any).start).getTime();
      return filters.sortOrder === 'asc' ? dateA - dateB : dateB - dateA;
     });
    }
+   // eslint-disable-next-line @typescript-eslint/no-explicit-any
    return data as any;
   },
  });
@@ -49,6 +52,7 @@ export const useChantiers = ({ endpoint = '/chantiers', filters = {} }: UseChant
    addToast('Chantier supprimé avec succès', 'success');
    queryClient.invalidateQueries({ queryKey: ['chantiers'] });
   },
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   onError: (error: any) => {
    const msg = error.response?.data?.message || error.response?.data?.error || 'Erreur lors de la suppression du chantier';
    addToast(msg, 'error');
@@ -70,6 +74,7 @@ export const useChantier = (id: string | undefined, options: { endpoint?: string
   queryFn: async () => {
    if (!id) return null;
    const url = options.endpoint ? `${options.endpoint}/${id}` : `/chantiers/${id}`;
+   // eslint-disable-next-line @typescript-eslint/no-explicit-any
    const response = await apiClient.get<any>(url);
    return response.data;
   },

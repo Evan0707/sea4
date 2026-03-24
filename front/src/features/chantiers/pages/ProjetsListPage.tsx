@@ -18,7 +18,7 @@ export const ProjetsListPage = () => {
 
   usePageHeader('Tous les projets', undefined, 'Consultez la liste de tous les projets.');
 
-  const { chantiers: projets, loading } = useChantiers({
+  const { chantiers: projets, loading, error, refetch } = useChantiers({
     filters: {
       search: debouncedSearch,
       sortOrder
@@ -103,12 +103,16 @@ export const ProjetsListPage = () => {
         data={projets as Projet[]}
         columns={columns}
         loading={loading}
+        isError={!!error}
+        errorTitle="Erreur de chargement"
+        errorDescription="Impossible de récupérer la liste des projets."
         sortColumn="dateCreation"
         sortDirection={sortOrder}
         onSort={() => setSortOrder(prev => prev === 'asc' ? 'desc' : 'asc')}
         keyExtractor={(item) => item.noChantier}
         onRowClick={(item) => navigate(`/chantiers/${item.noChantier}`)}
         emptyMessage="Aucun projet trouvé"
+        onRefresh={refetch}
       />
     </div>
   );

@@ -6,16 +6,16 @@ interface statusProps {
 
 const Status = ({ label }: statusProps) => {
 
-  const variant = label === 'Complété' && 'bg-green-50 text-green-700 border-green-200'
-    || label === 'Terminé' && 'bg-green-50 text-green-700 border-green-200'
-    || label === 'En chantier' && 'bg-orange-50 text-orange-700 border-orange-200'
-    || label === 'À venir' && 'bg-blue-50 text-blue-700 border-blue-200'
-    || label === 'À compléter' && 'bg-red-50 text-red-700 border-red-200'
+  const variant = label === 'Complété' && 'bg-bg-primary text-green-700 border-green-200'
+    || label === 'Terminé' && 'bg-bg-primary text-green-500 border-green-500'
+    || label === 'En chantier' && 'bg-bg-primary text-orange-500 border-orange-500'
+    || label === 'À venir' && 'bg-bg-primary text-blue-500 border-blue-500'
+    || label === 'À compléter' && 'bg-bg-primary text-red-500 border-red-500'
 
   return (
     <div className='flex items-center'>
-      {label === 'À compléter' && <DangerCircle size={16} className='text-red-700 mr-1.5' />}
-      <span className={`px-2 py-0.5 rounded text-xs font-medium border whitespace-nowrap ${variant}`}>
+      {label === 'À compléter' && <DangerCircle size={16} className='text-red-500 bg-bg-primary mr-1.5' />}
+      <span className={`px-2 py-0.5 rounded text-xs font-medium border whitespace-nowrap bg-bg-primary ${variant}`}>
         {label}
       </span>
     </div>

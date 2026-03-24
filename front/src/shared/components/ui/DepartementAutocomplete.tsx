@@ -8,18 +8,22 @@ interface DepartementAutocompleteProps {
   label: string;
   selectedDepartements: string[];
   onChange: (departements: string[]) => void;
-  info?: string;
+  info?: boolean;
+  message?: string;
   placeholder?: string;
   maxSelections?: number;
+  required?: boolean;
 }
 
 export const DepartementAutocomplete: React.FC<DepartementAutocompleteProps> = ({
   label,
   selectedDepartements,
   onChange,
-  info,
+  info = false,
+  message = '',
   placeholder = 'Rechercher un département...',
   maxSelections,
+  required = false,
 }) => {
   const [query, setQuery] = useState('');
   const [suggestions, setSuggestions] = useState<Departement[]>([]);
@@ -78,10 +82,11 @@ export const DepartementAutocomplete: React.FC<DepartementAutocompleteProps> = (
       <div className="flex items-center gap-2">
         <Label className="text-sm font-bold text-text-primary">
           {label}
+          {required && <span className="text-red ml-1">*</span>}
         </Label>
         {info && (
-          <Tooltip content={info}>
-            <InfoCircleSolid size={14} className="text-text-secondary" />
+          <Tooltip content={message}>
+            <InfoCircleSolid size={14} className="text-text-secondary cursor-help" />
           </Tooltip>
         )}
       </div>
@@ -129,7 +134,7 @@ export const DepartementAutocomplete: React.FC<DepartementAutocompleteProps> = (
         />
 
         {isOpen && suggestions.length > 0 && (
-          <div className="absolute z-50 w-full mt-1 bg-bg-secondary rounded-md shadow-lg border border-border max-h-60 overflow-y-auto">
+          <div className="absolute z-50 w-full mt-1 bg-bg-secondary/80 backdrop-blur-lg rounded-md shadow-lg border border-border/50 max-h-60 overflow-y-auto">
             {suggestions.map((dept) => {
               const isSelected = selectedDepartements.includes(dept.code);
               return (
@@ -137,7 +142,7 @@ export const DepartementAutocomplete: React.FC<DepartementAutocompleteProps> = (
                   key={dept.code}
                   type="button"
                   onClick={() => handleSelectSuggestion(dept)}
-                  className="w-full text-left px-3 py-2 hover:bg-primary/5 focus:bg-primary/5 focus:outline-none transition-colors border-b border-border last:border-b-0 flex items-center justify-between"
+                  className="w-full text-left px-3 py-2 hover:bg-primary/10 focus:bg-primary/10 focus:outline-none transition-colors border-b border-border/50 last:border-b-0 flex items-center justify-between"
                 >
                   <div className="flex items-center gap-3">
                     <div className={`w-8 h-8 rounded flex items-center justify-center text-xs font-bold ${

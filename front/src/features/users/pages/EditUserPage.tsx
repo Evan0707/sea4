@@ -1,3 +1,4 @@
+
 import { useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import Input from '@/shared/components/ui/Input'
@@ -9,14 +10,23 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { updateUserSchema, type UpdateUserFormData } from '@/shared/utils/validators'
 import { useUtilisateur } from '../hooks/useUtilisateurs'
+import type { Utilisateur } from '../types'
 import Skeleton from '@/shared/components/ui/Skeleton'
-import { ArrowLeft } from '@mynaui/icons-react'
+import { Card, CardContent, CardHeader, CardTitle } from '@/shared/components/ui/Card'
+
 
 const roles = [
  { value: 'admin', label: 'Administrateur' },
  { value: 'commercial', label: 'Commercial' },
  { value: 'maitre_oeuvre', label: 'Maître d\'œuvre' },
 ]
+
+const getSafeRole = (role: string | null | undefined): 'admin' | 'commercial' | 'maitre_oeuvre' => {
+ if (role === 'admin' || role === 'commercial' || role === 'maitre_oeuvre') {
+  return role
+ }
+ return 'admin'
+}
 
 export default function EditUserPage() {
  const { id } = useParams<{ id: string }>()
@@ -33,13 +43,13 @@ export default function EditUserPage() {
 
  // Pré-remplissage du formulaire
  useEffect(() => {
-  if (userData && !Array.isArray(userData)) {
-   const user = userData as any;
+    if (userData) {
+     const user = userData as Utilisateur;
    reset({
     prenom: user.prenom || '',
     nom: user.nom || '',
     login: user.login || '',
-    role: user.role,
+    role: getSafeRole(user.role),
     password: ''
    })
   }
@@ -49,7 +59,12 @@ export default function EditUserPage() {
  const onSubmit = async (data: UpdateUserFormData) => {
   if (!id) return;
 
-  const payload: any = {
+    const payload: {
+     login: string;
+     nom: string;
+     prenom: string;
+     password?: string;
+    } = {
    login: data.login,
    nom: data.nom,
    prenom: data.prenom,
@@ -63,103 +78,94 @@ export default function EditUserPage() {
    await apiClient.put(`/admin/utilisateurs/${id}`, payload)
    addToast('Utilisateur mis à jour', 'success')
    navigate('/admin/utilisateurs')
-  } catch (err: any) {
+    } catch (err: unknown) {
    console.error(err)
-   const msg = err?.response?.data?.error || 'Erreur lors de la mise à jour'
+     const msg = (err as { response?: { data?: { error?: string } } })?.response?.data?.error || 'Erreur lors de la mise à jour'
    addToast(msg, 'error')
   }
  }
 
  if (loadingQuery) {
   return (
-   <div className="p-4 md:p-8 h-screen flex flex-col">
+   <div className="p-6 max-w-4xl mx-auto w-full">
     <Skeleton className="h-10 w-64 mb-6" />
-    <Skeleton className="h-[400px] w-full max-w-3xl mx-auto rounded-lg bg-bg-secondary" />
+    <Skeleton className="h-[400px] w-full rounded-[var(--radius-lg)]" />
    </div>
   )
  }
 
  if (!userData) {
   return (
-   <div className="p-8 flex flex-col items-center justify-center">
-    <Text>Utilisateur introuvable</Text>
-    <Button variant="Secondary" classname="mt-4" onClick={() => navigate('/admin/utilisateurs')}>Retour</Button>
+   <div className="p-12 flex flex-col items-center justify-center">
+    <Text color="text-secondary" className="mb-4">Utilisateur introuvable</Text>
+    <Button variant="Secondary" size="md" onClick={() => navigate('/admin/utilisateurs')}>Retour à la liste</Button>
    </div>
   )
  }
 
  return (
-  <div className="p-4 md:p-8 h-screen flex flex-col">
-   <div className="flex items-center gap-4 mb-6">
-
-    <H1>Modifier l'utilisateur</H1>
-   </div>
-
-   <form onSubmit={handleSubmit(onSubmit)} className="w-full max-w-3xl mx-auto space-y-4 bg-bg-secondary p-4 md:p-6 rounded-lg border border-border">
-
-    {/* Info Rôle Read-only */}
-    <div className="bg-primary/5 border border-primary/20 p-4 rounded-md mb-4">
-     <Text variant="small" className="text-primary font-medium">
-      Le rôle de l'utilisateur ne peut pas être modifié.
-     </Text>
+  <div className="p-6 flex flex-col max-w-4xl mx-auto w-full">
+    <div className="mb-6">
+     <H1>Modifier l'utilisateur</H1>
     </div>
 
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-     <Input
-      label="Prénom"
-      name="prenom"
-      type="text"
-      placeholder="John"
-      register={register('prenom')}
-      error={errors.prenom?.message as string | undefined}
-     />
+    <Card className="w-full">
+      <CardHeader>
+        <CardTitle>Détails du compte</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+          {/* Info Rôle Read-only */}
+          <div className="bg-primary/5 border border-primary/20 p-4 rounded-[var(--radius)]">
+           <Text variant="small" className="text-primary font-medium">
+            Le rôle de l'utilisateur ({roles.find(r => r.value === userData.role)?.label || userData.role}) ne peut pas être modifié.
+           </Text>
+          </div>
 
-     <Input
-      label="Nom"
-      name="nom"
-      type="text"
-      placeholder="Doe"
-      register={register('nom')}
-      error={errors.nom?.message as string | undefined}
-     />
-    </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+           <Input
+            label="Prénom *"
+            name="prenom"
+            type="text"
+            placeholder="John"
+            register={register('prenom')}
+            error={errors.prenom?.message}
+           />
 
-    <Input
-     label="Login"
-     name="login"
-     type="text"
-     register={register('login')}
-     error={errors.login?.message as string | undefined}
-    />
+           <Input
+            label="Nom *"
+            name="nom"
+            type="text"
+            placeholder="Doe"
+            register={register('nom')}
+            error={errors.nom?.message}
+           />
+          </div>
 
-    <div className="relative">
-     <Input
-      label="Nouveau mot de passe (optionnel)"
-      name="password"
-      type="password"
-      placeholder="Laisser vide pour conserver le mot de passe actuel"
-      register={register('password')}
-      error={errors.password?.message as string | undefined}
-     />
-    </div>
+          <Input
+           label="Login *"
+           name="login"
+           type="text"
+           register={register('login')}
+           error={errors.login?.message}
+          />
 
-    <div>
-     {/* If Select doesn't support disabled, we render a disabled mock or use Input readOnly if Select is just for role which is now fixed */}
-     {/* Let's try to see if I can simply render a readonly Input for Role instead of Select, since it's unchangeable */}
-     <div className="flex flex-col gap-1.5">
-      <label className="text-sm font-medium text-text-primary">Rôle</label>
-      <div className="flex h-10 w-full rounded-md border border-input bg-bg-primary px-3 py-2 text-sm text-text-secondary opacity-50 cursor-not-allowed">
-       {roles.find(r => r.value === userData.role)?.label || userData.role}
-      </div>
-     </div>
-     {/* Hidden input to keep form logic if needed, but we don't send role anyway */}
-    </div>
+          <Input
+           label="Nouveau mot de passe"
+           name="password"
+           type="password"
+           placeholder="Laisser vide pour conserver l'actuel"
+           register={register('password')}
+           error={errors.password?.message}
+          />
 
-    <div className="flex justify-end pr-4 gap-2 pt-4">
-     <Button variant="Secondary" type="button" onClick={() => navigate('/admin/utilisateurs')}>Annuler</Button>
-     <Button variant="Primary" type="submit" loading={isSubmitting}>Enregistrer</Button>
-    </div>
-   </form>
+          <div className="flex justify-end gap-3 pt-4 border-t border-border mt-4">
+           <Button variant="Secondary" type="button" size="md" onClick={() => navigate('/admin/utilisateurs')}>Annuler</Button>
+           <Button variant="Primary" type="submit" size="md" loading={isSubmitting}>Enregistrer les modifications</Button>
+          </div>
+        </form>
+      </CardContent>
+    </Card>
   </div>
  )
 }

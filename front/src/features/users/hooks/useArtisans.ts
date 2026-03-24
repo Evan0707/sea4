@@ -9,7 +9,7 @@ export const useArtisans = (filters: UserFilters) => {
  const queryClient = useQueryClient();
  const queryKey = ['artisans', filters];
 
- const { data: artisans = [], isLoading: loading, refetch: fetchArtisans } = useQuery({
+ const { data: artisans = [], isLoading: loading, isError, refetch: fetchArtisans } = useQuery({
   queryKey,
   queryFn: async () => {
    const response = await apiClient.get('/artisan', {
@@ -20,6 +20,7 @@ export const useArtisans = (filters: UserFilters) => {
    });
 
    // nettoyage des données
+   // eslint-disable-next-line @typescript-eslint/no-explicit-any
    const cleanArtisans = response.data.map((a: any) => ({
     noArtisan: a.noArtisan,
     // nettoyage des clés
@@ -43,6 +44,7 @@ export const useArtisans = (filters: UserFilters) => {
    toast.addToast('Artisan supprimé avec succès', 'success');
    queryClient.invalidateQueries({ queryKey: ['artisans'] });
   },
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   onError: (error: any) => {
    console.error('Erreur suppression artisan', error);
    if (error.response?.status === 400) {
@@ -63,7 +65,7 @@ export const useArtisans = (filters: UserFilters) => {
   await deleteMutation.mutateAsync(noArtisan);
  };
 
- return { artisans, loading, fetchArtisans, deleteArtisan };
+ return { artisans, loading, isError, fetchArtisans, deleteArtisan };
 };
 
 export const useArtisan = (id: string | undefined) => {
@@ -83,6 +85,7 @@ export const useArtisanPlanning = (id: string | undefined) => {
   queryKey: ['artisan-planning', id],
   queryFn: async () => {
    if (!id) return null;
+   // eslint-disable-next-line @typescript-eslint/no-explicit-any
    const response = await apiClient.get<any>(`/artisan/${id}/planning`);
    return response.data;
   },

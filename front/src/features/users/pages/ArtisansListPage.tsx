@@ -1,12 +1,13 @@
 import CsvImportPopup, { type CsvArtisan } from '../components/CsvImportPopup';
 import { usePageHeader } from '@/shared/context/LayoutContext';
+import { motion, AnimatePresence } from 'framer-motion';
 import SearchBar from '@/shared/components/ui/SearchBar';
 import { DataList, type Column } from '@/shared/components/ui/DataList';
 import Button from '@/shared/components/ui/Button';
 import { Text } from '@/shared/components/ui/Typography';
-import { Pencil, Trash, Download } from '@mynaui/icons-react';
+import { Pencil, Trash, Download, Upload } from '@mynaui/icons-react';
 import Popover from '@/shared/components/ui/Popover';
-import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/shared/hooks/useToast';
 import { useArtisans } from '../hooks/useArtisans';
@@ -24,9 +25,10 @@ export const ArtisansListPage = () => {
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
   const [artisanToDelete, setArtisanToDelete] = useState<number | null>(null);
+  const [keysToDelete, setKeysToDelete] = useState<number[]>([]);
 
   // Custom hook usage
-  const { artisans, loading, deleteArtisan, fetchArtisans } = useArtisans({
+  const { artisans, loading, isError, deleteArtisan, fetchArtisans } = useArtisans({
     search: debouncedSearch,
     sortOrder
   });
@@ -37,14 +39,39 @@ export const ArtisansListPage = () => {
   const [showCsvPopup, setShowCsvPopup] = useState(false);
   const dragCounter = useRef(0);
 
+  const handleDeleteSelected = (keys: (string | number)[]) => {
+    setKeysToDelete(keys.map(Number));
+  };
+
   const confirmDelete = async () => {
+    // Suppression unitaire (via Popover)
     if (artisanToDelete) {
       try {
         await deleteArtisan(artisanToDelete);
-      } catch (e) {
+        toast.addToast('Artisan supprimé', 'success');
+      } catch {
         toast.addToast('Erreur lors de la suppression', 'error');
       }
       setArtisanToDelete(null);
+    }
+    // Suppression multiple (via sélection)
+    if (keysToDelete.length > 0) {
+      try {
+        const results = await Promise.allSettled(keysToDelete.map((id) => deleteArtisan(id)));
+        const fulfilledCount = results.filter(r => r.status === 'fulfilled').length;
+        const rejectedCount = results.filter(r => r.status === 'rejected').length;
+
+        if (rejectedCount === 0) {
+          toast.addToast(`${fulfilledCount} artisan${fulfilledCount > 1 ? 's supprimés' : ' supprimé'}`, 'success');
+        } else if (fulfilledCount === 0) {
+          toast.addToast('Erreur lors de la suppression', 'error');
+        } else {
+          toast.addToast(`${fulfilledCount} supprimé${fulfilledCount > 1 ? 's' : ''}, ${rejectedCount} erreur${rejectedCount > 1 ? 's' : ''}`, 'error');
+        }
+      } catch {
+        toast.addToast('Erreur inattendue lors de la suppression', 'error');
+      }
+      setKeysToDelete([]);
     }
   };
 
@@ -61,13 +88,13 @@ export const ArtisansListPage = () => {
 
   const headerActions = useMemo(() => (
     <div className='flex flex-row items-center gap-2'>
-      <Button variant='Secondary' onClick={handleExport} size='md' icon={Download}>
-        Exporter CSV
+      <Button variant='Secondary' onClick={handleExport} icon={Download}>
+        Exporter
       </Button>
-      <Button variant='Secondary' onClick={() => fileInputRef.current?.click()} size='md'>
-        Importer CSV
+      <Button variant='Secondary' onClick={() => { setCsvArtisans([]); setShowCsvPopup(true); }} icon={Upload}>
+        Importer
       </Button>
-      <Button variant='Primary' onClick={() => navigate('/admin/artisans/new')} size='md'>
+      <Button variant='Primary' onClick={() => navigate('/admin/artisans/new')} icon={Pencil}>
         Nouveau
       </Button>
     </div>
@@ -121,7 +148,6 @@ export const ArtisansListPage = () => {
     }
   }, []);
 
-  // Gestionnaires Drag & Drop
   const handleDragOver = useCallback((e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
@@ -147,16 +173,6 @@ export const ArtisansListPage = () => {
 
     processFile(files[0]);
   }, [processFile]);
-
-  const fileInputRef = useRef<HTMLInputElement>(null);
-
-  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files.length > 0) {
-      processFile(e.target.files[0]);
-    }
-    // Reset value to allow selecting same file again
-    e.target.value = '';
-  };
 
   // Configuration des colonnes
   const columns: Column<Artisan>[] = [
@@ -238,18 +254,52 @@ export const ArtisansListPage = () => {
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
     >
-      {isDragging && (
-        <div
-          className="absolute inset-0 bg-primary/10 border-2 border-dashed border-primary rounded-lg z-50 flex items-center justify-center"
-        >
-          <Text className="text-xl font-semibold text-primary">Déposez votre fichier CSV ici</Text>
-        </div>
-      )}
+
+      <AnimatePresence>
+        {isDragging && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="absolute inset-0 bg-bg-primary/95 backdrop-blur-sm border-2 border-dashed border-border rounded-lg z-50 flex flex-col items-center justify-center p-4 transition-all"
+          >
+            <div className="relative flex items-center justify-center mb-10 w-32 h-24">
+              {[...Array(3)].map((_, i) => {
+                const angles = [-30, 0, 30];
+                const xOffsets = [-40, 0, 40];
+                const yOffsets = [-10, -25, -10];
+                return (
+                  <motion.img
+                    key={i}
+                    src="/CSV_ICON.svg"
+                    alt="CSV File"
+                    className="absolute w-20 h-20 object-contain z-0 drop-shadow-sm opacity-50"
+                    initial={{ x: 0, y: 10, rotate: 0, opacity: 0, scale: 0.6 }}
+                    animate={{ x: xOffsets[i], y: yOffsets[i], rotate: angles[i], opacity: 0.6, scale: 0.8 }}
+                    transition={{ type: "spring", stiffness: 400, damping: 25, delay: i * 0.05 }}
+                  />
+                );
+              })}
+              <motion.img
+                src="/EXCEL_ICON.svg"
+                alt="Excel File"
+                className="relative w-28 h-28 object-contain z-10 drop-shadow-xl"
+                initial={{ y: 10, scale: 0.95 }}
+                animate={{ y: 0, scale: 1.05 }}
+                transition={{ type: "spring", stiffness: 400, damping: 25 }}
+              />
+            </div>
+            <Text className="text-2xl font-semibold text-primary mb-2 text-center">Déposez votre fichier CSV ici</Text>
+            <Text className="text-sm text-text-secondary text-center">L'importation commencera encadrant les données correspondantes au document</Text>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {showCsvPopup && (
         <CsvImportPopup
           artisans={csvArtisans}
           onClose={() => setShowCsvPopup(false)}
+          onFileSelect={processFile}
           onConfirm={async (artisansToImport) => {
             try {
               // Note: direct api usage here might be moved to hook if specific action exists
@@ -259,6 +309,7 @@ export const ArtisansListPage = () => {
               toast.addToast(response.data.message, 'success');
               setShowCsvPopup(false);
               fetchArtisans();
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
             } catch (error: any) {
               toast.addToast(error.response?.data?.message || 'Erreur lors de l\'import', 'error');
             }
@@ -272,34 +323,37 @@ export const ArtisansListPage = () => {
           onChange={setSearch}
           placeholder="Rechercher par nom, prénom ou ville..."
         />
-        {/* Hidden file input */}
-        <input
-          type="file"
-          ref={fileInputRef}
-          onChange={handleFileSelect}
-          accept=".csv"
-          className="hidden"
-        />
       </div>
 
       <DataList
         data={artisans}
         columns={columns}
         loading={loading}
+        isError={isError}
+        errorTitle="Erreur de chargement"
+        errorDescription="Impossible de récupérer la liste des artisans."
+        errorAction={{ label: 'Réessayer', onClick: fetchArtisans }}
         sortColumn="nomArtisan"
         sortDirection={sortOrder}
         onSort={() => setSortOrder(prev => prev === 'asc' ? 'desc' : 'asc')}
         keyExtractor={(item) => item.noArtisan}
         onRowClick={(item) => navigate(`/admin/artisans/${item.noArtisan}`)}
         emptyMessage="Aucun artisan trouvé"
+        selectable
+        onDeleteSelected={handleDeleteSelected}
+        deleteLabel="Supprimer la sélection"
+        onRefresh={fetchArtisans}
       />
 
       <ConfirmModal
-        isOpen={!!artisanToDelete}
-        onClose={() => setArtisanToDelete(null)}
+        isOpen={!!artisanToDelete || keysToDelete.length > 0}
+        onClose={() => { setArtisanToDelete(null); setKeysToDelete([]); }}
         onConfirm={confirmDelete}
-        title="Supprimer l'artisan"
-        message="Êtes-vous sûr de vouloir supprimer cet artisan ? Cette action est irréversible."
+        title={keysToDelete.length > 1 ? `Supprimer ${keysToDelete.length} artisans` : "Supprimer l'artisan"}
+        message={keysToDelete.length > 1
+          ? `Êtes-vous sûr de vouloir supprimer ces ${keysToDelete.length} artisans ? Cette action est irréversible.`
+          : "Êtes-vous sûr de vouloir supprimer cet artisan ? Cette action est irréversible."
+        }
         confirmText="Supprimer"
       />
     </div>

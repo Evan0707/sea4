@@ -17,6 +17,7 @@ export const ChantiersMapPage = () => {
  const { setHeader } = useLayout();
  const { addToast } = useToast();
  const [loading, setLoading] = useState(true);
+ // eslint-disable-next-line @typescript-eslint/no-explicit-any
  const [markers, setMarkers] = useState<any[]>([]);
  const [stats, setStats] = useState({ total: 0, mapped: 0 });
 
@@ -55,7 +56,9 @@ export const ChantiersMapPage = () => {
     };
 
     const validMarkers = data
+     // eslint-disable-next-line @typescript-eslint/no-explicit-any
      .filter((c: any) => c.latitude && c.longitude)
+     // eslint-disable-next-line @typescript-eslint/no-explicit-any
      .map((c: any) => ({
       id: c.noChantier,
       latitude: c.latitude,
@@ -83,65 +86,73 @@ export const ChantiersMapPage = () => {
  }, [addToast]);
 
  return (
-  <div className="p-4 md:p-10 max-w-[1600px] mx-auto space-y-6">
+  <div className="p-6 mx-auto space-y-4">
 
-   <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+   <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
     <Card>
-     <CardHeader className="pb-2">
+     <CardHeader className="pb-1">
       <CardTitle className="text-4xl">{stats.total}</CardTitle>
      </CardHeader>
      <CardContent>
-      <Text className="text-text-secondary">Total Chantiers</Text>
+      <Text variant='small' className="text-text-secondary">Total Chantiers</Text>
      </CardContent>
     </Card>
     <Card>
-     <CardHeader className="pb-2">
+     <CardHeader className="pb-1">
       <CardTitle className="text-4xl">{stats.mapped}</CardTitle>
      </CardHeader>
      <CardContent>
-      <Text className="text-text-secondary">Géolocalisés</Text>
+      <Text variant='small' className="text-text-secondary">Géolocalisés</Text>
      </CardContent>
     </Card>
     <Card>
-     <CardHeader className="pb-2">
+     <CardHeader className="pb-1">
       <CardTitle className="text-4xl">{((stats.mapped / (stats.total || 1)) * 100).toFixed(0)}%</CardTitle>
      </CardHeader>
      <CardContent>
-      <Text className="text-text-secondary">Couverture</Text>
+      <Text variant='small' className="text-text-secondary">Couverture</Text>
      </CardContent>
     </Card>
    </div>
 
-   {/* Legend */}
-   <div className="flex flex-wrap gap-4 items-center mb-4">
-    <div className="flex items-center gap-2">
-     <div className="w-3 h-3 rounded-full bg-[#9CA3AF]"></div>
-     <span className="text-sm text-text-secondary">À compléter</span>
-    </div>
-    <div className="flex items-center gap-2">
-     <div className="w-3 h-3 rounded-full bg-[#F59E0B]"></div>
-     <span className="text-sm text-text-secondary">À venir</span>
-    </div>
-    <div className="flex items-center gap-2">
-     <div className="w-3 h-3 rounded-full bg-[#3B82F6]"></div>
-     <span className="text-sm text-text-secondary">En chantier</span>
-    </div>
-    <div className="flex items-center gap-2">
-     <div className="w-3 h-3 rounded-full bg-[#10B981]"></div>
-     <span className="text-sm text-text-secondary">Terminé</span>
-    </div>
-   </div>
-
-   <Card className="h-[600px] flex flex-col overflow-hidden">
-    <CardContent className="p-0 flex-1">
+   <Card className="h-[550px] flex flex-col overflow-hidden">
+    <CardContent className="p-0 flex-1 relative bg-bg-secondary/20">
      {loading ? (
-      <Skeleton className="w-full h-full" />
+      <div className="w-full h-full relative overflow-hidden bg-bg-secondary/30">
+       <Skeleton className="absolute inset-0 opacity-50" />
+       {[...Array(5)].map((_, i) => (
+        <div key={i} className="absolute w-8 h-8 bg-border rounded-full flex items-center justify-center animate-pulse shadow-sm" style={{ top: `${Math.random() * 80 + 10}%`, left: `${Math.random() * 80 + 10}%` }}>
+         <div className="w-3 h-3 bg-bg-secondary rounded-full" />
+        </div>
+       ))}
+      </div>
      ) : (
-      <Map
-       markers={markers}
-       height="100%"
-       zoom={8}
-      />
+      <>
+       {/* Legend */}
+       <div className="flex flex-wrap gap-4 items-center mb-4">
+        <div className="flex items-center gap-2">
+         <div className="w-3 h-3 rounded-full bg-[#9CA3AF]"></div>
+         <span className="text-sm text-text-secondary">À compléter</span>
+        </div>
+        <div className="flex items-center gap-2">
+         <div className="w-3 h-3 rounded-full bg-[#F59E0B]"></div>
+         <span className="text-sm text-text-secondary">À venir</span>
+        </div>
+        <div className="flex items-center gap-2">
+         <div className="w-3 h-3 rounded-full bg-[#3B82F6]"></div>
+         <span className="text-sm text-text-secondary">En chantier</span>
+        </div>
+        <div className="flex items-center gap-2">
+         <div className="w-3 h-3 rounded-full bg-[#10B981]"></div>
+         <span className="text-sm text-text-secondary">Terminé</span>
+        </div>
+       </div>
+       <Map
+        markers={markers}
+        height="93%"
+        zoom={8}
+       />
+      </>
      )}
     </CardContent>
    </Card>

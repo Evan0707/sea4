@@ -93,3 +93,33 @@ export interface Projet {
   prenom: string;
  };
 }
+
+export interface FactureArtisanDetail {
+ noFacture: number;
+ artisan: { noArtisan: number; nom: string; prenom: string } | null;
+ dateFacture: string;
+ montantFacture: string;
+ nbJoursTravail: number | null;
+ dateReglFacture: string | null;
+}
+
+export interface EtapeAnalyse {
+ noEtapeChantier: number;
+ nomEtape: string;
+ artisan: { noArtisan: number; nom: string; prenom: string } | null;
+ montantTheorique: string | null;
+ nbJoursPrevu: number | null;
+ factures: FactureArtisanDetail[];
+ montantReel: string;
+ nbJoursReel: number;
+ ecartMontant: string;
+ ecartJours: number | null;
+}
+
+export interface FactureArtisanFormData {
+ artisanId: number;
+ dateFacture: string;
+ montantFacture: number;
+ nbJoursTravail: number;
+ dateReglFacture?: string;
+}

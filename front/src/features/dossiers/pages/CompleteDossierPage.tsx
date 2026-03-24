@@ -7,14 +7,14 @@ import EtapeItem from '../components/EtapeItem';
 import { useToast } from '@/shared/hooks/useToast';
 import Skeleton from '@/shared/components/ui/Skeleton';
 import type { DossierResponse, Etape } from '@/shared/types/dossier';
-import { AvailabilitySelector } from '../../users/components/AvailabilitySelector';
-import type { Artisan } from '../../users/types';
+import { AvailabilitySelector } from '@/features/users/components/AvailabilitySelector';
+import type { Artisan } from '@/features/users/types';
 import apiClient from '@/shared/api/client';
 import { Card, CardHeader, CardTitle, CardContent } from '@/shared/components/ui/Card';
 import { useDossier, useDossierEtapes } from '../hooks/useDossiers';
 import { Tabs } from '@/shared/components/ui/Tabs';
 import { Calendar, User } from '@mynaui/icons-react';
-import { useArtisans } from '../../users/hooks/useArtisans';
+import { useArtisans } from '@/features/users/hooks/useArtisans';
 import { useAuth } from '@/features/auth/context/AuthContext';
 
 interface EtapeState extends Etape {
@@ -49,7 +49,8 @@ const CompleteDossierPage: React.FC = () => {
   useEffect(() => {
     if (etapesData.length > 0) {
       // Sort etapes par noEtape 
-      const sortedEtapes = [...etapesData].sort((a: any, b: any) => {
+       
+      const sortedEtapes = [...etapesData].sort((a: { noEtape: number }, b: { noEtape: number }) => {
         const idA = a.noEtape || a.noEtapeChantier || a.id;
         const idB = b.noEtape || b.noEtapeChantier || b.id;
         return idA - idB;
@@ -58,8 +59,9 @@ const CompleteDossierPage: React.FC = () => {
       let currentDate = dossierData?.chantier?.dateCreation
         ? new Date(dossierData.chantier.dateCreation)
         : new Date();
-
-      const etapesState = sortedEtapes.map((e: any) => {
+
+      const etapesState = sortedEtapes.map((e: { noEtape: number }) => {
+ 
 
         const startDate = new Date(currentDate);
 
@@ -245,19 +247,39 @@ const CompleteDossierPage: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="p-10 max-w-[1200px] mx-auto">
-        <H1>Compléter le dossier</H1>
-        <Skeleton className="h-[120px] w-full rounded-lg my-6" />
-        <Skeleton className="h-[200px] w-full rounded-lg my-6" />
+      <div className="p-4 max-w-[1500px] mx-auto">
+        <H1 className="mb-6">Compléter le dossier</H1>
+        <div className="flex gap-2 border-b border-border/60 pb-2 mb-6">
+          {[...Array(2)].map((_, i) => <Skeleton key={i} className="h-10 w-32 rounded-t-lg" />)}
+        </div>
+        <Card className="mb-6 overflow-hidden" padding="none">
+          <CardHeader className="p-6 pb-4"><Skeleton className="h-6 w-48" /></CardHeader>
+          <CardContent className="p-0 divide-y divide-border">
+            {[...Array(4)].map((_, i) => (
+              <div key={i} className="p-4 flex flex-col md:flex-row gap-4 items-start md:items-center">
+                <div className="flex-1 space-y-2">
+                  <div className="flex items-center gap-2"><Skeleton className="h-5 w-5 rounded-full" /><Skeleton className="h-5 w-40" /></div>
+                  <Skeleton className="h-4 w-32 ml-7" />
+                </div>
+                <div className="flex gap-4">
+                  <Skeleton className="h-10 w-40 rounded-[var(--radius-sm)]" />
+                </div>
+              </div>
+            ))}
+          </CardContent>
+        </Card>
       </div>
     );
   }
 
   if (!dossier) {
     return (
-      <div className="p-10 max-w-[1200px] mx-auto">
-        <H1>Compléter le dossier</H1>
-        <Text>Impossible de charger le dossier.</Text>
+      <div className="p-10 h-full flex flex-col items-center justify-center">
+        <div className="bg-red/5 border border-red/20 rounded-[var(--radius-lg)] p-6 text-center max-w-md">
+          <Text className="text-lg font-bold text-red mb-2">Dossier introuvable</Text>
+          <Text className="text-sm text-text-secondary mb-4">Impossible de charger ce dossier.</Text>
+          <Button variant="Secondary" onClick={() => navigate(-1)}>Retour</Button>
+        </div>
       </div>
     );
   }
