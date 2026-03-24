@@ -78,7 +78,8 @@ const NewArtisanPage = () => {
               setCp(address.postcode);
               setVille(address.city);
             }}
-            info="Commencez à taper l'adresse pour voir les suggestions"
+            info={true}
+            message="Commencez à taper l'adresse pour voir les suggestions"
             placeholder="123 rue de la Paix"
           />
 

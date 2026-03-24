@@ -36,8 +36,8 @@ import { LayoutProvider } from '@/shared/context/LayoutContext';
 import { ChantiersMapPage } from '../features/dashboard/pages/ChantiersMapPage';
 import { ModelesListPage } from '../features/chantiers/pages/ModelesListPage';
 import { ModeleEditPage } from '../features/chantiers/pages/ModeleEditPage';
-import {ArtisanDashboardPage} from "@/features/dashboard/pages/ArtisanDashboardPage.tsx";
-import {ArtisanChantierPage} from "@/features/users/pages/ArtisanChantierPage.tsx";
+import {ArtisanDashboardPage} from "@/features/dashboard/pages/ArtisanDashboardPage";
+import {ArtisanChantierPage} from "@/features/users/pages/ArtisanChantierPage";
 
 function App() {
   return (

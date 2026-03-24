@@ -260,7 +260,7 @@ export const AdminChantierDetailPage = () => {
                                     {isExpanded ? <ChevronUp className="w-4 h-4 text-placeholder" /> : <ChevronDown className="w-4 h-4 text-placeholder" />}
                                   </Button>
                                 )}
-                                <StatusBadge status={etape.statut} dot={false} />
+                                <StatusBadge status={etape.statut} />
                               </div>
                             </div>
                             {hasReducSuppl && isExpanded && (
@@ -328,7 +328,6 @@ export const AdminChantierDetailPage = () => {
                               <td className="py-2.5 px-3 text-right">
                                 <StatusBadge
                                   status={appel.dateReglement ? 'Réglé' : 'En attente'}
-                                  dot={false}
                                 />
                               </td>
                             </tr>

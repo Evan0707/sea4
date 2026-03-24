@@ -79,7 +79,7 @@ export const ArtisanChantierPage = () => {
                 variant="Secondary"
                 icon={ArrowLeft}
                 onClick={() => navigate('/artisan')}
-                classname="self-start"
+                className="self-start"
             >
                 Retour aux projets
             </Button>
