@@ -1,8 +1,8 @@
 # On part d'une base PHP avec Apache
-FROM php:8.2-apache
+FROM php:8.4-apache
 
 # 1. On installe les dépendances système, PostgreSQL, Git et les librairies pour Zip et Intl
-RUN apt-get update && apt-get install -y \
+RUN apt-get update && apt-get install -y libpq-dev unzip \
     git \
     unzip \
     libpq-dev \
