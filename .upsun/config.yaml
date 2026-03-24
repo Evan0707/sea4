@@ -101,7 +101,7 @@ applications:
       build: |
         set -eux
         export APP_ENV=prod
-        composer --no-ansi --no-interaction install --no-progress --prefer-dist --optimize-autoloader --no-dev
+        composer --no-ansi --no-interaction install --no-progress --prefer-dist --optimize-autoloader --no-dev --ignore-platform-req=ext-pdo_pgsql
         
       # The deploy hook is run after the app container has been started, but before it has started accepting requests.
       # More information: https://docs.upsun.com/create-apps/hooks/hooks-comparison.html#deploy-hook
@@ -120,7 +120,9 @@ applications:
     # crons:
 
     # Customizations to your PHP or Lisp runtime. More information: https://docs.upsun.com/create-apps/app-reference/single-runtime-image.html#runtime
-    # runtime:
+    runtime:
+      extensions:
+          - pdo_pgsql
 
     # More information: https://docs.upsun.com/create-apps/app-reference/single-runtime-image.html#additional-hosts
     # additional_hosts:
