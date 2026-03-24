@@ -52,19 +52,19 @@ security:
         - { path: ^/login, roles: PUBLIC_ACCESS }
         - { path: ^/login_check, roles: PUBLIC_ACCESS }
         - { path: ^/register, roles: PUBLIC_ACCESS }
-        - { path: ^//modeles, roles: PUBLIC_ACCESS }
-        - { path: ^//maitres-oeuvre, roles: PUBLIC_ACCESS }
-        - { path: ^//chantiers, roles: PUBLIC_ACCESS }
-        - { path: ^//etapes, roles: PUBLIC_ACCESS }
-        - { path: ^//admin, roles: ROLE_ADMIN }
-        - { path: ^//artisan/mes-chantiers, roles: ROLE_ARTISAN }
-        - { path: ^//artisan, roles: PUBLIC_ACCESS }
-        - { path: ^//commercial, roles: ROLE_COMMERCIAL }
-        - { path: ^//maitre_oeuvre, roles: ROLE_MAITRE_OEUVRE }
-        - { path: ^//dossier, roles: PUBLIC_ACCESS }
-        - { path: ^//dossiers, roles: PUBLIC_ACCESS }
-        - { path: ^//mes-dossiers, roles: PUBLIC_ACCESS }
-        - { path: ^//utilisateurs, roles: PUBLIC_ACCESS }
+        - { path: ^/modeles, roles: PUBLIC_ACCESS }
+        - { path: ^/maitres-oeuvre, roles: PUBLIC_ACCESS }
+        - { path: ^/chantiers, roles: PUBLIC_ACCESS }
+        - { path: ^/etapes, roles: PUBLIC_ACCESS }
+        - { path: ^/admin, roles: ROLE_ADMIN }
+        - { path: ^/artisan/mes-chantiers, roles: ROLE_ARTISAN }
+        - { path: ^/artisan, roles: PUBLIC_ACCESS }
+        - { path: ^/commercial, roles: ROLE_COMMERCIAL }
+        - { path: ^/maitre_oeuvre, roles: ROLE_MAITRE_OEUVRE }
+        - { path: ^/dossier, roles: PUBLIC_ACCESS }
+        - { path: ^/dossiers, roles: PUBLIC_ACCESS }
+        - { path: ^/mes-dossiers, roles: PUBLIC_ACCESS }
+        - { path: ^/utilisateurs, roles: PUBLIC_ACCESS }
         - { path: ^/, roles: IS_AUTHENTICATED_FULLY }
 
 when@test:
