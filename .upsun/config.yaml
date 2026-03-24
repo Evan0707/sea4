@@ -1,0 +1,41 @@
+# .upsun/config.yaml
+
+applications:
+  api:
+    # On indique à Upsun que le code Symfony est dans le dossier 'back'
+    source:
+      root: "back"
+    
+    type: "php:8.2"
+    
+    # Upsun installe automatiquement les dépendances avec Composer
+    build:
+      flavor: composer
+      
+    # On connecte l'application à la base de données définie plus bas
+    relationships:
+      database: "postgres:postgresql"
+      
+    web:
+      locations:
+        "/":
+          root: "public"
+          passthru: "/index.php" # Remplace le fameux .htaccess !
+
+    # Commandes à lancer après le build (vider le cache, faire les migrations)
+    hooks:
+      deploy: |
+        set -e
+        php bin/console cache:clear --env=prod
+        php bin/console doctrine:migrations:migrate --no-interaction
+
+# Définition de la base de données PostgreSQL
+services:
+  postgres:
+    type: postgresql:15
+
+# Configuration de la route publique
+routes:
+  "https://{default}/":
+    type: upstream
+    upstream: "api:http"
