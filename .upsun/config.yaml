@@ -73,6 +73,7 @@ applications:
       env:
         N_PREFIX: "/app/.global"
         APP_ENV: "prod"
+        APP_SECRET: "$ecretf0rt3st"
         
 
     # Outbound firewall rules for the application. More information: https://docs.upsun.com/create-apps/app-reference/single-runtime-image.html#firewall
@@ -107,6 +108,7 @@ applications:
       deploy: |
         set -eux
         # echo 'Put your deploy command here'
+        php bin/console cache:clear --env=prod
         
 
       # The post_deploy hook is run after the app container has been started and after it has started accepting requests.

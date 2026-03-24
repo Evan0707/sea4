@@ -1,8 +1,8 @@
 import axios, { type AxiosInstance, type InternalAxiosRequestConfig, AxiosError } from 'axios';
 
 // URL de base de l'API (à configurer via .env)
-// const API_URL =  'https://main-bvxea6i-yjbt5mr6fwn4g.fr-4.platformsh.site/api/';
-const API_URL = 'http://localhost:8000/api/';
+const API_URL =  'https://main-bvxea6i-yjbt5mr6fwn4g.fr-4.platformsh.site/api/';
+// const API_URL = 'http://localhost:8000/api/';
 
 // Création de l'instance Axios
 const apiClient: AxiosInstance = axios.create({
