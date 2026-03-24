@@ -19,7 +19,7 @@ interface Etape {
 interface FactureArtisanCreationModalProps {
  isOpen: boolean;
  onClose: () => void;
- onSubmit: (data: { montant: number; date: string; artisanId: number; etapeId: number }) => Promise<void>;
+ onSubmit: (data: { montant: number; date: string; artisanId: number; etapeId: number; nbJoursTravail?: number }) => Promise<void>;
  etapes: Etape[];
  loading?: boolean;
 }
@@ -33,6 +33,7 @@ export const FactureArtisanCreationModal = ({
 }: FactureArtisanCreationModalProps) => {
  const [montant, setMontant] = useState('');
  const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
+ const [nbJoursTravail, setNbJoursTravail] = useState('');
  const [selectedEtapeId, setSelectedEtapeId] = useState<string>('');
 
  // Filtrer les etapes qui ont un artisan assigne
@@ -52,11 +53,13 @@ export const FactureArtisanCreationModal = ({
    montant: parseFloat(montant),
    date,
    artisanId: etape.artisan.noArtisan,
-   etapeId: etape.noEtapeChantier
+   etapeId: etape.noEtapeChantier,
+   nbJoursTravail: nbJoursTravail ? parseInt(nbJoursTravail) : undefined,
   });
 
   // Reset le formulaire
   setMontant('');
+  setNbJoursTravail('');
   setSelectedEtapeId('');
  };
 
@@ -123,7 +126,7 @@ export const FactureArtisanCreationModal = ({
 
       <div>
        <label className="block text-sm font-medium text-gray-700 mb-1">
-        Montant (€)
+        Montant facturé (€)
        </label>
        <Input
         name="montant"
@@ -137,6 +140,21 @@ export const FactureArtisanCreationModal = ({
        />
       </div>
 
+      <div>
+       <label className="block text-sm font-medium text-gray-700 mb-1">
+        Nombre réel de jours travaillés
+       </label>
+       <Input
+        name="nbJoursTravail"
+        type="number"
+        min="1"
+        placeholder="ex: 8"
+        value={nbJoursTravail}
+        onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNbJoursTravail(e.target.value)}
+        required
+       />
+      </div>
+
       <div className="flex justify-end gap-3 mt-6">
        <Button variant="Secondary" onClick={onClose} type="button">
         Annuler
@@ -145,7 +163,7 @@ export const FactureArtisanCreationModal = ({
         variant="Primary"
         type="submit"
         loading={loading}
-        disabled={!selectedEtapeId || !montant}
+        disabled={!selectedEtapeId || !montant || !nbJoursTravail}
        >
         Enregistrer
        </Button>

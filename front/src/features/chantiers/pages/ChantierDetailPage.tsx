@@ -1,47 +1,34 @@
 import { useState, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import apiClient from '@/shared/api/client';
 import { H1, H2, Text } from '@/shared/components/ui/Typography';
 import Button from '@/shared/components/ui/Button';
 import { usePageHeader } from '@/shared/context/LayoutContext';
-import Status from '@/shared/components/ui/Status';
+import { StatusBadge } from '@/shared/components/ui/StatusBadge';
 import Skeleton from '@/shared/components/ui/Skeleton';
-import { Bank, Pin, ChevronDown, ChevronUp, Edit, Download } from '@mynaui/icons-react';
+import { Bank, Pin, ChevronDown, ChevronUp, Edit, Download, TrendingUp } from '@mynaui/icons-react';
 import { ArrowLeft, User, Calendar, Play, Check, CheckCircle } from '@mynaui/icons-react';
 import { formatDate } from '@/shared/utils/dateFormatter';
 import { useToast } from '@/shared/hooks/useToast';
-import { AvailabilitySelector } from '../../users/components/AvailabilitySelector';
-import type { Artisan } from '../../users/types';
+import { AvailabilitySelector } from '@/features/users/components/AvailabilitySelector';
+import type { Artisan } from '@/features/users/types';
 import CopyToClipboard from '@/shared/components/ui/CopyToClipboard';
-import { Card } from '@/shared/components/ui/Card';
+import { Card, CardHeader, CardContent } from '@/shared/components/ui/Card';
 import { Table } from '@/shared/components/ui/Table';
 import { DevisCreationModal } from '../components/DevisCreationModal';
 import { FactureArtisanCreationModal } from '../components/FactureArtisanCreationModal';
+import { AnalyseCoutsPanel } from '../components/AnalyseCoutsPanel';
 
 import { Tabs } from '@/shared/components/ui/Tabs';
 import { useChantier } from '../hooks/useChantiers';
 import type { ChantierDetail, Etape } from '../types';
-
-const getStatusVariant = (statut: string): 'À venir' | 'Terminé' | 'Complété' | 'En chantier' => {
-  switch (statut) {
-    case 'Terminé':
-    case 'Terminée':
-      return 'Terminé';
-    case 'En cours':
-      return 'En chantier';
-    case 'À venir':
-      return 'À venir';
-    default:
-      return 'À venir';
-  }
-};
 
 export const ChantierDetailPage = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { addToast } = useToast();
   // Cast the result to ChantierDetail to fix Property does not exist errors
-  const { data: chantierData, isLoading: loading, refetch } = useChantier(id, { endpoint: '/mes-chantiers' });
+  const { data: chantierData, isLoading: loading, isError, refetch } = useChantier(id, { endpoint: '/mes-chantiers' });
   const chantier = chantierData as ChantierDetail | undefined | null;
 
   const [actionLoading, setActionLoading] = useState<string | null>(null);
@@ -84,9 +71,10 @@ export const ChantierDetailPage = () => {
   const emettreAppelInitial = async () => {
     setActionLoading('appel-initial');
     try {
-      const res = await axios.post(`http://localhost:8000/api/mes-chantiers/${id}/emettre-appel-initial`);
+      const res = await apiClient.post(`/mes-chantiers/${id}/emettre-appel-initial`);
       addToast(res.data.message, 'success');
       refetch();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       addToast(error.response?.data?.message || 'Erreur', 'error');
     } finally {
@@ -97,9 +85,10 @@ export const ChantierDetailPage = () => {
   const demarrerChantier = async () => {
     setActionLoading('demarrer');
     try {
-      const res = await axios.post(`http://localhost:8000/api/mes-chantiers/${id}/demarrer`);
+      const res = await apiClient.post(`/mes-chantiers/${id}/demarrer`);
       addToast(res.data.message, 'success');
       refetch();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       addToast(error.response?.data?.message || 'Erreur', 'error');
     } finally {
@@ -110,9 +99,10 @@ export const ChantierDetailPage = () => {
   const terminerChantier = async () => {
     setActionLoading('terminer');
     try {
-      const res = await axios.post(`http://localhost:8000/api/mes-chantiers/${id}/terminer`);
+      const res = await apiClient.post(`/mes-chantiers/${id}/terminer`);
       addToast(res.data.message, 'success');
       refetch();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       addToast(error.response?.data?.message || 'Erreur', 'error');
     } finally {
@@ -123,9 +113,10 @@ export const ChantierDetailPage = () => {
   const demarrerEtape = async (etapeId: number) => {
     setActionLoading(`etape-demarrer-${etapeId}`);
     try {
-      const res = await axios.post(`http://localhost:8000/api/mes-chantiers/${id}/etapes/${etapeId}/demarrer`);
+      const res = await apiClient.post(`/mes-chantiers/${id}/etapes/${etapeId}/demarrer`);
       addToast(res.data.message, 'success');
       await refetch();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       addToast(error.response?.data?.message || 'Erreur', 'error');
     } finally {
@@ -136,9 +127,10 @@ export const ChantierDetailPage = () => {
   const terminerEtape = async (etapeId: number) => {
     setActionLoading(`etape-terminer-${etapeId}`);
     try {
-      const res = await axios.post(`http://localhost:8000/api/mes-chantiers/${id}/etapes/${etapeId}/terminer`);
+      const res = await apiClient.post(`/mes-chantiers/${id}/etapes/${etapeId}/terminer`);
       addToast(res.data.message, 'success');
       await refetch();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       addToast(error.response?.data?.message || 'Erreur', 'error');
     } finally {
@@ -149,9 +141,10 @@ export const ChantierDetailPage = () => {
   const reglerAppel = async (appelId: number) => {
     setActionLoading(`appel-${appelId}`);
     try {
-      const res = await axios.post(`http://localhost:8000/api/mes-chantiers/${id}/appels/${appelId}/regler`);
+      const res = await apiClient.post(`/mes-chantiers/${id}/appels/${appelId}/regler`);
       addToast(res.data.message, 'success');
       refetch();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       addToast(error.response?.data?.message || 'Erreur', 'error');
     } finally {
@@ -169,7 +162,7 @@ export const ChantierDetailPage = () => {
     if (!selectedEtapeForAssignment || !chantier) return;
 
     try {
-      await axios.put(`http://localhost:8000/api/chantiers/${id}/etapes`, {
+      await apiClient.put(`/chantiers/${id}/etapes`, {
         etapes: [{
           noEtape: selectedEtapeForAssignment.noEtape,
           artisanId: artisan.noArtisan
@@ -178,6 +171,7 @@ export const ChantierDetailPage = () => {
       addToast(`Artisan ${artisan.nomArtisan} assigné avec succès`, 'success');
       setSelectionModalOpen(false);
       refetch();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       console.error(err);
       addToast(err.response?.data?.message || "Erreur lors de l'assignation", 'error');
@@ -187,7 +181,7 @@ export const ChantierDetailPage = () => {
 
   const handleDownloadPdf = async (devisId: number) => {
     try {
-      const response = await axios.get(`http://localhost:8000/api/devis/${devisId}/pdf`, {
+      const response = await apiClient.get(`/devis/${devisId}/pdf`, {
         responseType: 'blob'
       });
       // Créer une URL pour le Blob et l'ouvrir dans un nouvel onglet
@@ -203,10 +197,11 @@ export const ChantierDetailPage = () => {
   const handleCreateDevis = async (data: { remarques: string }) => {
     setActionLoading('create-devis');
     try {
-      await axios.post(`http://localhost:8000/api/mes-chantiers/${id}/devis`, data);
+      await apiClient.post(`/mes-chantiers/${id}/devis`, data);
       addToast('Devis créé avec succès', 'success');
       setDevisModalOpen(false);
       refetch();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       console.error(err);
       addToast(err.response?.data?.message || "Erreur lors de la création du devis", 'error');
@@ -218,13 +213,14 @@ export const ChantierDetailPage = () => {
   // Facture Modal State
   const [factureModalOpen, setFactureModalOpen] = useState(false);
 
-  const handleCreateFactureArtisan = async (data: { montant: number; date: string; artisanId: number; etapeId: number }) => {
+  const handleCreateFactureArtisan = async (data: { montant: number; date: string; artisanId: number; etapeId: number; nbJoursTravail?: number }) => {
     setActionLoading('create-facture');
     try {
-      await axios.post(`http://localhost:8000/api/mes-chantiers/${id}/factures-artisans`, data);
+      await apiClient.post(`/mes-chantiers/${id}/factures-artisans`, data);
       addToast('Facture enregistrée avec succès', 'success');
       setFactureModalOpen(false);
       refetch();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       console.error(err);
       addToast(err.response?.data?.message || "Erreur lors de l'enregistrement de la facture", 'error');
@@ -236,9 +232,42 @@ export const ChantierDetailPage = () => {
   if (loading) {
     return (
       <div className="p-8">
-        <Skeleton className="w-48 h-8 mb-6" />
-        <Skeleton className="w-full h-40 mb-6" />
-        <Skeleton className="w-full h-60" />
+        <div className="flex justify-between items-start mb-6">
+          <div>
+            <Skeleton className="h-10 w-64 mb-3" />
+            <Skeleton className="h-5 w-96" />
+          </div>
+          <div className="flex gap-2">
+            <Skeleton className="h-10 w-48 rounded-[var(--radius)]" />
+            <Skeleton className="h-10 w-48 rounded-[var(--radius)]" />
+          </div>
+        </div>
+        <Card className="mb-6 h-32 flex flex-col justify-center px-6">
+          <Skeleton className="h-6 w-48 mb-4" />
+          <Skeleton className="h-3 w-full rounded-full" />
+          <Skeleton className="h-4 w-32 mt-4" />
+        </Card>
+        <div className="flex gap-2 border-b border-border/60 pb-2 mb-6">
+          {[...Array(4)].map((_, i) => <Skeleton key={i} className="h-10 w-32 rounded-t-lg" />)}
+        </div>
+        <Card className="h-[400px]">
+          <CardHeader><Skeleton className="h-6 w-48 mb-2" /></CardHeader>
+          <CardContent className="space-y-4 mt-6">
+            {[...Array(4)].map((_, i) => <Skeleton key={i} className="h-20 w-full" />)}
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div className="p-8 h-full flex flex-col items-center justify-center">
+        <div className="bg-red/5 border border-red/20 rounded-[var(--radius-lg)] p-6 text-center max-w-md">
+          <Text className="text-lg font-bold text-red mb-2">Impossible de charger le chantier</Text>
+          <Text className="text-sm text-text-secondary mb-4">Une erreur est survenue lors de la récupération des données.</Text>
+          <Button variant="Secondary" onClick={() => navigate(-1)}>Retour</Button>
+        </div>
       </div>
     );
   }
@@ -278,7 +307,7 @@ export const ChantierDetailPage = () => {
         <div>
           <div className="flex items-center gap-3 mb-2">
             <H1>Chantier #{chantier.noChantier}</H1>
-            <Status label={getStatusVariant(chantier.statut)} />
+            <StatusBadge status={chantier.statut} />
           </div>
           <div className="flex items-center gap-2">
             <Text className="text-placeholder">
@@ -343,6 +372,7 @@ export const ChantierDetailPage = () => {
         tabs={[
           { id: 'planning', label: 'Suivi de chantier', icon: <Calendar className="w-4 h-4" /> },
           { id: 'finances', label: 'Documents & Finances', icon: <Bank className="w-4 h-4" /> },
+          { id: 'analyse', label: 'Analyse des coûts', icon: <TrendingUp className="w-4 h-4" /> },
           { id: 'infos', label: 'Informations', icon: <User className="w-4 h-4" /> }
         ]}
         defaultTab="planning"
@@ -387,7 +417,7 @@ export const ChantierDetailPage = () => {
                                 {isCompleted ? (
                                   <CheckCircle className="w-5 h-5 text-green-500" />
                                 ) : etape.statut === 'En cours' ? (
-                                  <div className="w-5 h-5 rounded-full border-2 border-primary border-t-transparent animate-spin" />
+                                  <div className="w-4 h-4 rounded-full border-2 border-primary border-t-transparent animate-spin" />
                                 ) : (
                                   <div className="w-5 h-5 rounded-full border-2 border-border" />
                                 )}
@@ -397,12 +427,10 @@ export const ChantierDetailPage = () => {
                                       {etape.nomEtape}
                                     </Text>
                                     {etape.reservee && (
-                                      <span className="px-2 py-0.5 text-xs rounded bg-yellow-50 text-yellow-700 border border-yellow-200">
-                                        Réservée
-                                      </span>
+                                      <StatusBadge status="Réservée" variant="warning" />
                                     )}
                                     {hasReducSuppl && (
-                                      <span className={`px-2 py-0.5 text-xs rounded border ${reducSuppl > 0 ? 'bg-green-50 text-green-700 border-green-200' : 'bg-red-50 text-red-700 border-red-200'}`}>
+                                      <span className={`px-2 py-0.5 text-xs rounded-[var(--radius-sm)] border ${reducSuppl > 0 ? 'bg-green-500/8 text-green-700 border-green-200' : 'bg-red/8 text-red border-red/20'}`}>
                                         {reducSuppl > 0 ? '+' : ''}{reducSuppl.toLocaleString('fr-FR')} €
                                       </span>
                                     )}
@@ -425,17 +453,18 @@ export const ChantierDetailPage = () => {
                                     )}
                                     {/* Gestion de l'affichage de l'artisan + bouton Assigner */}
                                     <div className="flex items-center gap-2">
-                                      <Text className="text-xs text-placeholder">
+                                      <Text className="text-xs text-placeholder" onClick={() => { navigate(`/artisans/${etape?.artisan?.noArtisan}`, { replace: true }) }}>
                                         Artisan: {etape.artisan ? `${etape.artisan.nom} ${etape.artisan.prenom}` : 'Non assigné'}
                                       </Text>
                                       {chantier.statut !== 'Terminé' && !isCompleted && (
-                                        <button
+                                        <Button
+                                          variant="Ghost"
+                                          size="icon"
                                           onClick={() => openAssignmentModal(etape)}
-                                          className="p-1 hover:bg-bg-secondary rounded-full transition-colors group"
-                                          title="Changer/Assigner l'artisan"
+                                          className="rounded-full"
                                         >
-                                          <Edit className="w-3 h-3 text-placeholder group-hover:text-primary" />
-                                        </button>
+                                          <Edit className="w-3 h-3" />
+                                        </Button>
                                       )}
                                     </div>
                                   </div>
@@ -448,12 +477,9 @@ export const ChantierDetailPage = () => {
                                   </Text>
                                 )}
                                 {hasReducSuppl && (
-                                  <button
-                                    onClick={() => toggleEtapeExpanded(etape.noEtapeChantier)}
-                                    className="p-1 hover:bg-bg-secondary rounded transition-colors"
-                                  >
+                                  <Button variant="Ghost" size="icon" onClick={() => toggleEtapeExpanded(etape.noEtapeChantier)}>
                                     {isExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-                                  </button>
+                                  </Button>
                                 )}
                                 {canStart && previousCompleted && !isAnyEtapeInProgress && (
                                   <Button
@@ -476,7 +502,7 @@ export const ChantierDetailPage = () => {
                                   </Button>
                                 )}
                                 {!canStart && !canFinish && (
-                                  <Status label={getStatusVariant(etape.statut)} />
+                                  <StatusBadge status={etape.statut} />
                                 )}
                               </div>
                             </div>
@@ -488,7 +514,7 @@ export const ChantierDetailPage = () => {
                                     {reducSuppl > 0 ? 'Supplément' : 'Réduction'}
                                   </Text>
                                   <div className="flex items-center justify-between">
-                                    <Text className={`font-mono text-sm ${reducSuppl > 0 ? 'text-green-600' : 'text-red-500'}`}>
+                                    <Text className={`font-mono text-sm ${reducSuppl > 0 ? 'text-green-700' : 'text-red'}`}>
                                       {reducSuppl > 0 ? '+' : ''}{reducSuppl.toLocaleString('fr-FR')} €
                                     </Text>
                                     <Text className="text-xs text-placeholder">
@@ -565,9 +591,7 @@ export const ChantierDetailPage = () => {
                           align: 'right',
                           render: (appel) => (
                             appel.dateReglement ? (
-                              <span className="px-2 py-1 text-xs rounded bg-green-500/10 text-green-600 border border-green-500/20">
-                                Réglé
-                              </span>
+                              <StatusBadge status="Réglé" />
                             ) : (
                               <Button
                                 variant="Secondary"
@@ -613,7 +637,7 @@ export const ChantierDetailPage = () => {
                         columns={[
                           { header: 'Date', render: (d) => formatDate(d.dateEmission) },
                           { header: 'Montant', align: 'right', render: (d) => <span className="font-mono">{parseFloat(d.montant).toLocaleString('fr-FR')} €</span> },
-                          { header: 'Statut', render: (d) => <Status label={d.statut === 'Validé' ? 'Terminé' : d.statut === 'En attente' ? 'À venir' : 'En chantier'} /> },
+                          { header: 'Statut', render: (d) => <StatusBadge status={d.statut} /> },
                           {
                             header: 'Action',
                             align: 'right',
@@ -633,7 +657,7 @@ export const ChantierDetailPage = () => {
                     ) : (
                       <div className="text-center py-8">
                         <Text className="text-placeholder">Aucun devis émis</Text>
-                        <Button variant="Primary" onClick={() => setDevisModalOpen(true)} classname="mt-4">
+                        <Button variant="Primary" onClick={() => setDevisModalOpen(true)} className="mt-4">
                           Créer un devis
                         </Button>
                       </div>
@@ -658,7 +682,7 @@ export const ChantierDetailPage = () => {
                           { header: 'Date', render: (f) => formatDate(f.dateEmission) },
                           { header: 'Artisan', render: (f) => <span className="font-medium text-text-primary">{f.artisan || 'N/A'}</span> },
                           { header: 'Montant', align: 'right', render: (f) => <span className="font-mono">{parseFloat(f.montant).toLocaleString('fr-FR')} €</span> },
-                          { header: 'Statut', render: (f) => <Status label={f.statut === 'Réglée' ? 'Terminé' : 'À venir'} /> },
+                          { header: 'Statut', render: (f) => <StatusBadge status={f.statut} /> },
                           {
                             header: 'Action',
                             align: 'right',
@@ -669,7 +693,7 @@ export const ChantierDetailPage = () => {
                                 icon={Download}
                                 onClick={async () => {
                                   try {
-                                    const response = await axios.get(`http://localhost:8000/api/factures-artisans/${f.noFacture}/pdf`, {
+                                    const response = await apiClient.get(`/factures-artisans/${f.noFacture}/pdf`, {
                                       responseType: 'blob'
                                     });
                                     const file = new Blob([response.data], { type: 'application/pdf' });
@@ -690,7 +714,7 @@ export const ChantierDetailPage = () => {
                     ) : (
                       <div className="text-center py-8">
                         <Text className="text-placeholder">Aucune facture enregistrée</Text>
-                        <Button variant="Primary" onClick={() => setFactureModalOpen(true)} classname="mt-4">
+                        <Button variant="Primary" onClick={() => setFactureModalOpen(true)} className="mt-4">
                           Enregistrer une facture
                         </Button>
                       </div>
@@ -698,6 +722,14 @@ export const ChantierDetailPage = () => {
                   </Card>
                 </div>
               </div>
+            )}
+
+            {activeTab === 'analyse' && (
+              <AnalyseCoutsPanel
+                chantierId={id!}
+                noChantier={chantier.noChantier}
+                canEdit={chantier.statut !== 'Terminé'}
+              />
             )}
 
             {activeTab === 'infos' && (

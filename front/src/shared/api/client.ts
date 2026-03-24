@@ -31,10 +31,7 @@ apiClient.interceptors.response.use(
  (response) => response,
  (error: AxiosError) => {
   if (error.response?.status === 401) {
-   // Optionnel : Redirection auto vers login ou dispatch d'événement logout
-   // window.location.href = '/login'; // À utiliser avec précaution
-   console.warn('Session expirée ou non autorisée');
-   // On pourrait aussi émettre un event pour que le AuthContext le catche
+   window.dispatchEvent(new CustomEvent('auth:logout'));
   }
   return Promise.reject(error);
  }

@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { DataList, type Column } from '@/shared/components/ui/DataList';
 import SearchBar from '@/shared/components/ui/SearchBar';
@@ -20,9 +20,9 @@ export const AdminChantiersListPage = () => {
   const [search, setSearch] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
-  const [chantierToDelete, setChantierToDelete] = useState<number | null>(null);
+  const [chantiersToDelete, setChantiersToDelete] = useState<number[]>([]);
 
-  const { chantiers, loading, deleteChantier } = useChantiers({
+  const { chantiers, loading, deleteChantier, error, refetch } = useChantiers({
     endpoint: '/admin/chantiers',
     filters: {
       search: debouncedSearch,
@@ -40,14 +40,14 @@ export const AdminChantiersListPage = () => {
 
   // supprimer un chantier
   const confirmDelete = async () => {
-    if (chantierToDelete) {
-      await deleteChantier(chantierToDelete);
-      setChantierToDelete(null);
+    if (chantiersToDelete.length > 0) {
+      await Promise.all(chantiersToDelete.map(id => deleteChantier(id)));
+      setChantiersToDelete([]);
     }
   };
 
   // exporter les chantiers
-  const handleExport = () => {
+  const handleExport = useCallback(() => {
     const exportColumns: CsvColumn<Chantier>[] = [
       { key: 'nom', header: 'Nom Client' },
       { key: 'prenom', header: 'Prénom Client' },
@@ -57,7 +57,7 @@ export const AdminChantiersListPage = () => {
       { key: 'status', header: 'Statut' },
     ];
     exportToCSV(chantiers as Chantier[], exportColumns, 'chantiers');
-  };
+  }, [chantiers] );
 
   // actions en-tête
   const headerActions = useMemo(() => (
@@ -69,7 +69,7 @@ export const AdminChantiersListPage = () => {
         Voir la carte
       </Button>
     </div>
-  ), [navigate]);
+  ), [handleExport, navigate]);
 
   // en-tête de la page
   usePageHeader(
@@ -134,7 +134,7 @@ export const AdminChantiersListPage = () => {
             </Popover.Item>
             <Popover.Item
               variant="destructive"
-              onClick={() => setChantierToDelete(c.noChantier)}
+              onClick={() => setChantiersToDelete([c.noChantier])}
               icon={Trash}
             >
               Supprimer
@@ -161,20 +161,28 @@ export const AdminChantiersListPage = () => {
         data={chantiers as Chantier[]}
         columns={columns}
         loading={loading}
+        isError={!!error}
+        errorTitle="Erreur de chargement"
+        errorDescription="Impossible de récupérer la liste des chantiers."
         sortColumn="start"
         sortDirection={sortOrder}
         onSort={() => setSortOrder(prev => prev === 'asc' ? 'desc' : 'asc')}
         keyExtractor={(item) => item.noChantier}
         onRowClick={(item) => navigate(`/admin/chantiers/${item.noChantier}`)}
         emptyMessage="Aucun chantier trouvé"
+        selectable={true}
+        onDeleteSelected={(keys) => setChantiersToDelete(keys as number[])}
+        onRefresh={refetch}
       />
 
       <ConfirmModal
-        isOpen={!!chantierToDelete}
-        onClose={() => setChantierToDelete(null)}
+        isOpen={chantiersToDelete.length > 0}
+        onClose={() => setChantiersToDelete([])}
         onConfirm={confirmDelete}
-        title="Supprimer le chantier"
-        message="Êtes-vous sûr de vouloir supprimer ce chantier ? Cette action est irréversible."
+        title={chantiersToDelete.length > 1 ? "Supprimer les chantiers" : "Supprimer le chantier"}
+        message={chantiersToDelete.length > 1
+          ? `Êtes-vous sûr de vouloir supprimer ces ${chantiersToDelete.length} chantiers ? Cette action est irréversible.`
+          : "Êtes-vous sûr de vouloir supprimer ce chantier ? Cette action est irréversible."}
         confirmText="Supprimer"
       />
     </div>

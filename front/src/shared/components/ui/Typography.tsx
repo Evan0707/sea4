@@ -1,75 +1,83 @@
 import { type ReactNode } from 'react'
 import { tokens } from '@/shared/styles/tokens'
+import { cn } from '@/shared/lib/utils'
 
 type HeadingLevel = 1 | 2 | 3 | 4 | 5 | 6
 type TextVariant = 'body' | 'small' | 'caption' | 'lead'
 type TextAlign = 'left' | 'center' | 'right' | 'justify'
 type TextWeight = 'light' | 'normal' | 'medium' | 'semibold' | 'bold' | 'extrabold'
 
-interface BaseTypographyProps {
+const alignMap: Record<TextAlign, string> = {
+  left: 'text-left',
+  center: 'text-center',
+  right: 'text-right',
+  justify: 'text-justify',
+}
+
+const weightMap: Record<TextWeight, string> = {
+  light: 'font-light',
+  normal: 'font-normal',
+  medium: 'font-medium',
+  semibold: 'font-semibold',
+  bold: 'font-bold',
+  extrabold: 'font-extrabold',
+}
+
+interface BaseTypographyProps extends React.HTMLAttributes<HTMLElement> {
   children: ReactNode
   className?: string
   align?: TextAlign
   weight?: TextWeight
   color?: string
-  onClick?: () => void
 }
 
 interface HeadingProps extends BaseTypographyProps {
   level?: HeadingLevel
 }
 
-// Composant Heading (H1-H6)
+const headingSizes: Record<HeadingLevel, string> = {
+  1: 'text-4xl leading-tight',
+  2: 'text-3xl leading-tight',
+  3: 'text-2xl leading-snug',
+  4: 'text-xl leading-snug',
+  5: 'text-lg leading-normal',
+  6: 'text-base leading-normal',
+}
+
+const headingDefaultWeights: Record<HeadingLevel, TextWeight> = {
+  1: 'extrabold',
+  2: 'bold',
+  3: 'bold',
+  4: 'semibold',
+  5: 'semibold',
+  6: 'medium',
+}
+
 export const Heading = ({
   level = 1,
   children,
   className = '',
   align = 'left',
   weight,
-  onClick,
+  ...props
 }: HeadingProps) => {
-  const baseStyles = `font-bold text-${align}`
-  
-  const sizes = {
-    1: 'text-4xl leading-tight',     // 36px
-    2: 'text-3xl leading-tight',     // 30px
-    3: 'text-2xl leading-snug',      // 24px
-    4: 'text-xl leading-snug',       // 20px
-    5: 'text-lg leading-normal',     // 18px
-    6: 'text-base leading-normal',   // 16px
-  }
-  
-  const weights = {
-    1: weight || 'extrabold',
-    2: weight || 'bold',
-    3: weight || 'bold',
-    4: weight || 'semibold',
-    5: weight || 'semibold',
-    6: weight || 'medium',
-  }
-  
-  const weightClass = `font-${weights[level]}`
-  const sizeClass = sizes[level]
-  
-  const classNames = `${baseStyles} ${sizeClass} ${weightClass} text-text-primary ${className}`
-  const props = { className: classNames, onClick }
-  
-  switch (level) {
-    case 1:
-      return <h1 {...props}>{children}</h1>
-    case 2:
-      return <h2 {...props}>{children}</h2>
-    case 3:
-      return <h3 {...props}>{children}</h3>
-    case 4:
-      return <h4 {...props}>{children}</h4>
-    case 5:
-      return <h5 {...props}>{children}</h5>
-    case 6:
-      return <h6 {...props}>{children}</h6>
-    default:
-      return <h1 {...props}>{children}</h1>
-  }
+  const resolvedWeight = weight || headingDefaultWeights[level]
+  const Component = `h${level}` as const
+
+  return (
+    <Component
+      className={cn(
+        headingSizes[level],
+        alignMap[align],
+        weightMap[resolvedWeight],
+        'text-text-primary',
+        className
+      )}
+      {...props}
+    >
+      {children}
+    </Component>
+  )
 }
 
 // Composants individuels pour faciliter l'utilisation
@@ -89,6 +97,20 @@ interface TextProps extends BaseTypographyProps {
   as?: 'p' | 'span' | 'div' | 'label'
 }
 
+const textVariants: Record<TextVariant, string> = {
+  lead: 'text-xl leading-relaxed',
+  body: 'text-base leading-normal',
+  small: 'text-sm leading-normal',
+  caption: 'text-xs leading-normal',
+}
+
+const textDefaultColors: Record<TextVariant, string> = {
+  lead: 'text-text-primary',
+  body: 'text-text-primary',
+  small: 'text-text-secondary',
+  caption: 'text-text-secondary',
+}
+
 export const Text = ({
   variant = 'body',
   color,
@@ -100,34 +122,23 @@ export const Text = ({
   underline = false,
   strikethrough = false,
   as: Component = 'p',
+  ...props
 }: TextProps) => {
-  const variants = {
-    lead: 'text-xl leading-relaxed',      // 20px
-    body: 'text-base leading-normal',     // 16px
-    small: 'text-sm leading-normal',      // 14px
-    caption: 'text-xs leading-normal',    // 12px
-  }
-
-  const defaultColors = {
-    lead: 'text-text-primary',
-    body: 'text-text-primary',
-    small: 'text-text-secondary',
-    caption: 'text-text-secondary',
-  }
-  
-  const styles = [
-    variants[variant],
-    !color && defaultColors[variant],
-    `text-${align}`,
-    `font-${weight}`,
-    italic && 'italic',
-    underline && 'underline',
-    strikethrough && 'line-through',
-    className,
-  ].filter(Boolean).join(' ')
-  
   return (
-    <Component className={styles} style={color ? { color } : undefined}>
+    <Component
+      className={cn(
+        textVariants[variant],
+        !color && textDefaultColors[variant],
+        alignMap[align],
+        weightMap[weight],
+        italic && 'italic',
+        underline && 'underline',
+        strikethrough && 'line-through',
+        className,
+      )}
+      style={color ? { color } : undefined}
+      {...props}
+    >
       {children}
     </Component>
   )
@@ -149,7 +160,7 @@ export const Label = ({
   return (
     <label
       htmlFor={htmlFor}
-      className={`text-sm font-${weight} ${className} text-text-primary`}
+      className={cn('text-sm text-text-primary', weightMap[weight], className)}
     >
       {children}
       {required && <span className="text-red-500 ml-1">*</span>}
@@ -175,15 +186,13 @@ export const Link = ({
   underline = true,
   external = false,
 }: LinkProps) => {
-  const styles = [
+  const styles = cn(
     'text-base',
-    `font-${weight}`,
+    weightMap[weight],
     underline && 'underline',
-    'hover:opacity-80',
-    'transition-opacity',
-    'cursor-pointer',
+    'hover:opacity-80 transition-opacity cursor-pointer',
     className,
-  ].filter(Boolean).join(' ')
+  )
   
   const externalProps = external ? {
     target: '_blank',

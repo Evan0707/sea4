@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import apiClient from '@/shared/api/client';
 import type { MaitreOeuvre, Modele, EtapeModele } from '@/shared/types/dossier';
+import { useToast } from '@/shared/hooks/useToast';
 
 // Fonction pour recuperer les maitres d'oeuvre
 export const useMaitresOeuvre = () => {
@@ -55,6 +56,7 @@ export const useModele = (id: string | undefined) => {
 // Fonction pour creer un modele
 export const useCreateModele = () => {
  const queryClient = useQueryClient();
+ const { addToast } = useToast();
  return useMutation({
   mutationFn: async (data: Omit<Modele, 'noModele'>) => {
    const response = await apiClient.post<Modele>('/modeles', data);
@@ -62,6 +64,12 @@ export const useCreateModele = () => {
   },
   onSuccess: () => {
    queryClient.invalidateQueries({ queryKey: ['modeles'] });
+   addToast('Modèle créé avec succès', 'success');
+  },
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  onError: (error: any) => {
+   const msg = error.response?.data?.message || 'Erreur lors de la création du modèle';
+   addToast(msg, 'error');
   },
  });
 };
@@ -69,6 +77,7 @@ export const useCreateModele = () => {
 // Fonction pour mettre a jour un modele
 export const useUpdateModele = () => {
  const queryClient = useQueryClient();
+ const { addToast } = useToast();
  return useMutation({
   mutationFn: async ({ id, data }: { id: number; data: Partial<Modele> }) => {
    const response = await apiClient.put<Modele>(`/modeles/${id}`, data);
@@ -76,18 +85,31 @@ export const useUpdateModele = () => {
   },
   onSuccess: () => {
    queryClient.invalidateQueries({ queryKey: ['modeles'] });
+   addToast('Modèle mis à jour avec succès', 'success');
+  },
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  onError: (error: any) => {
+   const msg = error.response?.data?.message || 'Erreur lors de la mise à jour du modèle';
+   addToast(msg, 'error');
   },
  });
 };
 
 export const useDeleteModele = () => {
  const queryClient = useQueryClient();
+ const { addToast } = useToast();
  return useMutation({
   mutationFn: async (id: number) => {
    await apiClient.delete(`/modeles/${id}`);
   },
   onSuccess: () => {
    queryClient.invalidateQueries({ queryKey: ['modeles'] });
+   addToast('Modèle supprimé avec succès', 'success');
+  },
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  onError: (error: any) => {
+   const msg = error.response?.data?.message || 'Erreur lors de la suppression du modèle';
+   addToast(msg, 'error');
   },
  });
 };

@@ -5,7 +5,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useToast } from '@/shared/hooks/useToast';
 import { usePageHeader } from '@/shared/context/LayoutContext';
-import { useModele, useCreateModele, useUpdateModele } from '../../dossiers/hooks/useDossierData';
+import { useModele, useCreateModele, useUpdateModele } from '@/features/dossiers/hooks/useDossierData';
 import Button from '@/shared/components/ui/Button';
 import Input from '@/shared/components/ui/Input';
 import Textarea from '@/shared/components/ui/Textarea';
@@ -59,7 +59,7 @@ export const ModeleEditPage = () => {
     etapes: modele.etapes || []
    });
   }
- }, [modele, form.reset]);
+ }, [modele, form]);
 
  const onSubmit = useCallback(async (data: ModeleFormData) => {
   try {
@@ -93,7 +93,7 @@ export const ModeleEditPage = () => {
     addToast('Modèle créé avec succès', 'success');
    }
    navigate('/admin/modeles');
-  } catch (error) {
+  } catch {
    addToast('Une erreur est survenue', 'error');
   }
  }, [isEditMode, id, updateModele, createModele, navigate, addToast]);
@@ -116,7 +116,7 @@ export const ModeleEditPage = () => {
     Enregistrer
    </Button>
   </div>
- ), [navigate, form.handleSubmit, onSubmit, isCreating, isUpdating, isDirty]);
+ ), [navigate, form, isCreating, isUpdating, isDirty, onSubmit]);
 
  usePageHeader(
   isEditMode ? 'Modifier le Modèle' : 'Nouveau Modèle',
@@ -125,7 +125,20 @@ export const ModeleEditPage = () => {
  );
 
  if (isEditMode && isLoading) {
-  return <div className="p-8"><Skeleton className="h-64 w-full" /></div>;
+  return (
+   <div className="p-4 md:p-8 max-w-3xl mx-auto w-full">
+    <Card>
+     <CardHeader className="border-b border-border">
+      <div className="flex gap-3"><Skeleton className="h-12 w-12 rounded-xl shrink-0" /><div className="space-y-2"><Skeleton className="h-6 w-48" /><Skeleton className="h-4 w-64" /></div></div>
+     </CardHeader>
+     <CardContent className="space-y-8 pt-6">
+      <div className="space-y-4"><Skeleton className="h-6 w-40" />
+       <div className="pl-4 space-y-4"><Skeleton className="h-10 w-full" /><Skeleton className="h-32 w-full" /></div>
+      </div>
+     </CardContent>
+    </Card>
+   </div>
+  );
  }
 
  if (isEditMode && isError) {
@@ -200,7 +213,8 @@ export const ModeleEditPage = () => {
         }}
         label="Sélectionner les étapes"
         disabled={isEditMode}
-        info={isEditMode ? "Les étapes ne peuvent pas être modifiées après création" : undefined}
+        info={isEditMode ? true : false}
+        message={isEditMode ? "Les étapes ne peuvent pas être modifiées après création" : undefined}
        />
 
        {/* Table for detailed values */}
@@ -214,7 +228,7 @@ export const ModeleEditPage = () => {
            { header: 'Étape', width: 'w-1/4', render: (item) => <Text className="text-sm font-medium">{item.nomEtape}</Text> },
            {
             header: 'Montant Facture (€)',
-            render: (item, index) => (
+            render: (_, index) => (
              <Input
               type="number"
               name={`etapes.${index}.montantFacture`}
@@ -226,7 +240,7 @@ export const ModeleEditPage = () => {
            },
            {
             header: 'Coût Sous-Traitant (€)',
-            render: (item, index) => (
+            render: (_, index) => (
              <Input
               type="number"
               name={`etapes.${index}.coutSousTraitant`}
@@ -239,7 +253,7 @@ export const ModeleEditPage = () => {
            {
             header: 'Nb Jours',
             width: 'w-24',
-            render: (item, index) => (
+            render: (_, index) => (
              <Input
               type="number"
               name={`etapes.${index}.nbJoursRealisation`}

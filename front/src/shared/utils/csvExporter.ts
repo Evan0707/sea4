@@ -1,6 +1,7 @@
 export interface CsvColumn<T> {
  key: keyof T | string;
  header: string;
+ // eslint-disable-next-line @typescript-eslint/no-explicit-any
  formatter?: (value: any, item: T) => string;
 }
 
@@ -20,12 +21,14 @@ export const exportToCSV = <T>(
  // Generate body rows
  const rows = data.map(item => {
   return columns.map(col => {
+   // eslint-disable-next-line @typescript-eslint/no-explicit-any
    let value: any;
 
    // Handle nested keys (e.g. 'client.nom') implies simple object access, but mainly we use direct keys
    // basic support for 'key' property
    if (typeof col.key === 'string' && col.key.includes('.')) {
     const parts = col.key.split('.');
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     value = parts.reduce((obj: any, part) => obj?.[part], item);
    } else {
     value = item[col.key as keyof T];

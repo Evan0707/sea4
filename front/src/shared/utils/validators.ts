@@ -70,7 +70,7 @@ export const chantierFormSchema = z.object({
   longitude: z.number().optional().nullable(),
   dateCreation: z.string().min(1, "La date de création est requise"),
   statutChantier: z.enum(['À compléter', 'À venir', 'En chantier', 'Terminé']),
-  noMOE: z.string().optional().refine((v) => v !== undefined && v !== null, { message: "Le maître d'œuvre est requis" }),
+  noMOE: z.number().optional().refine((v) => v !== undefined && v !== null, { message: "Le maître d'œuvre est requis" }),
   noModele: z.number().optional().refine((v) => v !== undefined && v !== null, { message: "Le modèle est requis" }),
 });
 
@@ -154,3 +154,16 @@ export const updateUserSchema = z.object({
 })
 
 export type UpdateUserFormData = z.infer<typeof updateUserSchema>
+
+// Schéma pour la création/modification d'un artisan
+export const artisanSchema = z.object({
+  nomArtisan: z.string().min(1, 'Le nom est requis').max(50, 'Le nom ne peut pas dépasser 50 caractères'),
+  prenomArtisan: z.string().max(50, 'Le prénom ne peut pas dépasser 50 caractères').optional().or(z.literal('')),
+  emailArtisan: z.string().email('Email invalide').optional().or(z.literal('')),
+  telArtisan: z.string().max(20, 'Téléphone trop long').optional().or(z.literal('')),
+  adresseArtisan: z.string().max(100, "L'adresse ne peut pas dépasser 100 caractères").optional().or(z.literal('')),
+  cpArtisan: z.string().regex(/^[0-9]{5}$/, 'Code postal invalide (5 chiffres requis)').optional().or(z.literal('')),
+  villeArtisan: z.string().max(50, 'La ville ne peut pas dépasser 50 caractères').optional().or(z.literal('')),
+})
+
+export type ArtisanFormData = z.infer<typeof artisanSchema>

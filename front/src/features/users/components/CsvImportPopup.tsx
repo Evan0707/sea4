@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
-import axios from 'axios';
-import { X } from '@mynaui/icons-react';
+import apiClient from '@/shared/api/client';
+import { motion, AnimatePresence } from 'framer-motion';
+import { X, Upload } from '@mynaui/icons-react';
 import { H1, Text } from '@/shared/components/ui/Typography';
 import Button from '@/shared/components/ui/Button';
 
@@ -24,6 +25,7 @@ interface CsvImportPopupProps {
   artisans: CsvArtisan[];
   onClose: () => void;
   onConfirm: (artisans: CsvArtisan[]) => void;
+  onFileSelect?: (file: File) => void;
 }
 
 interface EtapeSelectorProps {
@@ -165,22 +167,29 @@ interface ExistingArtisan {
   prenom: string;
 }
 
-const CsvImportPopup: React.FC<CsvImportPopupProps> = ({ artisans: initialArtisans, onClose, onConfirm }) => {
+const CsvImportPopup: React.FC<CsvImportPopupProps> = ({ artisans: initialArtisans, onClose, onConfirm, onFileSelect }) => {
   const [etapes, setEtapes] = useState<Etape[]>([]);
   const [existingArtisans, setExistingArtisans] = useState<ExistingArtisan[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [editableArtisans, setEditableArtisans] = useState<CsvArtisan[]>(initialArtisans);
   const [selectedIndexes, setSelectedIndexes] = useState<Set<number>>(new Set());
+  const [isDragOver, setIsDragOver] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
+    setEditableArtisans(initialArtisans);
+    if (initialArtisans.length === 0) return;
+
+    setLoading(true);
     const fetchData = async () => {
       try {
         const [etapesRes, artisansRes] = await Promise.all([
-          axios.get('http://localhost:8000/api/etapes', { params: { limit: 1000 } }),
-          axios.get('http://localhost:8000/api/artisan')
+          apiClient.get('/etapes', { params: { limit: 1000 } }),
+          apiClient.get('/artisan')
         ]);
         setEtapes(etapesRes.data || []);
 
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const existing = (artisansRes.data || []).map((a: any) => ({
           nom: normalizeString(a.nomArtisan || ''),
           prenom: normalizeString(a.prenomArtisan || '')
@@ -268,6 +277,86 @@ const CsvImportPopup: React.FC<CsvImportPopupProps> = ({ artisans: initialArtisa
   };
 
   const invalidCount = loading ? 0 : getInvalidCount();
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragOver(false);
+    if (e.dataTransfer.files && e.dataTransfer.files.length > 0 && onFileSelect) {
+      onFileSelect(e.dataTransfer.files[0]);
+    }
+  };
+
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0 && onFileSelect) {
+      onFileSelect(e.target.files[0]);
+    }
+  };
+
+  if (editableArtisans.length === 0) {
+    return (
+      <div className="fixed inset-0 bg-black/50 z-[100] flex items-center justify-center p-4">
+        <div className="bg-bg-primary rounded-xl border border-border max-w-lg w-full p-6 shadow-2xl transition-all">
+          <div className="flex items-center justify-between mb-8">
+            <H1 className="text-xl">Importer des artisans</H1>
+            <button onClick={onClose} className="text-placeholder hover:text-text-primary transition-colors p-1 cursor-pointer">
+              <X className="w-5 h-5" />
+            </button>
+          </div>
+          
+          <motion.div 
+            animate={isDragOver ? "hover" : "initial"}
+            whileHover="hover"
+            className={`border-2 border-dashed rounded-xl p-12 flex flex-col items-center justify-center cursor-pointer transition-colors ${isDragOver ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/50'}`}
+            onDragOver={(e) => { e.preventDefault(); setIsDragOver(true); }}
+            onDragLeave={(e) => { e.preventDefault(); setIsDragOver(false); }}
+            onDrop={handleDrop}
+            onClick={() => fileInputRef.current?.click()}
+          >
+            <div className="relative flex items-center justify-center mb-10 w-32 h-24">
+              {/* Fichiers en arrière-plan qui s'ouvrent en éventail */}
+              {[...Array(3)].map((_, i) => {
+                // Pour faire 3 fichiers qui s'ouvrent en éventail, 1 à gauche, 1 en haut, 1 à droite
+                const angles = [-30, 0, 30];
+                const xOffsets = [-40, 0, 40];
+                const yOffsets = [-10, -25, -10];
+                return (
+                  <motion.img 
+                    key={i}
+                    src="/CSV_ICON.svg" 
+                    alt="CSV File"
+                    className="absolute w-16 h-16 object-contain z-0 drop-shadow-sm opacity-50"
+                    variants={{
+                      initial: { x: 0, y: 10, rotate: 0, opacity: 0, scale: 0.6 },
+                      hover: { x: xOffsets[i], y: yOffsets[i], rotate: angles[i], opacity: 0.6, scale: 0.8, transition: { type: "spring", stiffness: 400, damping: 25, delay: i * 0.05 } }
+                    }}
+                  />
+                );
+              })}
+
+              {/* Fichier de base au premier plan */}
+              <motion.img 
+                src="/EXCEL_ICON.svg" 
+                alt="Excel File"
+                className="relative w-24 h-24 object-contain z-10 drop-shadow-xl"
+                variants={{
+                  initial: { y: 10, scale: 0.95 },
+                  hover: { y: 0, scale: 1.05, transition: { type: "spring", stiffness: 400, damping: 25 } }
+                }}
+              />
+            </div>
+            
+            <Text className="text-lg font-medium text-text-primary mb-2 text-center">Cliquez ou glissez-déposez</Text>
+            <Text className="text-sm text-placeholder text-center">Fichier CSV uniquement</Text>
+            <input type="file" ref={fileInputRef} onChange={handleFileSelect} className="hidden" accept=".csv" />
+          </motion.div>
+          
+          <div className="flex justify-end mt-8">
+            <Button variant="Secondary" onClick={onClose}>Annuler</Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="fixed inset-0 bg-black/50 z-[100] flex items-center justify-center p-4">

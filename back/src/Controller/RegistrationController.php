@@ -37,8 +37,8 @@ class RegistrationController extends AbstractController
                 return $this->json(['error' => 'Missing required fields'], 400);
             }
             
-            // Vérifier les rôles autorisés
-            $allowedRoles = ['admin', 'commercial', 'maitre_oeuvre'];
+            // Vérifier les rôles autorisés (admin uniquement via UserAdminController)
+            $allowedRoles = ['commercial', 'maitre_oeuvre'];
             if (!in_array($role, $allowedRoles)) {
                 return $this->json(['error' => 'Invalid role'], 400);
             }

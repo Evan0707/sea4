@@ -24,13 +24,13 @@ interface UserDetail {
 const getRoleBadgeStyle = (role: string) => {
   switch (role?.toLowerCase()) {
     case 'admin':
-      return 'bg-red-500/10 text-red-600 border-red-500/20';
+      return 'bg-red/8 text-red border-red/20';
     case 'maitre_oeuvre':
-      return 'bg-blue-500/10 text-blue-600 border-blue-500/20';
+      return 'bg-primary/8 text-primary border-primary/20';
     case 'commercial':
-      return 'bg-green-500/10 text-green-600 border-green-500/20';
+      return 'bg-orange-500/8 text-orange-700 border-orange-200';
     default:
-      return 'bg-gray-500/10 text-gray-600 border-gray-500/20';
+      return 'bg-bg-secondary text-text-secondary border-border';
   }
 };
 
@@ -46,6 +46,7 @@ const UserDetailPage = () => {
   const navigate = useNavigate();
   const { addToast } = useToast();
   const { data: userData, isLoading: loading } = useUtilisateur(id);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const user = (Array.isArray(userData) ? userData.find((u: any) => u.noUtilisateur === Number(id)) : userData) as UserDetail | undefined | null;
 
   // Gestion de la suppression de l'utilisateur
@@ -54,6 +55,7 @@ const UserDetailPage = () => {
       await apiClient.delete(`/admin/utilisateurs/${id}`);
       addToast('Utilisateur supprimé', 'success');
       navigate('/admin/utilisateurs');
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       console.error(error);
       const msg = error.response?.data?.details || error.response?.data?.error || "Erreur lors de la suppression";
@@ -90,19 +92,28 @@ const UserDetailPage = () => {
   if (loading) {
     return (
       <div className="p-4 md:p-8 max-w-3xl mx-auto space-y-6">
-        <Skeleton className="h-10 w-40" />
+        <Skeleton className="h-10 w-40 rounded-[var(--radius)]" />
         <Card>
-          <CardContent className="pt-6">
+          <CardHeader className="border-b border-border pb-6">
             <div className="flex items-center gap-6">
-              <Skeleton className="w-24 h-24 rounded-full" />
+              <Skeleton className="w-20 h-20 rounded-full" />
               <div className="space-y-3 flex-1">
                 <Skeleton className="h-8 w-48" />
-                <Skeleton className="h-4 w-32" />
+                <Skeleton className="h-6 w-32 rounded-[var(--radius-sm)]" />
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-4 mt-8">
-              <Skeleton className="h-16" />
-              <Skeleton className="h-16" />
+          </CardHeader>
+          <CardContent className="pt-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {[...Array(4)].map((_, i) => (
+                <div key={i} className="p-4 bg-bg-secondary/50 rounded-[var(--radius-xl)] border border-border/50">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Skeleton className="w-4 h-4 rounded-full" />
+                    <Skeleton className="h-4 w-24" />
+                  </div>
+                  <Skeleton className="h-7 w-3/4 mt-2" />
+                </div>
+              ))}
             </div>
           </CardContent>
         </Card>
@@ -151,7 +162,7 @@ const UserDetailPage = () => {
                 {user.prenom || user.nom ? `${user.prenom || ''} ${user.nom || ''}`.trim() : user.login}
               </CardTitle>
               <div className="flex items-center gap-3">
-                <span className={`px-3 py-1 rounded-full text-sm font-medium border ${getRoleBadgeStyle(user.role)}`}>
+                <span className={`px-3 py-1 rounded-[var(--radius-sm)] text-sm font-medium border ${getRoleBadgeStyle(user.role)}`}>
                   <Shield className="w-3.5 h-3.5 inline-block mr-1.5 -mt-0.5" />
                   {user.role?.replace('_', ' ') || 'N/A'}
                 </span>
@@ -164,7 +175,7 @@ const UserDetailPage = () => {
           {/* Info Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Login */}
-            <div className="p-4 bg-bg-secondary/50 rounded-xl border border-border/50">
+            <div className="p-4 bg-bg-secondary/50 rounded-[var(--radius-xl)] border border-border/50">
               <div className="flex items-center gap-2 mb-2">
                 <At className="w-4 h-4 text-placeholder" />
                 <Text className="text-sm text-placeholder font-medium">Identifiant</Text>
@@ -173,7 +184,7 @@ const UserDetailPage = () => {
             </div>
 
             {/* User ID */}
-            <div className="p-4 bg-bg-secondary/50 rounded-xl border border-border/50">
+            <div className="p-4 bg-bg-secondary/50 rounded-[var(--radius-xl)] border border-border/50">
               <div className="flex items-center gap-2 mb-2">
                 <User className="w-4 h-4 text-placeholder" />
                 <Text className="text-sm text-placeholder font-medium">ID Utilisateur</Text>
@@ -182,13 +193,13 @@ const UserDetailPage = () => {
             </div>
 
             {/* Prénom */}
-            <div className="p-4 bg-bg-secondary/50 rounded-xl border border-border/50">
+            <div className="p-4 bg-bg-secondary/50 rounded-[var(--radius-xl)] border border-border/50">
               <Text className="text-sm text-placeholder font-medium mb-2">Prénom</Text>
               <Text className="text-lg font-semibold text-text-primary">{user.prenom || <span className="text-placeholder">Non renseigné</span>}</Text>
             </div>
 
             {/* Nom */}
-            <div className="p-4 bg-bg-secondary/50 rounded-xl border border-border/50">
+            <div className="p-4 bg-bg-secondary/50 rounded-[var(--radius-xl)] border border-border/50">
               <Text className="text-sm text-placeholder font-medium mb-2">Nom</Text>
               <Text className="text-lg font-semibold text-text-primary">{user.nom || <span className="text-placeholder">Non renseigné</span>}</Text>
             </div>

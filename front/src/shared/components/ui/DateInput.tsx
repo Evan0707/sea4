@@ -7,10 +7,11 @@ import 'react-datepicker/dist/react-datepicker.css'
 import { format } from 'date-fns'
 import { fr } from 'date-fns/locale'
 import { Label } from './Typography'
+import { cn } from '@/shared/lib/utils'
 
 export type DateInputProps = {
   name: string
-  label: string
+  label?: string
   placeholder?: string
   className?: string
   error?: string
@@ -23,6 +24,7 @@ export type DateInputProps = {
   min?: string
   max?: string
   size?: 'small' | 'default'
+  required?: boolean
 }
 
 const DateInput: React.FC<DateInputProps> = ({
@@ -39,7 +41,8 @@ const DateInput: React.FC<DateInputProps> = ({
   message = '',
   min,
   max,
-  size = 'default'
+  size = 'default',
+  required = false,
 }) => {
   const [selectedDate, setSelectedDate] = useState<Date | null>(
     value ? new Date(value) : defaultValue ? new Date(defaultValue) : null
@@ -47,34 +50,22 @@ const DateInput: React.FC<DateInputProps> = ({
   const datePickerRef = useRef<ReactDatePicker>(null)
 
   useEffect(() => {
-    if (value) {
-      setSelectedDate(new Date(value))
-    } else if (defaultValue) {
-      setSelectedDate(new Date(defaultValue))
-    }
+    if (value) setSelectedDate(new Date(value))
+    else if (defaultValue) setSelectedDate(new Date(defaultValue))
   }, [value, defaultValue])
 
   const hasError = Boolean(error)
   const inputId = name || label
   const describedBy = hasError ? `${inputId}-error` : undefined
-
   const reg = register ?? ({} as UseFormRegisterReturn)
 
   const handleDateChange = (date: Date | null) => {
-    // Only update local state if controlled component logic is not interfering, 
-    // but since we sync via useEffect, we can set it here too for immediate feedback.
     setSelectedDate(date)
-
     if (date) {
-      // ... same logic
       const formattedDate = format(date, 'yyyy-MM-dd')
       const event = {
-        target: {
-          name: reg.name ?? name,
-          value: formattedDate,
-        },
+        target: { name: reg.name ?? name, value: formattedDate },
       } as React.ChangeEvent<HTMLInputElement>
-
       reg.onChange?.(event)
       onChange?.(event)
     }
@@ -84,20 +75,33 @@ const DateInput: React.FC<DateInputProps> = ({
   const maxDate = max ? new Date(max) : undefined
 
   return (
-    <div className={`${className ?? ''} relative w-full ${size === 'small' ? 'flex-row max-w-[300px]' : ''}`}>
-      <div className='flex items-center'>
-        <Label weight='bold' className='m-1 whitespace-nowrap text-[14px] text-text-primary' htmlFor={inputId}>
-          {label}
-        </Label>
-        {info && (
-          <Tooltip content={message}>
-            <InfoCircleSolid size={16} className='text-placeholder' />
-          </Tooltip>
-        )}
-      </div>
+    <div className={cn('relative w-full', size === 'small' && 'max-w-[300px]', className)}>
+      {/* Label */}
+      {(label || info) && (
+        <div className="flex items-center mb-1.5">
+          {label && (
+            <Label weight="medium" className="text-text-primary whitespace-nowrap" htmlFor={inputId}>
+              {label}
+              {required && <span className="text-red ml-1">*</span>}
+            </Label>
+          )}
+          {info && (
+            <Tooltip content={message}>
+              <InfoCircleSolid size={14} className="text-placeholder ml-1.5 cursor-help" />
+            </Tooltip>
+          )}
+        </div>
+      )}
+
+      {/* Input wrapper */}
       <div
-        className={`border-[1.5px] ${hasError ? 'border-red' : 'border-border'
-          } px-3 flex items-center rounded-md focus-within:border-primary focus-within:outline-[1px] text-text-primary outline-border justify-between mt-1 mb-0 w-full`}
+        className={cn(
+          'flex items-center gap-2 px-3 rounded-[var(--radius)] border bg-bg-primary transition-[border-color,box-shadow]',
+          'focus-within:ring-2 focus-within:ring-primary/25 focus-within:border-primary',
+          hasError
+            ? 'border-red focus-within:ring-red/25 focus-within:border-red'
+            : 'border-border'
+        )}
       >
         <ReactDatePicker
           ref={datePickerRef}
@@ -111,7 +115,7 @@ const DateInput: React.FC<DateInputProps> = ({
           maxDate={maxDate}
           aria-invalid={hasError}
           aria-describedby={describedBy}
-          className={`focus:outline-none h-[38px] px-0 ml-1 flex-1 bg-transparent w-full placeholder-placeholder`}
+          className="h-9 flex-1 bg-transparent text-sm text-text-primary placeholder:text-placeholder focus:outline-none w-full"
           calendarClassName="custom-datepicker"
           showPopperArrow={false}
           onBlur={reg.onBlur}
@@ -120,14 +124,15 @@ const DateInput: React.FC<DateInputProps> = ({
         <button
           type="button"
           onClick={() => datePickerRef.current?.setFocus()}
-          className="p-1 hover:bg-bg-secondary rounded transition-colors"
+          className="shrink-0 p-0.5 text-placeholder hover:text-text-primary transition-colors"
           aria-label="Ouvrir le calendrier"
         >
-          <Calendar className="w-5 h-5 text-placeholder" />
+          <Calendar className="w-4 h-4" />
         </button>
       </div>
+
       {hasError && (
-        <p id={describedBy} className='text-red text-[13px] font-semibold ml-1 mt-1 absolute b-0'>
+        <p id={describedBy} className="mt-1.5 text-xs font-medium text-red">
           {error}
         </p>
       )}

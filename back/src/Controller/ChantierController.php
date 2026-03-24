@@ -93,7 +93,6 @@ class ChantierController extends AbstractController
             return $this->json([
                 'message' => 'Erreur lors de la suppression du chantier',
                 'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
             ], 500);
         }
     }
@@ -1005,6 +1004,10 @@ class ChantierController extends AbstractController
         if ($date) {
             $factureArtisan->setDateFacture(new \DateTime($date));
         }
+        $nbJoursTravail = $data['nbJoursTravail'] ?? null;
+        if ($nbJoursTravail !== null) {
+            $factureArtisan->setNbJoursTravail((int)$nbJoursTravail);
+        }
 
         // Link to etape
         $factureArtisan->addEtapeChantier($etape);
@@ -1020,6 +1023,7 @@ class ChantierController extends AbstractController
                 'noFacture' => $factureArtisan->getId(),
                 'dateEmission' => $factureArtisan->getDateFacture()->format('Y-m-d'),
                 'montant' => $factureArtisan->getMontant(),
+                'nbJoursTravail' => $factureArtisan->getNbJoursTravail(),
                 'statut' => $factureArtisan->getDateReglement() ? 'Réglée' : 'À régler',
                 'artisan' => $artisan->getNom() . ' ' . $artisan->getPrenom(),
             ]
@@ -1401,5 +1405,177 @@ class ChantierController extends AbstractController
         $entityManager->flush();
 
         return $this->json(['message' => 'Chantier supprimé']);
+    }
+
+    /**
+     * Enregistre une facture artisan pour une étape donnée (admin et MOE).
+     */
+    #[Route('/api/chantiers/{id}/etapes/{etapeId}/factures', name: 'api_create_facture_etape', methods: ['POST'])]
+    public function createFactureEtape(
+        int $id,
+        int $etapeId,
+        Request $request,
+        EntityManagerInterface $entityManager
+    ): JsonResponse {
+        $chantier = $entityManager->getRepository(\App\Entity\Chantier::class)->find($id);
+        if (!$chantier) {
+            return $this->json(['message' => 'Chantier non trouvé'], 404);
+        }
+
+        $etape = $entityManager->getRepository(\App\Entity\EtapeChantier::class)->find($etapeId);
+        if (!$etape || $etape->getChantier()->getId() !== $chantier->getId()) {
+            return $this->json(['message' => 'Étape non valide pour ce chantier'], 400);
+        }
+
+        $data = json_decode($request->getContent(), true);
+        $montantFacture = $data['montantFacture'] ?? null;
+        $dateFacture = $data['dateFacture'] ?? null;
+        $artisanId = $data['artisanId'] ?? null;
+        $nbJoursTravail = $data['nbJoursTravail'] ?? null;
+        $dateReglFacture = $data['dateReglFacture'] ?? null;
+
+        if (!$montantFacture || !$dateFacture) {
+            return $this->json(['message' => 'Données manquantes (montantFacture, dateFacture)'], 400);
+        }
+
+        // Auto-détecter l'artisan depuis l'étape si non fourni
+        if (!$artisanId) {
+            $artisanFromEtape = $etape->getArtisan();
+            if ($artisanFromEtape) {
+                $artisanId = $artisanFromEtape->getId();
+            }
+        }
+
+        $artisan = null;
+        if ($artisanId) {
+            $artisan = $entityManager->getRepository(\App\Entity\Artisan::class)->find($artisanId);
+            if (!$artisan) {
+                return $this->json(['message' => 'Artisan non trouvé'], 404);
+            }
+        }
+
+        $factureArtisan = new \App\Entity\FactureArtisan();
+        if ($artisan) {
+            $factureArtisan->setArtisan($artisan);
+        }
+        $factureArtisan->setMontant((string)$montantFacture);
+        $factureArtisan->setDateFacture(new \DateTime($dateFacture));
+        if ($nbJoursTravail !== null) {
+            $factureArtisan->setNbJoursTravail((int)$nbJoursTravail);
+        }
+        if ($dateReglFacture) {
+            $factureArtisan->setDateReglement(new \DateTime($dateReglFacture));
+        }
+
+        $factureArtisan->addEtapeChantier($etape);
+        $etape->addFactureArtisan($factureArtisan);
+
+        $entityManager->persist($factureArtisan);
+        $entityManager->persist($etape);
+        $entityManager->flush();
+
+        $artisanFa = $factureArtisan->getArtisan();
+
+        return $this->json([
+            'message' => 'Facture artisan enregistrée avec succès',
+            'facture' => [
+                'noFacture' => $factureArtisan->getId(),
+                'dateFacture' => $factureArtisan->getDateFacture()->format('Y-m-d'),
+                'montantFacture' => $factureArtisan->getMontant(),
+                'nbJoursTravail' => $factureArtisan->getNbJoursTravail(),
+                'dateReglFacture' => $factureArtisan->getDateReglement()?->format('Y-m-d'),
+                'artisan' => $artisanFa ? [
+                    'noArtisan' => $artisanFa->getId(),
+                    'nom' => $artisanFa->getNom(),
+                    'prenom' => $artisanFa->getPrenom(),
+                ] : null,
+            ]
+        ], 201);
+    }
+
+    /**
+     * Retourne l'analyse des écarts (montants et délais) pour chaque étape d'un chantier.
+     */
+    #[Route('/api/chantiers/{id}/analyse-couts', name: 'api_chantier_analyse_couts', methods: ['GET'])]
+    public function analyseCouts(
+        int $id,
+        EntityManagerInterface $entityManager
+    ): JsonResponse {
+        $chantier = $entityManager->getRepository(\App\Entity\Chantier::class)->find($id);
+        if (!$chantier) {
+            return $this->json(['message' => 'Chantier non trouvé'], 404);
+        }
+
+        $result = [];
+        foreach ($chantier->getEtapeChantiers() as $ec) {
+            $artisan = $ec->getArtisan();
+            $etape = $ec->getEtape();
+
+            $factures = [];
+            $montantReel = 0.0;
+            $nbJoursReel = 0;
+
+            foreach ($ec->getFacturesArtisan() as $fa) {
+                $artisanFa = $fa->getArtisan();
+                $montantFa = (float)($fa->getMontant() ?? 0);
+                $nbJoursFa = $fa->getNbJoursTravail() ?? 0;
+                $montantReel += $montantFa;
+                $nbJoursReel += $nbJoursFa;
+
+                $factures[] = [
+                    'noFacture' => $fa->getId(),
+                    'artisan' => $artisanFa ? [
+                        'noArtisan' => $artisanFa->getId(),
+                        'nom' => $artisanFa->getNom(),
+                        'prenom' => $artisanFa->getPrenom(),
+                    ] : null,
+                    'dateFacture' => $fa->getDateFacture()?->format('Y-m-d'),
+                    'montantFacture' => $fa->getMontant(),
+                    'nbJoursTravail' => $fa->getNbJoursTravail(),
+                    'dateReglFacture' => $fa->getDateReglement()?->format('Y-m-d'),
+                ];
+            }
+
+            $montantTheorique = (float)($ec->getMontantTheoriqueFacture() ?? 0);
+            $nbJoursPrevu = $ec->getNbJoursPrevu();
+
+            $result[] = [
+                'noEtapeChantier' => $ec->getId(),
+                'nomEtape' => $etape?->getNom(),
+                'artisan' => $artisan ? [
+                    'noArtisan' => $artisan->getId(),
+                    'nom' => $artisan->getNom(),
+                    'prenom' => $artisan->getPrenom(),
+                ] : null,
+                'montantTheorique' => $ec->getMontantTheoriqueFacture(),
+                'nbJoursPrevu' => $nbJoursPrevu,
+                'factures' => $factures,
+                'montantReel' => (string)round($montantReel, 2),
+                'nbJoursReel' => $nbJoursReel,
+                'ecartMontant' => (string)round($montantReel - $montantTheorique, 2),
+                'ecartJours' => $nbJoursPrevu !== null ? ($nbJoursReel - $nbJoursPrevu) : null,
+            ];
+        }
+
+        return $this->json($result);
+    }
+
+    /**
+     * Supprime une facture artisan.
+     */
+    #[Route('/api/factures/{id}', name: 'api_delete_facture', methods: ['DELETE'])]
+    public function deleteFacture(
+        int $id,
+        EntityManagerInterface $entityManager
+    ): JsonResponse {
+        $facture = $entityManager->getRepository(\App\Entity\FactureArtisan::class)->find($id);
+        if (!$facture) {
+            return $this->json(['message' => 'Facture non trouvée'], 404);
+        }
+
+        $entityManager->remove($facture);
+        $entityManager->flush();
+
+        return $this->json(['message' => 'Facture supprimée avec succès']);
     }
 }

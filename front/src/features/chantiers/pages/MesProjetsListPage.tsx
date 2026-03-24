@@ -19,7 +19,7 @@ export const MesProjetsListPage = () => {
 
   usePageHeader('Mes Chantiers', undefined, 'Suivi de vos projets en cours.');
 
-  const { chantiers, loading } = useChantiers({
+  const { chantiers, loading, error, refetch } = useChantiers({
     endpoint: '/mes-chantiers',
     filters: {
       search: debouncedSearch,
@@ -108,12 +108,16 @@ export const MesProjetsListPage = () => {
         data={chantiers}
         columns={columns}
         loading={loading}
+        isError={!!error}
+        errorTitle="Erreur de chargement"
+        errorDescription="Impossible de récupérer la liste des chantiers."
         sortColumn="start"
         sortDirection={sortOrder}
         onSort={() => setSortOrder(prev => prev === 'asc' ? 'desc' : 'asc')}
         keyExtractor={(item) => item.noChantier}
         onRowClick={(item) => navigate(`/maitre-doeuvre/chantiers/${item.noChantier}`)}
         emptyMessage="Aucun chantier trouvé"
+        onRefresh={refetch}
       />
     </div>
   );
