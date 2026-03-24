@@ -1,14 +1,17 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { DataList, type Column } from '@/shared/components/ui/DataList';
 import SearchBar from '@/shared/components/ui/SearchBar';
+import Button from '@/shared/components/ui/Button';
 import { StatusBadge } from '@/shared/components/ui/StatusBadge';
 import Popover from '@/shared/components/ui/Popover';
 import { Text } from '@/shared/components/ui/Typography';
-import { Eye } from '@mynaui/icons-react';
+import { Eye, Download } from '@mynaui/icons-react';
 import { formatDate } from '@/shared/utils/dateFormatter';
 import { usePageHeader } from '@/shared/context/LayoutContext';
 import apiClient from '@/shared/api/client';
+import { exportToCSV, type CsvColumn } from '@/shared/utils/csvExporter';
+
 
 // Type représentant un chantier vu par l'artisan
 interface ChantierArtisan {
@@ -32,7 +35,31 @@ export const ArtisanDashboardPage = () => {
     const [chantiers, setChantiers] = useState<ChantierArtisan[]>([]);
     const [loading, setLoading] = useState(true);
 
-    usePageHeader('Mes Projets');
+    const handleExport = useCallback(() => {
+        const exportColumns: CsvColumn<ChantierArtisan>[] = [
+        { key: 'noChantier', header: 'Numero Chantier' },
+        { key: 'nomChantier', header: 'Nom Chantier' },
+        { key: 'adresse', header: 'Adresse' },
+        { key: 'cp', header: 'Code Postal' },
+        { key: 'ville', header: 'Ville' },
+        { key: 'dateDebut', header: 'Date debut'},
+        { key: 'dateFin', header: 'Date fin' },
+        { key: 'status', header: 'Statut' },
+        { key: 'etape', header: 'Etape' },
+        ];
+        exportToCSV(chantiers, exportColumns, 'chantiers');
+    }, [chantiers]);
+
+    // Configuration des actions du header
+    const headerActions = useMemo(() => (
+        <Button variant="Secondary" icon={Download} onClick={handleExport}>
+            Exporter CSV
+        </Button>
+    ), [handleExport, navigate]);
+
+    usePageHeader('Mes Projets',
+        headerActions
+    );
 
     // Debounce search
     useEffect(() => {
