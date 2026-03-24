@@ -50,7 +50,7 @@ const CompleteDossierPage: React.FC = () => {
     if (etapesData.length > 0) {
       // Sort etapes par noEtape 
        
-      const sortedEtapes = [...etapesData].sort((a: { noEtape: number }, b: { noEtape: number }) => {
+      const sortedEtapes = [...etapesData].sort((a: any, b: any) => {
         const idA = a.noEtape || a.noEtapeChantier || a.id;
         const idB = b.noEtape || b.noEtapeChantier || b.id;
         return idA - idB;
@@ -59,9 +59,11 @@ const CompleteDossierPage: React.FC = () => {
       let currentDate = dossierData?.chantier?.dateCreation
         ? new Date(dossierData.chantier.dateCreation)
         : new Date();
-
-      const etapesState = sortedEtapes.map((e: { noEtape: number }) => {
- 
+
+
+      const etapesState = sortedEtapes.map((e: any) => {
+
+ 
 
         const startDate = new Date(currentDate);
 
