@@ -72,6 +72,7 @@ applications:
     variables:
       env:
         N_PREFIX: "/app/.global"
+        APP_ENV: "prod"
         
 
     # Outbound firewall rules for the application. More information: https://docs.upsun.com/create-apps/app-reference/single-runtime-image.html#firewall
@@ -98,6 +99,7 @@ applications:
       # More information: https://docs.upsun.com/create-apps/hooks/hooks-comparison.html#build-hook
       build: |
         set -eux
+        export APP_ENV=prod
         composer --no-ansi --no-interaction install --no-progress --prefer-dist --optimize-autoloader --no-dev
         n auto || n lts
         hash -r
