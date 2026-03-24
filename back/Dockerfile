@@ -1,9 +1,15 @@
 # On part d'une base PHP avec Apache
 FROM php:8.2-apache
 
-# 1. On installe les dépendances système et PostgreSQL
-RUN apt-get update && apt-get install -y libpq-dev unzip \
-    && docker-php-ext-install pdo pdo_pgsql
+# 1. On installe les dépendances système, PostgreSQL, Git et les librairies pour Zip et Intl
+RUN apt-get update && apt-get install -y \
+    git \
+    unzip \
+    libpq-dev \
+    libicu-dev \
+    libzip-dev \
+    && docker-php-ext-configure intl \
+    && docker-php-ext-install pdo pdo_pgsql intl zip
 
 # 2. On configure Apache pour qu'il lise le dossier /public de Symfony
 ENV APACHE_DOCUMENT_ROOT /var/www/html/public
@@ -16,9 +22,9 @@ COPY . /var/www/html/
 
 # 4. On installe Composer et on télécharge vos dépendances Symfony
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
-# On autorise Composer à tourner en super-utilisateur dans le conteneur
 ENV COMPOSER_ALLOW_SUPERUSER=1
-RUN composer install --no-dev --optimize-autoloader
+# Ajout de --no-interaction pour éviter les blocages
+RUN composer install --no-dev --optimize-autoloader --no-interaction
 
 # 5. On vide le cache et on donne les droits à Apache
 RUN php bin/console cache:clear --env=prod \
