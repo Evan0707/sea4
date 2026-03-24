@@ -1,13 +1,13 @@
 # Complete list of all available properties: https://docs.upsun.com/create-apps/app-reference/single-runtime-image.html
 applications:
-  batiparti:
+  batiprti:
     # Application source code directory
     source:
-      root: "/back"
+      root: "back"
 
     # The runtime the application uses.
     # Complete list of available runtimes: https://docs.upsun.com/create-apps/app-reference/single-runtime-image.html#types
-    type: "php:8.2"
+    type: "php:8.4"
 
     # Choose which container profile (ratio CPU+RAM) your app will use. Default value comes from the image itself.
     # More information: https://docs.upsun.com/manage-resources/adjust-resources.html#adjust-a-container-profile
@@ -52,7 +52,7 @@ applications:
       locations:
         "/":
           passthru: "/index.php"
-          root: "back/public"
+          root: "public"
           
         
 
@@ -72,6 +72,7 @@ applications:
     variables:
       env:
         N_PREFIX: "/app/.global"
+        APP_ENV: "prod"
         
 
     # Outbound firewall rules for the application. More information: https://docs.upsun.com/create-apps/app-reference/single-runtime-image.html#firewall
@@ -98,6 +99,7 @@ applications:
       # More information: https://docs.upsun.com/create-apps/hooks/hooks-comparison.html#build-hook
       build: |
         set -eux
+        export APP_ENV=prod
         composer --no-ansi --no-interaction install --no-progress --prefer-dist --optimize-autoloader --no-dev
         n auto || n lts
         hash -r
@@ -143,7 +145,7 @@ applications:
 routes:
   "https://{default}/":
     type: upstream
-    upstream: "batiparti:http"
+    upstream: "batiprti:http"
   # A basic redirect definition
   # More information: https://docs.upsun.com/define-routes.html#basic-redirect-definition
   "https://www.{default}":
