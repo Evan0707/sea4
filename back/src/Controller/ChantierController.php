@@ -235,19 +235,18 @@ class ChantierController extends AbstractController
             $sortOrder = 'asc';
         }
 
-        // Récupérer le MOE associé à l'utilisateur
-        $moe = $user->getMaitreOeuvre();
-        if (!$moe) {
-            return $this->json(['message' => 'Utilisateur non associé à un MOE'], 403);
-        }
-        elseif ($artisan = $user->getArtisan()) {
+        // Récupérer le MOE ou l'Artisan associé à l'utilisateur
+        $chantiers = [];
+        
+        if (method_exists($user, 'getMaitreOeuvre') && $moe = $user->getMaitreOeuvre()) {
+            $chantiers = $chantierRepository->findByMoeWithFilters($moe->getId(), $search, $sortOrder);
+        } elseif (method_exists($user, 'getArtisan') && $artisan = $user->getArtisan()) {
             $chantiers = $chantierRepository->findByArtisanWithFilters($artisan->getId(), $search, $sortOrder);
+        } elseif ($user instanceof \App\Entity\Artisan) {
+            $chantiers = $chantierRepository->findByArtisanWithFilters($user->getId(), $search, $sortOrder);
         } else {
-            return $this->json(['message' => 'Aucune profil associé'], 403);
+            return $this->json(['message' => 'Aucun profil valide (MOE ou Artisan) associé à cet utilisateur'], 403);
         }
-
-
-        $chantiers = $chantierRepository->findByMoeWithFilters($moe->getId(), $search, $sortOrder);
 
         $result = [];
         foreach ($chantiers as $chantier) {
