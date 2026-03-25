@@ -117,6 +117,10 @@ export const ChantierStep = ({ form }: ChantierStepProps) => {
               register={register('noMOE', {
                 setValueAs: (v) => (v ? parseInt(v) : undefined),
               })}
+              onChange={(value) => {
+                const numValue = value ? parseInt(value) : undefined;
+                setValue('noMOE', numValue);
+              }}
               error={errors.noMOE?.message}
             />
             <Select
