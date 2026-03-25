@@ -14,7 +14,7 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 class DevisController extends AbstractController
 {
     #[Route('/{id}/statut', name: 'api_devis_statut_update', methods: ['PUT'])]
-    #[IsGranted('ROLE_MOE')]
+    #[IsGranted('IS_AUTHENTICATED_FULLY')]
     public function updateStatut(
         int $id,
         Request $request,
@@ -26,11 +26,21 @@ class DevisController extends AbstractController
             return $this->json(['message' => 'Devis non trouvé'], 404);
         }
 
-        // Vérification des droits : le devis doit appartenir à un chantier du MOE connecté
         $user = $this->getUser();
-        $moe = method_exists($user, 'getMaitreOeuvre') ? $user->getMaitreOeuvre() : null;
+        $changerAutorise = false;
 
-        if (!$moe || $devis->getChantier()->getMaitreOeuvre()->getId() !== $moe->getId()) {
+        // Si l'utilisateur est admin ou commercial, il peut modifier le devis
+        if (in_array('ROLE_ADMIN', $user->getRoles()) || in_array('ROLE_COMMERCIAL', $user->getRoles())) {
+             $changerAutorise = true;
+        } else {
+             // Vérification des droits pour un MOE : le devis doit appartenir à un chantier de ce MOE
+             $moe = method_exists($user, 'getMaitreOeuvre') ? $user->getMaitreOeuvre() : null;
+             if ($moe && $devis->getChantier()->getMaitreOeuvre() && $devis->getChantier()->getMaitreOeuvre()->getId() === $moe->getId()) {
+                  $changerAutorise = true;
+             }
+        }
+
+        if (!$changerAutorise) {
             return $this->json(['message' => 'Non autorisé à modifier ce devis'], 403);
         }
 
