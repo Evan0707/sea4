@@ -141,6 +141,7 @@ export const NouveauDossierPage = () => {
             latitude: chantierData.latitude || null,
             longitude: chantierData.longitude || null,
             dateCreation: chantierData.dateCreation,
+            statutChantier: 'À compléter',
           },
         }
       );

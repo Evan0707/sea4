@@ -91,20 +91,6 @@ export const ChantierStep = ({ form }: ChantierStepProps) => {
               required
             />
             <Select
-              label="Statut initial"
-              name="statutChantier"
-              options={[
-                { value: 'À compléter', label: 'À compléter' },
-                { value: 'À venir', label: 'À venir' },
-                { value: 'En chantier', label: 'En chantier' },
-              ]}
-              register={register('statutChantier')}
-              error={errors.statutChantier?.message}
-              required
-              info
-              message="Le statut permet de suivre l'avancement global du dossier."
-            />
-            <Select
               label="Maître d'œuvre"
               name="noMOE"
               options={[
