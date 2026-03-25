@@ -100,7 +100,7 @@ const ToastItem = ({ toast, index, onRemove }: { toast: ToastProps, index: numbe
 
       {/* Close Button */}
       <button
-        className="flex-none -mr-2 -mt-2 p-2 text-gray-400 hover:text-gray-600 transition-colors rounded-full hover:bg-gray-100"
+        className="flex-none -mr-2 -mt-2 p-2 text-gray-400 hover:text-gray-600 transition-colors rounded-full hover:bg-bg-primary"
         onClick={(e) => {
           e.stopPropagation()
           handleDismiss()
