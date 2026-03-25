@@ -164,6 +164,15 @@ export const artisanSchema = z.object({
   adresseArtisan: z.string().max(100, "L'adresse ne peut pas dépasser 100 caractères").optional().or(z.literal('')),
   cpArtisan: z.string().regex(/^[0-9]{5}$/, 'Code postal invalide (5 chiffres requis)').optional().or(z.literal('')),
   villeArtisan: z.string().max(50, 'La ville ne peut pas dépasser 50 caractères').optional().or(z.literal('')),
-})
+  newPassword: z.string().min(8, 'Le mot de passe doit contenir au moins 8 caractères').optional().or(z.literal('')),
+  confirmPassword: z.string().optional().or(z.literal('')),
+  }).refine(
+      (data) => !data.newPassword || data.newPassword === data.confirmPassword,
+      {
+          message: 'Les deux mots de passe sont différents !',
+          path: ['confirmPassword'],
+      }
+  )
+
 
 export type ArtisanFormData = z.infer<typeof artisanSchema>

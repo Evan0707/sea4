@@ -246,8 +246,8 @@ class ArtisanController extends AbstractController
             $artisan->setTelephone($data['telArtisan']);
         }
 
-        if (!empty($data['mdpArtisan'])) {
-            $hashed = $passwordHasher->hashPassword($artisan, $data['mdpArtisan']);
+        if (!empty($data['newPassword'])) {
+            $hashed = $passwordHasher->hashPassword($artisan, $data['newPassword']);
             $artisan->setPassword($hashed);
         }
 
