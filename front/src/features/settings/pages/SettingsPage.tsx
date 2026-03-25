@@ -113,7 +113,9 @@ export const SettingsPage = () => {
   const sections = [
     { id: 'profil' as const, label: 'Général' },
     { id: 'preferences' as const, label: 'Préférences' },
-    ...(user?.roles.includes('ROLE_MAITRE_OEUVRE') || user?.roles.includes('ROLE_ADMIN')
+    ...(user?.roles.includes('ROLE_MAITRE_OEUVRE') ||
+    user?.roles.includes('ROLE_ADMIN') ||
+    user?.roles.includes('ROLE_ARTISAN')
       ? [{ id: 'export' as const, label: 'Avancé' }]
       : []),
   ];

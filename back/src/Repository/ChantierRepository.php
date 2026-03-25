@@ -47,6 +47,38 @@ class ChantierRepository extends ServiceEntityRepository
         return $qb->getQuery()->getResult();
     }
 
+    public function findAllByArtisan(Artisan $artisan)
+    {
+        return $this->createQueryBuilder('c')
+            ->join('c.etapeChantiers', 'ec')
+            // Si ton entité EtapeChantier a une collection d'artisans (ManyToMany)
+            ->join('ec.artisans', 'a')
+            ->andWhere('a.id = :artisanId')
+            ->setParameter('artisanId', $artisan->getId())
+            ->getQuery()
+            ->getResult();
+    }
+
+    public function findByArtisanWithFilters(int $artisanId, string $search, string $sortOrder)
+    {
+        $qb = $this->createQueryBuilder('c')
+            ->join('c.etapeChantiers', 'ec')
+            ->join('ec.artisans', 'a')
+            ->leftJoin('c.client', 'cl')
+            ->andWhere('a.id = :artisanId')
+            ->setParameter('artisanId', $artisanId);
+
+        if ($search) {
+            $qb->andWhere('cl.nom LIKE :search OR cl.prenom LIKE :search OR c.ville LIKE :search')
+                ->setParameter('search', '%' . $search . '%');
+        }
+
+        $qb->orderBy('c.dateCreation', $sortOrder);
+
+        return $qb->getQuery()->getResult();
+    }
+
+
     /**
      * Recherche des chantiers d'un MOE avec filtres
      * 

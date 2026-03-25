@@ -41,7 +41,16 @@ export const ArtisanChantierPage = () => {
             setLoading(true);
             try {
                 const response = await apiClient.get(`/artisan/mes-chantiers/${id}`);
-                setChantier(response.data);
+                const data = response.data;
+                setChantier({
+                    ...data,
+                    status: data.statut ?? data.status,
+                    etapes: data.etapes?.map((e: any) => ({
+                        ...e,
+                        status: e.statut ?? e.status,
+                    })) ?? [],
+                });
+
             } catch (err) {
                 console.error('Erreur lors de la récupération du chantier', err);
             } finally {

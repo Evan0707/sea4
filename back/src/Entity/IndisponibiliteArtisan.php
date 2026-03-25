@@ -15,8 +15,8 @@ class IndisponibiliteArtisan
     #[ORM\Column(name: 'noIndispo', type: 'integer')]
     private ?int $id = null;
 
-    #[ORM\ManyToOne]
-    #[ORM\JoinColumn(name: 'noArtisan', referencedColumnName: 'noArtisan', nullable: false, onDelete: 'CASCADE')]
+    #[ORM\ManyToOne(targetEntity: Artisan::class, inversedBy: 'indisponibilites')]
+    #[ORM\JoinColumn(name: 'noArtisan', referencedColumnName: 'noArtisan', nullable: false)]
     private ?Artisan $artisan = null;
 
     #[ORM\Column(name: 'date_debut', type: Types::DATE_MUTABLE)]

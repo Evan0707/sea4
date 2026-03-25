@@ -8,6 +8,7 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
+use App\Entity\Utilisateur;
 
 #[ORM\Table(name: 'artisan', schema: 'batiparti')]
 #[ORM\Entity(repositoryClass: ArtisanRepository::class)]
@@ -59,6 +60,11 @@ class Artisan implements UserInterface, PasswordAuthenticatedUserInterface
 
     #[ORM\OneToMany(mappedBy: 'artisan', targetEntity: IndisponibiliteArtisan::class, orphanRemoval: true)]
     private Collection $indisponibilites;
+
+    #[ORM\OneToOne(inversedBy: 'artisan', targetEntity: Utilisateur::class)]
+    #[ORM\JoinColumn(name: 'noUtilisateur', referencedColumnName: 'noUtilisateur', nullable: true)]
+    private ?Utilisateur $utilisateur = null;
+
 
     public function __construct()
     {
@@ -177,6 +183,17 @@ class Artisan implements UserInterface, PasswordAuthenticatedUserInterface
     public function setTelephone(?string $telephone): static
     {
         $this->telephone = $telephone;
+        return $this;
+    }
+
+    public function getUtilisateur(): ?Utilisateur
+    {
+        return $this->utilisateur;
+    }
+
+    public function setUtilisateur(?Utilisateur $utilisateur): static
+    {
+        $this->utilisateur = $utilisateur;
         return $this;
     }
 

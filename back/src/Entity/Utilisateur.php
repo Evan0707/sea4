@@ -35,6 +35,9 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\OneToOne(mappedBy: 'utilisateur', cascade: ['persist', 'remove'], targetEntity: Admin::class)]
     private ?Admin $admin = null;
 
+    #[ORM\OneToOne(mappedBy: 'utilisateur', cascade: ['persist', 'remove'], targetEntity: Artisan::class)]
+    private ?Artisan $artisan = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -107,6 +110,23 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
+    public function getArtisan(): ?Artisan
+    {
+        return $this->artisan;
+    }
+
+    public function setArtisan(?Artisan $artisan): static
+    {
+        if ($artisan === null && $this->artisan !== null) {
+            $this->artisan->setUtilisateur(null);
+        }
+        if ($artisan !== null && $artisan->getUtilisateur() !== $this) {
+            $artisan->setUtilisateur($this);
+        }
+        $this->artisan = $artisan;
+        return $this;
+    }
+
     public function getRoles(): array
     {
         
@@ -114,6 +134,7 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
             'admin' => 'ROLE_ADMIN',
             'commercial' => 'ROLE_COMMERCIAL',
             'maitre_oeuvre' => 'ROLE_MAITRE_OEUVRE',
+            'artisan' => 'ROLE_ARTISAN',
         ];
         $roles = [];
         if ($this->role && isset($map[$this->role])) {

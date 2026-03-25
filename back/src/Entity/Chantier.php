@@ -35,6 +35,9 @@ class Chantier
     #[ORM\Column(name: 'dateCreation', type: Types::DATE_MUTABLE)]
     private ?\DateTimeInterface $dateCreation = null;
 
+    #[ORM\Column(type: 'date', nullable: true)]
+    private ?\DateTimeInterface $dateFin = null;
+
     #[ORM\Column(name: 'statutChantier', length: 20, options: ['default' => 'À compléter'])]
     private string $statut = 'À compléter';
 
@@ -170,6 +173,17 @@ class Chantier
     public function setDateCreation(\DateTimeInterface $dateCreation): static
     {
         $this->dateCreation = $dateCreation;
+        return $this;
+    }
+
+    public function getDateFin(): ?\DateTimeInterface
+    {
+        return $this->dateFin;
+    }
+
+    public function setDateFin(?\DateTimeInterface $dateFin): static
+    {
+        $this->dateFin = $dateFin;
         return $this;
     }
 

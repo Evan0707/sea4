@@ -78,7 +78,7 @@ export const ArtisanDashboardPage = () => {
                         sortOrder,
                     },
                 });
-                setChantiers(response.data);
+                setChantiers(response.data.map((c: any) => ({ ...c, status: c.statut })));
             } catch (err) {
                 console.error('Erreur lors de la récupération des chantiers', err);
             } finally {
@@ -143,7 +143,7 @@ export const ArtisanDashboardPage = () => {
         },
         {
             key: 'status',
-            header: 'Statut',
+            header: 'statut',
             width: 'w-[150px]',
             align: 'right',
             render: (c) => <StatusBadge status={c.status} />,
@@ -171,12 +171,12 @@ export const ArtisanDashboardPage = () => {
     return (
         <div className="p-4 md:p-8 h-full flex flex-col">
             <SearchBar
-                value={search}
-                onChange={setSearch}
-                placeholder="Rechercher par chantier, ville ou étape..."
-                width="w-full md:w-[350px]"
-                className="mb-5"
-            />
+                    value={search}
+                    onChange={setSearch}
+                    placeholder="Rechercher par chantier, ville ou étape..."
+                    width="w-full md:w-[350px]"
+                    className="mb-5"
+                />
 
             <DataList
                 data={filteredChantiers}

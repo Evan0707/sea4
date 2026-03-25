@@ -33,6 +33,7 @@ function SidebarContent({
     if (user?.roles?.includes('ROLE_ADMIN')) return '/admin/settings'
     if (user?.roles?.includes('ROLE_MAITRE_OEUVRE')) return '/maitre-doeuvre/settings'
     if (user?.roles?.includes('ROLE_COMMERCIAL')) return '/commercial/settings'
+    if (user?.roles?.includes('ROLE_ARTISAN')) return '/artisan/settings'
     return '/settings'
   }
   const settingsPath = getSettingsPath()

@@ -36,8 +36,8 @@ import { LayoutProvider } from '@/shared/context/LayoutContext';
 import { ChantiersMapPage } from '@/features/dashboard/pages/ChantiersMapPage';
 import { ModelesListPage } from '@/features/chantiers/pages/ModelesListPage';
 import { ModeleEditPage } from '@/features/chantiers/pages/ModeleEditPage';
-import {ArtisanDashboardPage} from "@/features/dashboard/pages/ArtisanDashboardPage";
-import {ArtisanChantierPage} from "@/features/users/pages/ArtisanChantierPage";
+import ArtisanChantierPage from "@/features/users/pages/ArtisanChantierPage";
+import ArtisanDashboardPage from "@/features/dashboard/pages/ArtisanDashboardPage";
 import { ErrorBoundary } from './components/ErrorBoundary';
 
 function App() {
@@ -157,6 +157,8 @@ function AppRoutes() {
                     path="/artisan/:id"
                     element={<ArtisanChantierPage />}
                 />
+                <Route
+                    path="/artisan/settings" element={<SettingsPage />} />
             </Route>
         </Route>
 
