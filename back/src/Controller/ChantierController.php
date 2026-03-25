@@ -228,6 +228,7 @@ class ChantierController extends AbstractController
             return $this->json(['message' => 'Non authentifié'], 401);
         }
 
+        
         // Récupérer le MOE associé à l'utilisateur
         $moe = $user->getMaitreOeuvre();
         if (!$moe) {
