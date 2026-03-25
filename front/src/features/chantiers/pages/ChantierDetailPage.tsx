@@ -210,6 +210,21 @@ export const ChantierDetailPage = () => {
     }
   };
 
+  const handleUpdateDevisStatut = async (devisId: number, nouveauStatut: string) => {
+    setActionLoading(`devis-statut-${devisId}`);
+    try {
+      await apiClient.put(`/devis/${devisId}/statut`, { statut: nouveauStatut });
+      addToast('Statut du devis mis à jour', 'success');
+      refetch();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (err: any) {
+      console.error(err);
+      addToast(err.response?.data?.message || "Erreur lors de la mise à jour du statut", 'error');
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
   // Facture Modal State
   const [factureModalOpen, setFactureModalOpen] = useState(false);
 
@@ -642,14 +657,36 @@ export const ChantierDetailPage = () => {
                             header: 'Action',
                             align: 'right',
                             render: (d) => (
-                              <Button
-                                variant="Secondary"
-                                size="sm"
-                                icon={Download}
-                                onClick={() => handleDownloadPdf(d.noDevis)}
-                              >
-                                PDF
-                              </Button>
+                              <div className="flex justify-end gap-2">
+                                {d.statut === 'En attente' && (
+                                  <>
+                                    <Button
+                                      variant="Secondary"
+                                      size="sm"
+                                      onClick={() => handleUpdateDevisStatut(d.noDevis, 'Accepté')}
+                                      loading={actionLoading === `devis-statut-${d.noDevis}`}
+                                    >
+                                      Accepter
+                                    </Button>
+                                    <Button
+                                      variant="Destructive"
+                                      size="sm"
+                                      onClick={() => handleUpdateDevisStatut(d.noDevis, 'Refusé')}
+                                      loading={actionLoading === `devis-statut-${d.noDevis}`}
+                                    >
+                                      Refuser
+                                    </Button>
+                                  </>
+                                )}
+                                <Button
+                                  variant="Secondary"
+                                  size="sm"
+                                  icon={Download}
+                                  onClick={() => handleDownloadPdf(d.noDevis)}
+                                >
+                                  PDF
+                                </Button>
+                              </div>
                             )
                           }
                         ]}
