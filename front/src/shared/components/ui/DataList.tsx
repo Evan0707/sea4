@@ -300,7 +300,7 @@ export function DataList<T>({
                       onRowClick && !selectable && 'cursor-pointer hover:bg-bg-secondary hover:z-10 relative',
                       selectable && 'hover:bg-bg-secondary/40 relative'
                     )}
-                    whileHover={onRowClick && !selectable ? { scale: 1.002, boxShadow: '0px 4px 12px rgba(0,0,0,0.06)' } : undefined}
+                    whileHover={onRowClick && !selectable ? { boxShadow: '0px 4px 12px rgba(0,0,0,0.06)' } : undefined}
                     whileTap={onRowClick && !selectable ? { scale: 0.995 } : undefined}
                   >
                     {selectable && (
