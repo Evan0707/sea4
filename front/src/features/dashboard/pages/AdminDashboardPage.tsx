@@ -8,8 +8,6 @@ import Button from '@/shared/components/ui/Button';
 import { useAdminStats } from '../hooks/useDashboardStats';
 import { MonochromeBarChart } from '@/components/ui/monochrome-bar-chart';
 import { RoundedPieChart } from '@/components/ui/rounded-pie-chart';
-
-import { MiniSparkline } from '@/components/ui/mini-sparkline';
 import { StatCard } from '@/shared/components/dashboard/StatCard';
 import { RoleBadge } from '@/shared/components/ui/RoleBadge';
 
